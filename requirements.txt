@@ -5,3 +5,4 @@ openai
 langchain
 line-bot-sdk
 google-api-python-client
+tiktoken
