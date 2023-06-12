@@ -20,7 +20,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationTokenBufferMemory
 from langchain.chains import ConversationChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.callbacks.base import CallbackManager
 from langchain.agents import load_tools
 
 app = Flask(__name__)
@@ -44,8 +43,7 @@ llm = ChatOpenAI(
     model_name="gpt-3.5-turbo",
     max_tokens=256,
     temperature=1,
-    streaming=True,
-    callback_manager=CallbackManager([StreamingStdOutCallbackHandler()])
+    streaming=True
 )
 
 tools = load_tools(["google-search"], llm=llm)
