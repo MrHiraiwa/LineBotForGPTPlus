@@ -1,5 +1,5 @@
 flask
 gunicorn
 openai
-langchain==0.0.196
+langchain==0.0.155
 line-bot-sdk
