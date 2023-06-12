@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, abort
 from google.cloud import firestore
-from googleapiclient
+from googleapiclient.discovery import build
 from linebot import (
     LineBotApi, WebhookHandler
 )
