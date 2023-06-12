@@ -25,8 +25,8 @@ app = Flask(__name__)
 
 
 # LINE Messaging APIの準備
-line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
-handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
+line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
+handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 
 # 設定プロンプト
 character_setting = "YOUR_FAVORITE_PROMPT"
