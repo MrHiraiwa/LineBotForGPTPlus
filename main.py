@@ -21,6 +21,7 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import ConversationChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.callbacks.base import CallbackManager
+from langchain.agents import load_tools
 
 app = Flask(__name__)
 
@@ -46,6 +47,8 @@ llm = ChatOpenAI(
     streaming=True,
     callback_manager=CallbackManager([StreamingStdOutCallbackHandler()])
 )
+
+tools = load_tools(["google-search"], llm=llm)
 # メモリ
 memory = ConversationBufferWindowMemory(k=3, return_messages=True)
 # 会話チェーン
