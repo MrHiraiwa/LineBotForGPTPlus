@@ -40,8 +40,8 @@ prompt = ChatPromptTemplate.from_messages([
 # チャットモデル
 llm = ChatOpenAI(
     model_name="gpt-3.5-turbo",
-    max_tokens=64,
-    temperature=0.2,
+    max_tokens=256,
+    temperature=1,
     streaming=True,
     callback_manager=CallbackManager([StreamingStdOutCallbackHandler()])
 )
@@ -50,11 +50,7 @@ memory = ConversationBufferWindowMemory(k=3, return_messages=True)
 # 会話チェーン
 conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=True)
 
-@app.route("/")
-def hello_world():
-    return "It Works!"
-
-@app.route("/callback", methods=["POST"])
+@app.route("/", methods=["POST"])
 def callback():
     # get X-Line-Signature header value
     signature = request.headers["X-Line-Signature"]
