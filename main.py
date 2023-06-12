@@ -18,7 +18,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationTokenBufferMemory
+from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import ConversationChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.agents import load_tools
