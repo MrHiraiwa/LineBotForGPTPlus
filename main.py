@@ -22,6 +22,7 @@ from langchain.memory import ConversationBufferWindowMemory, ConversationTokenBu
 from langchain.chains import ConversationChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.agents import load_tools
+import tiktoken
 
 app = Flask(__name__)
 
