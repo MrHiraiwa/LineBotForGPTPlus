@@ -4,3 +4,4 @@ google-cloud-firestore
 openai
 langchain
 line-bot-sdk
+google-api-python-client
