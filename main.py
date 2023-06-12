@@ -30,7 +30,7 @@ line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 
 # 設定プロンプト
-character_setting = "YOUR_FAVORITE_PROMPT"
+character_setting = "私は有能な秘書です。"
 
 # チャットプロンプトテンプレート
 prompt = ChatPromptTemplate.from_messages([
