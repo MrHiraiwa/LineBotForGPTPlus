@@ -2,5 +2,5 @@ flask
 gunicorn
 google-cloud-firestore
 openai
-langchain==0.0.150
+langchain
 line-bot-sdk
