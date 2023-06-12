@@ -50,7 +50,7 @@ llm = ChatOpenAI(
 
 tools = load_tools(["google-search"], llm=llm)
 # メモリ
-memory = ConversationBufferWindowMemory(k=3, return_messages=True)
+memory = ConversationTokenBufferMemory(llm=self.chat, max_token_limit=2000, memory_key="chat_history", return_messages=True)
 # 会話チェーン
 conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=True)
 
