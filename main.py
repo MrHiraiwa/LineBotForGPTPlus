@@ -23,6 +23,7 @@ from langchain.callbacks.base import CallbackManager
 
 app = Flask(__name__)
 
+
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
