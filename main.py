@@ -96,6 +96,77 @@ def update_setting(key, value):
     
 reload_settings()
 
+@app.route('/reset_logs', methods=['POST'])
+def reset_logs():
+    if 'is_admin' not in session or not session['is_admin']:
+        return redirect(url_for('login'))
+    else:
+        try:
+            users_ref = db.collection(u'users')
+            users = users_ref.stream()
+            for user in users:
+                user_ref = users_ref.document(user.id)
+                user_ref.delete()
+            return 'All user data reset successfully', 200
+        except Exception as e:
+            print(f"Error resetting user data: {e}")
+            return 'Error resetting user data', 500
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    attempts_doc_ref = db.collection(u'settings').document('admin_attempts')
+    attempts_doc = attempts_doc_ref.get()
+    attempts_info = attempts_doc.to_dict() if attempts_doc.exists else {}
+
+    attempts = attempts_info.get('attempts', 0)
+    lockout_time = attempts_info.get('lockout_time', None)
+
+    # ロックアウト状態をチェック
+    if lockout_time:
+        if datetime.now(jst) < lockout_time:
+            return render_template('login.html', message='Too many failed attempts. Please try again later.')
+        else:
+            # ロックアウト時間が過ぎたらリセット
+            attempts = 0
+            lockout_time = None
+
+    if request.method == 'POST':
+        password = request.form.get('password')
+
+        if password == ADMIN_PASSWORD:
+            session['is_admin'] = True
+            # ログイン成功したら試行回数とロックアウト時間をリセット
+            attempts_doc_ref.set({'attempts': 0, 'lockout_time': None})
+            return redirect(url_for('settings'))
+        else:
+            attempts += 1
+            lockout_time = datetime.now(jst) + timedelta(minutes=10) if attempts >= 5 else None
+            attempts_doc_ref.set({'attempts': attempts, 'lockout_time': lockout_time})
+            return render_template('login.html', message='Incorrect password. Please try again.')
+
+    return render_template('login.html')
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if 'is_admin' not in session or not session['is_admin']:
+        return redirect(url_for('login'))
+    
+    current_settings = {key: get_setting(key) or DEFAULT_ENV_VARS.get(key, '') for key in REQUIRED_ENV_VARS}
+
+    if request.method == 'POST':
+        for key in REQUIRED_ENV_VARS:
+            value = request.form.get(key)
+            if value:
+                update_setting(key, value)
+        return redirect(url_for('settings'))
+    return render_template(
+    'settings.html', 
+    settings=current_settings, 
+    default_settings=DEFAULT_ENV_VARS, 
+    required_env_vars=REQUIRED_ENV_VARS
+    )
+
 # 設定プロンプト
 character_setting = SYSTEM_PROMPT
 # チャットプロンプトテンプレート
