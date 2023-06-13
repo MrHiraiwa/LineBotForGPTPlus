@@ -43,14 +43,6 @@ llm = ChatOpenAI(
     temperature=1,
     streaming=True
 )
-# メモリ
-#memory = ConversationBufferWindowMemory(k=3, return_messages=True)
-# memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
-memory = CustomConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
-
-# 会話チェーン
-conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=True)
-
 db = firestore.Client()
 
 class CustomConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
@@ -60,7 +52,13 @@ class CustomConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
     def set_state(self, state):
         self.__dict__.update(state)
 
+# メモリ
+#memory = ConversationBufferWindowMemory(k=3, return_messages=True)
+# memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
+memory = CustomConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
 
+# 会話チェーン
+conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=True)
 
 def get_user_memory(user_id):
     doc_ref = db.collection('memory').document(user_id)
