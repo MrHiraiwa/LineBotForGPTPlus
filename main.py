@@ -20,7 +20,6 @@ from langchain.prompts.chat import (
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferWindowMemory, ConversationTokenBufferMemory
 from langchain.chains import ConversationChain
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 import tiktoken
 
 app = Flask(__name__)
