@@ -95,7 +95,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_id = event.source.user_id
-    profile = get_profile(userId)
+    profile = get_profile(user_id)
     display_name = profile.display_name
 
     # Get memory state from Firestore
