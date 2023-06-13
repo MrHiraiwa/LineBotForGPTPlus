@@ -38,9 +38,6 @@ handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 
 # 設定プロンプト
 character_setting = "私は有能な秘書です。"
-
-# 設定プロンプト
-character_setting = "私は有能な秘書です。"
 # チャットプロンプトテンプレート
 prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template(character_setting),
