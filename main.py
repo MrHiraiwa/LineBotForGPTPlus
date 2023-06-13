@@ -58,7 +58,7 @@ class CustomConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
 memory = CustomConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
 
 # 会話チェーン
-conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=True)
+conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=False)
 
 def get_user_memory(user_id):
     doc_ref = db.collection('memory').document(user_id)
