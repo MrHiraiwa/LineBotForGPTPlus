@@ -23,8 +23,6 @@ from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 
-app = Flask(__name__)
-
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
@@ -98,6 +96,8 @@ def update_setting(key, value):
     doc_ref.update({key: value})
     
 reload_settings()
+
+app = Flask(__name__)
 
 @app.route('/reset_logs', methods=['POST'])
 def reset_logs():
