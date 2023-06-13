@@ -41,6 +41,9 @@ DEFAULT_ENV_VARS = {
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
     'GPT_MODEL': 'gpt-3.5-turbo'
 }
+
+db = firestore.Client()
+
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT
     BOT_NAME = get_setting('BOT_NAME')
@@ -182,7 +185,6 @@ llm = ChatOpenAI(
     temperature=1,
     streaming=True
 )
-db = firestore.Client()
 
 class CustomConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
     def get_state(self):
