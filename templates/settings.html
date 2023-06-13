@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+  <title>Settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    input[type="submit"],
+input[type="button"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  background-color: #4CAF50;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #666666;
+      text-decoration: none;
+    }
+    @media (min-width: 700px) {
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+  </style>
+<script>
+    const defaultSettings = {{ default_settings | tojson | safe }};
+
+    function resetToDefaults() {
+      for (const key in defaultSettings) {
+        const inputElem = document.getElementById(key);
+        if (inputElem) {
+          inputElem.value = defaultSettings[key];
+        }
+      }
+    }
+  function adjustHeight(elem) {
+    elem.style.height = "1px";
+    elem.style.height = (elem.scrollHeight)+"px";
+    elem.style.overflow = 'hidden';
+}
+
+window.onload = function() {
+  var resetButton = document.getElementById('resetButton');
+  resetButton.addEventListener('click', function(e) {
+    e.preventDefault(); // Prevent the form from being submitted
+    resetToDefaults();
+  });
+
+  var systemPromptElem = document.getElementById("SYSTEM_PROMPT");
+  if (systemPromptElem) {
+    adjustHeight(systemPromptElem);
+  }
+
+  // Get the reset logs form and the reset button
+  var resetLogsForm = document.getElementById('resetLogsForm');
+  var resetAllUserLogsButton = document.getElementById('resetAllUserLogsButton');
+
+  resetAllUserLogsButton.addEventListener('click', function(e) {
+    // Show a confirm dialog. If the user clicks "Cancel", prevent the form from being submitted.
+    if (!window.confirm('Are you sure you want to reset all user logs? This action cannot be undone.')) {
+      e.preventDefault();
+    }
+  });
+};
+
+  </script>
+</head>
+<body>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="flash-message">
+        {{ messages[0] }}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Rest of your HTML code -->
+  <h1>Settings</h1>
+  <form method="post">
+  {% for key in required_env_vars %}
+    <div>
+      <label for="{{ key }}">{{ key }}</label>
+      {% if key == "SYSTEM_PROMPT" or key == "PREVIOUS_DUMMY_USER_MESSAGE1" or key == "PREVIOUS_DUMMY_ASSISTANT_MESSAGE1" or key == "PREVIOUS_DUMMY_USER_MESSAGE2" or key == "PREVIOUS_DUMMY_ASSISTANT_MESSAGE2" %}
+        <textarea id="{{ key }}" name="{{ key }}" oninput="adjustHeight(this)">{{ settings[key] or '' }}</textarea>
+      {% else %}
+        <input type="text" id="{{ key }}" name="{{ key }}" value="{{ settings[key] or '' }}">
+      {% endif %}
+    </div>
+  {% endfor %}
+  <input type="submit" value="Save">
+  <input id="resetButton" type="button" value="Reset to Default">
+</form>
+  <form action="{{ url_for('reset_logs') }}" method="post" id="resetLogsForm">
+    <input type="submit" value="Reset All User Logs" id="resetAllUserLogsButton">
+  </form>
+</body>
+</html>
