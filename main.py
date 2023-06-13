@@ -111,6 +111,10 @@ def handle_message(event):
         event.reply_token,
         TextSendMessage(text=response)
     )
+    
+def get_profile(user_id):
+    profile = line_bot_api.get_profile(user_id)
+    return profile
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
