@@ -98,6 +98,8 @@ def update_setting(key, value):
 reload_settings()
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', default='YOUR-DEFAULT-SECRET-KEY')
+
 
 @app.route('/reset_logs', methods=['POST'])
 def reset_logs():
