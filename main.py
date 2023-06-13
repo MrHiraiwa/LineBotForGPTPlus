@@ -45,7 +45,7 @@ DEFAULT_ENV_VARS = {
 db = firestore.Client()
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT
+    global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
