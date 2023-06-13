@@ -95,13 +95,15 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_id = event.source.user_id
+    profile = get_profile(userId)
+    display_name = profile.display_name
 
     # Get memory state from Firestore
     memory_state = get_user_memory(user_id)
     if memory_state is not None:
         memory.set_state(memory_state)
 
-    response = conversation.predict(input=event.message.text)
+    response = conversation.predict(input=display_name + ":" + event.message.text)
 
     # Save memory state to Firestore
     memory_state = memory.get_state()
