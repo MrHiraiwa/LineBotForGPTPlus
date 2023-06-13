@@ -136,7 +136,7 @@ def login():
     if request.method == 'POST':
         password = request.form.get('password')
 
-        if password == ADMIN_PASSWORD:
+        if password == admin_password:
             session['is_admin'] = True
             # ログイン成功したら試行回数とロックアウト時間をリセット
             attempts_doc_ref.set({'attempts': 0, 'lockout_time': None})
