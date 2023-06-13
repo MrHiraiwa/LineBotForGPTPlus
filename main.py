@@ -12,9 +12,14 @@ from linebot.models import (
 )
 from langchain.prompts.chat import (
     ChatPromptTemplate,
-    MessagesPlaceholder,
     SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
     HumanMessagePromptTemplate,
+)
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
 )
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferWindowMemory, ConversationTokenBufferMemory
@@ -37,7 +42,6 @@ character_setting = "私は有能な秘書です。"
 # チャットプロンプトテンプレート
 prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template(character_setting),
-    MessagesPlaceholder(variable_name="history"),
     HumanMessagePromptTemplate.from_template("{input}")
 ])
 
