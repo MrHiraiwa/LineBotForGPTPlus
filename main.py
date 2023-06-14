@@ -237,30 +237,38 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_id = event.source.user_id
-    profile = get_profile(user_id)
-    display_name = profile.display_name
-    user_message = event.message.text
-    reply_token = event.reply_token
-    
-    # Get memory state from Firestore
-    memory_state = get_user_memory(user_id)
-    if memory_state is not None:
-        memory.set_state(memory_state)
+    try:
+        user_id = event.source.user_id
+        profile = get_profile(user_id)
+        display_name = profile.display_name
+        user_message = event.message.text
+        reply_token = event.reply_token
         
-    if user_message.strip() == "忘れて":
-        line_reply(reply_token, "記憶を消去しました。")
-        memory_state = []
+        # Get memory state from Firestore
+        memory_state = get_user_memory(user_id)
+        if memory_state is not None:
+            memory.set_state(memory_state)
+        
+        if user_message.strip() == "忘れて":
+            line_reply(reply_token, "記憶を消去しました。")
+            memory_state = []
+            return 'OK'
+    
+        response = conversation.predict(input=display_name + ":" + user_message)
+    
+        line_reply(reply_token, response)
+    
+        # Save memory state to Firestore
+        memory_state = memory.get_state()
+        save_user_memory(user_id, memory_state)
+    except KeyError:
+        return 'Not a valid JSON', 200 
+    except Exception as e:
+        print(f"Error in lineBot: {e}")
+        callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
+        raise
+    finally:
         return 'OK'
-    
-    response = conversation.predict(input=display_name + ":" + user_message)
-    
-    line_reply(reply_token, response)
-    
-    # Save memory state to Firestore
-    memory_state = memory.get_state()
-    save_user_memory(user_id, memory_state)
-    return 'OK'
     
 def line_reply(reply_token, response):
     line_bot_api.reply_message(
