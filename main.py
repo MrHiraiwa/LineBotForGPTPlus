@@ -265,7 +265,7 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
+        line_reply(reply_token, "エラーが発生しました。")
         raise
     finally:
         return 'OK'
