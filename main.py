@@ -251,7 +251,7 @@ def handle_message(event):
         
         if user_message.strip() == "忘れて":
             line_reply(reply_token, "記憶を消去しました。")
-            memory_state = []
+            memory = []
             memory_state = memory.get_state()
             save_user_memory(user_id, memory_state)
             return 'OK'
