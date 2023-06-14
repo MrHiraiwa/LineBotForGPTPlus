@@ -260,7 +260,7 @@ def handle_message(event):
     # Save memory state to Firestore
     memory_state = memory.get_state()
     save_user_memory(user_id, memory_state)
-
+    return 'OK'
     
 def line_reply(reply_token, response):
     line_bot_api.reply_message(
