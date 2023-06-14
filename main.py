@@ -249,12 +249,14 @@ def handle_message(event):
         memory.set_state(memory_state)
         
     if user_message.strip() == "忘れて":
-        line_reply(replyToken, "記憶を消去しました。")
+        line_reply(reply_token, "記憶を消去しました。")
         memory_state = []
         return 'OK'
     
     response = conversation.predict(input=display_name + ":" + user_message)
-
+    
+    line_reply(reply_token, response)
+    
     # Save memory state to Firestore
     memory_state = memory.get_state()
     save_user_memory(user_id, memory_state)
