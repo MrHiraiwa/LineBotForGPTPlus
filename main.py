@@ -240,20 +240,29 @@ def handle_message(event):
     user_id = event.source.user_id
     profile = get_profile(user_id)
     display_name = profile.display_name
-
+    user_message = event.message.text
+    reply_token = event.reply_token
+    
     # Get memory state from Firestore
     memory_state = get_user_memory(user_id)
     if memory_state is not None:
         memory.set_state(memory_state)
-
-    response = conversation.predict(input=display_name + ":" + event.message.text)
+        
+    if user_message.strip() == "忘れて":
+        line_reply(replyToken, "記憶を消去しました。")
+        memory_state = []
+        return 'OK'
+    
+    response = conversation.predict(input=display_name + ":" + user_message)
 
     # Save memory state to Firestore
     memory_state = memory.get_state()
     save_user_memory(user_id, memory_state)
 
+    
+def line_reply(reply_token, response)
     line_bot_api.reply_message(
-        event.reply_token,
+        reply_token,
         TextSendMessage(text=response)
     )
     
