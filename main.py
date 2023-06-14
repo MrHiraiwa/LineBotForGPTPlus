@@ -260,7 +260,7 @@ def handle_message(event):
     save_user_memory(user_id, memory_state)
 
     
-def line_reply(reply_token, response)
+def line_reply(reply_token, response):
     line_bot_api.reply_message(
         reply_token,
         TextSendMessage(text=response)
