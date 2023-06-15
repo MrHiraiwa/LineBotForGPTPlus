@@ -10,3 +10,4 @@ langchain
 line-bot-sdk
 tiktoken
 pydub
+pytz
