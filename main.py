@@ -9,7 +9,7 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, AudioMessage, TextSendMessage,
+    MessageEvent, TextMessage, AudioMessage, TextSendMessage, AudioSendMessage,
 )
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -33,6 +33,7 @@ admin_password = os.environ["ADMIN_PASSWORD"]
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
+    "LINE_REPLY",
     "GPT_MODEL",
     "FORGET_KEYWORDS",
     "FORGET_MESSAGE",
@@ -42,6 +43,7 @@ REQUIRED_ENV_VARS = [
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
+    'LINE_REPLY': 'Text',
     'GPT_MODEL': 'gpt-3.5-turbo',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_MESSAGE': '記憶を消去しました。',
@@ -51,13 +53,14 @@ DEFAULT_ENV_VARS = {
 db = firestore.Client()
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL, FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE
+    global BOT_NAME, SYSTEM_PROMPT, LINE_REPLY, GPT_MODEL, FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
     else:
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
+    LINE_REPLY = get_setting('LINE_REPLY')
     GPT_MODEL = get_setting('GPT_MODEL')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
@@ -273,14 +276,14 @@ def handle_message(event):
             memory.set_state(memory_state)
         
         if user_message.strip() == FORGET_KEYWORDS:
-            line_text_reply(reply_token, FORGET_MESSAGE)
+            line_reply(reply_token, FORGET_MESSAGE)
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
     
         response = conversation.predict(input=display_name + ":" + user_message)
     
-        line_text_reply(reply_token, response)
+        line_reply(reply_token, response)
     
         # Save memory state to Firestore
         memory_state = memory.get_state()
@@ -289,15 +292,25 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_text_reply(reply_token, ERROR_MESSAGE)
+        line_reply(reply_token, ERROR_MESSAGE)
         raise
     finally:
         return 'OK'
     
-def line_text_reply(reply_token, response):
+def line_reply(reply_token, response, LINE_REPLY):
+    if LINE_REPLY == 'Text':
+        message = TextSendMessage(text=response)
+    elif LINE_REPLY == 'Audio':
+        # ここで、responseは音声データのURLを指していると想定します。
+        # AudioSendMessageの引数は、音声データのURLと音声の長さ（ミリ秒単位）です。
+        message = AudioSendMessage(original_content_url=response, duration=240000)
+    else:
+        print(f"Unknown REPLY type: {REPLY}")
+        return
+
     line_bot_api.reply_message(
         reply_token,
-        TextSendMessage(text=response)
+        message
     )
     
 def get_profile(user_id):
