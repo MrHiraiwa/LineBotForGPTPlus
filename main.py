@@ -294,7 +294,6 @@ def handle_message(event):
         exec_functions = False
         quick_reply_items = []
         head_message = ""
-        be_quick_reply = []
         
         if message_type == 'text':
             user_message = event.message.text
@@ -314,7 +313,7 @@ def handle_message(event):
             return 'OK'
         
         if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
-                be_quick_reply.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
+                quick_reply_item.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE                
                 
         response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
@@ -335,7 +334,7 @@ def handle_message(event):
                     line_push(user_id, response, message_type, None, duration)
                 return 'OK'
     
-        line_reply(reply_token, response, LINE_REPLY, be_quick_reply)
+        line_reply(reply_token, response, LINE_REPLY, quick_reply_item)
     
         # Save memory state to Firestore
         memory_state = memory.get_state()
