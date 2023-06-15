@@ -1,15 +1,19 @@
 import os
+import pytz
+from datetime import datetime, time, timedelta
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort
 from google.cloud import firestore
 from googleapiclient.discovery import build
 from linebot import (
     LineBotApi, WebhookHandler
 )
+from linebot.models import QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction
 from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
     MessageEvent, TextMessage, AudioMessage, TextSendMessage, AudioSendMessage,
+    QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction,
 )
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -18,57 +22,81 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferWindowMemory, ConversationTokenBufferMemory, ConversationSummaryBufferMemory
+from langchain.memory import (
+    ConversationBufferWindowMemory,
+    ConversationTokenBufferMemory,
+    ConversationSummaryBufferMemory,
+)
 from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 
 from whisper import get_audio
+from voice import convert_audio_to_m4a, text_to_speech, delete_local_file, set_bucket_lifecycle
 
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 admin_password = os.environ["ADMIN_PASSWORD"]
-
+jst = pytz.timezone('Asia/Tokyo')
+nowDate = datetime.now(jst) 
+nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z') + "\n"
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
-    "LINE_REPLY",
     "GPT_MODEL",
     "FORGET_KEYWORDS",
+    "FORGET_GUIDE_MESSAGE",
     "FORGET_MESSAGE",
-    "ERROR_MESSAGE"
+    "FORGET_QUICK_REPLY",
+    "ERROR_MESSAGE",
+    "LINE_REPLY",
+    "VOICE_GENDER",
+    "BACKET_NAME",
+    "FILE_AGE",
 ]
 
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
-    'LINE_REPLY': 'Text',
     'GPT_MODEL': 'gpt-3.5-turbo',
     'FORGET_KEYWORDS': '忘れて,わすれて',
+    'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
-    'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。'
+    'FORGET_QUICK_REPLY': '😱記憶を消去',
+    'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
+    'LINE_REPLY': 'Text',
+    'VOICE_GENDER': 'female',
+    'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
+    'FILE_AGE': '7'
 }
 
 db = firestore.Client()
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, LINE_REPLY, GPT_MODEL, FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE
+    global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
+    global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
+    global LINE_REPLY, VOICE_GENDER, BACKET_NAME, FILE_AGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
     else:
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
-    LINE_REPLY = get_setting('LINE_REPLY')
     GPT_MODEL = get_setting('GPT_MODEL')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
         FORGET_KEYWORDS = FORGET_KEYWORDS.split(',')
     else:
         FORGET_KEYWORDS = []
+    FORGET_GUIDE_MESSAGE = get_setting('FORGET_GUIDE_MESSAGE')
     FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
+    FORGET_QUICK_REPLY = get_setting('FORGET_QUICK_REPLY')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
+    LINE_REPLY = get_setting('LINE_REPLY')
+    VOICE_GENDER = get_setting('VOICE_GENDER')
+    BACKET_NAME = get_setting('BACKET_NAME')
+    FILE_AGE = get_setting('FILE_AGE')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -263,6 +291,9 @@ def handle_message(event):
         message_type = event.message.type
         message_id = event.message.id
         exec_audio = False
+        exec_functions = False
+        quick_reply_items = []
+        head_message = ""
         
         if message_type == 'text':
             user_message = event.message.text
@@ -275,15 +306,35 @@ def handle_message(event):
         if memory_state is not None:
             memory.set_state(memory_state)
         
-        if user_message.strip() == FORGET_KEYWORDS:
+        if user_message.strip() == FORGET_QUICK_REPLY:
             line_reply(reply_token, FORGET_MESSAGE, LINE_REPLY)
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
+        
+        if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
+                quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
+                head_message = head_message + FORGET_GUIDE_MESSAGE                
+                
+        response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
+        
+        if quick_reply_items is None and exec_functions == False:            
+            if LINE_REPLY == "Audio" or "Both":
+                if bucket_exists(BACKET_NAME):
+                    set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
+                else:
+                    print(f"Bucket {BACKET_NAME} does not exist.")
+                    return 'OK'
+                blob_path = f'{userId}/{message_id}.m4a'
+                public_url, local_path, duration = text_to_speech(botReply, BACKET_NAME, blob_path, or_chinese, or_english, voice_speed, VOICE_GENDER)
+                success = send_audio_to_line_reply(public_url, replyToken, duration)
+                if success:
+                    delete_local_file(local_path)
+                if LINE_REPLY == "Both":
+                    line_push(user_id, response, message_type, None, duration)
+                return 'OK'
     
-        response = conversation.predict(input=display_name + ":" + user_message)
-    
-        line_reply(reply_token, response, LINE_REPLY)
+        line_reply(reply_token, response, LINE_REPLY, quick_reply_items)
     
         # Save memory state to Firestore
         memory_state = memory.get_state()
@@ -296,14 +347,37 @@ def handle_message(event):
         raise
     finally:
         return 'OK'
-    
-def line_reply(reply_token, response, LINE_REPLY):
+
+#呼び出しサンプル
+#line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
+
+def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_duration=None):
     if LINE_REPLY == 'Text':
-        message = TextSendMessage(text=response)
+        if quick_reply_items:
+            # Create QuickReplyButton list from quick_reply_items
+            quick_reply_button_list = []
+            for item in quick_reply_items:
+                action_type, label, action_data = item
+                if action_type == 'message':
+                    action = MessageAction(label=label, text=action_data)
+                elif action_type == 'location':
+                    action = LocationAction(label=label)
+                elif action_type == 'uri':
+                    action = URIAction(label=label, uri=action_data)
+                else:
+                    print(f"Unknown action type: {action_type}")
+                    continue
+                quick_reply_button_list.append(QuickReplyButton(action=action))
+
+            # Create QuickReply
+            quick_reply = QuickReply(items=quick_reply_button_list)
+
+            # Add QuickReply to TextSendMessage
+            message = TextSendMessage(text=response, quick_reply=quick_reply)
+        else:
+            message = TextSendMessage(text=response)
     elif LINE_REPLY == 'Audio':
-        # ここで、responseは音声データのURLを指していると想定します。
-        # AudioSendMessageの引数は、音声データのURLと音声の長さ（ミリ秒単位）です。
-        message = AudioSendMessage(original_content_url=response, duration=240000)
+        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
         print(f"Unknown REPLY type: {REPLY}")
         return
@@ -312,6 +386,41 @@ def line_reply(reply_token, response, LINE_REPLY):
         reply_token,
         message
     )
+
+
+def line_push(user_id, response, message_type, quick_reply_items=None, audio_duration=None):
+    if message_type == 'text':
+        if quick_reply_items:
+            # Create QuickReplyButton list from quick_reply_items
+            quick_reply_button_list = []
+            for item in quick_reply_items:
+                action_type, label, action_data = item
+                if action_type == 'message':
+                    action = MessageAction(label=label, text=action_data)
+                elif action_type == 'location':
+                    action = LocationAction(label=label)
+                elif action_type == 'uri':
+                    action = URIAction(label=label, uri=action_data)
+                else:
+                    print(f"Unknown action type: {action_type}")
+                    continue
+                quick_reply_button_list.append(QuickReplyButton(action=action))
+
+            # Create QuickReply
+            quick_reply = QuickReply(items=quick_reply_button_list)
+
+            # Add QuickReply to TextSendMessage
+            message = TextSendMessage(text=response, quick_reply=quick_reply)
+        else:
+            message = TextSendMessage(text=response)
+    elif message_type == 'audio':
+        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
+    else:
+        print(f"Unknown REPLY type: {LINE_REPLY}")
+        return
+
+    line_bot_api.push_message(user_id, message)
+
     
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
