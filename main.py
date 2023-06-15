@@ -302,7 +302,7 @@ def handle_message(event):
 #呼び出しサンプル
 #line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
 
-def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None):
+def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_duration=None):
     if LINE_REPLY == 'Text':
         if quick_reply_items is not None:
             # Create QuickReplyButton list from quick_reply_items
@@ -328,7 +328,7 @@ def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None):
         else:
             message = TextSendMessage(text=response)
     elif LINE_REPLY == 'Audio':
-        message = AudioSendMessage(original_content_url=response, duration=240000)
+        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
         print(f"Unknown REPLY type: {REPLY}")
         return
