@@ -256,7 +256,7 @@ def handle_message(event):
         user_id = event.source.user_id
         profile = get_profile(user_id)
         display_name = profile.display_name
-        user_message = event.message.text
+        user_message = []
         reply_token = event.reply_token
         message_type = event.message.type
         message_id = event.message.id
