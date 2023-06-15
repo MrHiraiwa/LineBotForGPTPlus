@@ -250,7 +250,7 @@ def callback():
         abort(400)
     return "OK"
 
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=(TextMessage, AudioMessage))
 def handle_message(event):
     try:
         user_id = event.source.user_id
