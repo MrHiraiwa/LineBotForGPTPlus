@@ -20,7 +20,11 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferWindowMemory, ConversationTokenBufferMemory, ConversationSummaryBufferMemory
+from langchain.memory import (
+    ConversationBufferWindowMemory,
+    ConversationTokenBufferMemory,
+    ConversationSummaryBufferMemory,
+)
 from langchain.chains import ConversationChain
 import tiktoken
 import pickle
