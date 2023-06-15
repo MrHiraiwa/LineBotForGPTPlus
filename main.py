@@ -47,6 +47,7 @@ REQUIRED_ENV_VARS = [
     "GPT_MODEL",
     "FORGET_KEYWORDS",
     "FORGET_MESSAGE",
+    "FORGET_QUICK_REPLY",
     "ERROR_MESSAGE",
     "LINE_REPLY",
     "VOICE_GENDER",
@@ -60,6 +61,7 @@ DEFAULT_ENV_VARS = {
     'GPT_MODEL': 'gpt-3.5-turbo',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_MESSAGE': '記憶を消去しました。',
+    'FORGET_QUICK_REPLY': '忘れて',
     'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
     'LINE_REPLY': 'Text',
     'VOICE_GENDER': 'female',
@@ -71,7 +73,7 @@ db = firestore.Client()
 
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
-    global FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE
+    global FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global LINE_REPLY, VOICE_GENDER, BACKET_NAME, FILE_AGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -86,6 +88,7 @@ def reload_settings():
     else:
         FORGET_KEYWORDS = []
     FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
+    FORGET_QUICK_REPLY get_setting('FORGET_QUICK_REPLY')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
     VOICE_GENDER = get_setting('VOICE_GENDER')
@@ -299,7 +302,7 @@ def handle_message(event):
         if memory_state is not None:
             memory.set_state(memory_state)
         
-        if user_message.strip() == FORGET_KEYWORDS:
+        if user_message.strip() == FORGET_QUICK_REPLY:
             line_reply(reply_token, FORGET_MESSAGE, LINE_REPLY)
             memory_state = []
             save_user_memory(user_id, memory_state)
