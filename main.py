@@ -262,7 +262,9 @@ def handle_message(event):
         message_id = event.message.id
         exec_audio = False
         
-        if message_type == 'audio':
+        if message_type == 'text':
+            user_message = event.message.text
+        elif message_type == 'audio':
             exec_audio = True
             user_message = get_audio(message_id)
         
