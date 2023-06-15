@@ -46,6 +46,7 @@ REQUIRED_ENV_VARS = [
     "SYSTEM_PROMPT",
     "GPT_MODEL",
     "FORGET_KEYWORDS",
+    "FORGET_GUIDE_MESSAGE",
     "FORGET_MESSAGE",
     "FORGET_QUICK_REPLY",
     "ERROR_MESSAGE",
@@ -60,6 +61,7 @@ DEFAULT_ENV_VARS = {
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
     'GPT_MODEL': 'gpt-3.5-turbo',
     'FORGET_KEYWORDS': '忘れて,わすれて',
+    'FORGET_GUIDE_MESSAGE': '  ',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '忘れて',
     'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
@@ -73,7 +75,7 @@ db = firestore.Client()
 
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
-    global FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
+    global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global LINE_REPLY, VOICE_GENDER, BACKET_NAME, FILE_AGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -87,6 +89,7 @@ def reload_settings():
         FORGET_KEYWORDS = FORGET_KEYWORDS.split(',')
     else:
         FORGET_KEYWORDS = []
+    FORGET_GUIDE_MESSAGE = get_setting('FORGET_GUIDE_MESSAGE')
     FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
     FORGET_QUICK_REPLY = get_setting('FORGET_QUICK_REPLY')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
@@ -291,6 +294,7 @@ def handle_message(event):
         exec_functions = False
         quick_reply_items = []
         head_message = ""
+        be_quick_reply = []
         
         if message_type == 'text':
             user_message = event.message.text
@@ -308,7 +312,11 @@ def handle_message(event):
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
-    
+        
+        if any(word in userMessage for word in FORGET_KEYWORDS) and exec_functions == False:
+                be_quick_reply = ['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY]
+                headMessage = headMessage + FORGET_GUIDE_MESSAGE                
+                
         response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
         if quick_reply_items is None and exec_functions == False:            
@@ -327,7 +335,7 @@ def handle_message(event):
                     line_push(user_id, response, message_type, None, duration)
                 return 'OK'
     
-        line_reply(reply_token, response, LINE_REPLY)
+        line_reply(reply_token, response, LINE_REPLY, be_quick_reply)
     
         # Save memory state to Firestore
         memory_state = memory.get_state()
