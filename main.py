@@ -5,11 +5,13 @@ from googleapiclient.discovery import build
 from linebot import (
     LineBotApi, WebhookHandler
 )
+from linebot.models import QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction
 from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
     MessageEvent, TextMessage, AudioMessage, TextSendMessage, AudioSendMessage,
+    QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction,
 )
 from langchain.prompts.chat import (
     ChatPromptTemplate,
