@@ -23,7 +23,7 @@ from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 
-from whisper import get_audio, speech_to_text
+from whisper import get_audio
 
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -245,6 +245,13 @@ def handle_message(event):
         display_name = profile.display_name
         user_message = event.message.text
         reply_token = event.reply_token
+        message_type = event.message.type
+        message_id = event.message.id
+        exec_audio = False
+        
+        elif message_type == 'audio':
+            exec_audio = True
+            user_message = get_audio(message_id)
         
         # Get memory state from Firestore
         memory_state = get_user_memory(user_id)
