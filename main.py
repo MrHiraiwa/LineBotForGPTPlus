@@ -23,6 +23,8 @@ from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 
+from whisper import get_audio, speech_to_text
+
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
