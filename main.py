@@ -216,7 +216,7 @@ def settings():
     )
 
 # 設定プロンプト
-character_setting = SYSTEM_PROMPT + "/nyou know the current time. Current time is " + nowDateStr + "."
+character_setting = SYSTEM_PROMPT
 # チャットプロンプトテンプレート
 prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template(character_setting),
@@ -308,7 +308,7 @@ def handle_message(event):
             save_user_memory(user_id, memory_state)
             return 'OK'
     
-        response = conversation.predict(input=display_name + ":" + user_message)
+        response = conversation.predict(input=nowDateStr + " "  display_name + ":" + user_message)
         
         if quick_reply_items is None and exec_functions == False:            
             if LINE_REPLY == "Audio" or "Both":
