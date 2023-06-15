@@ -213,7 +213,7 @@ def settings():
     )
 
 # 設定プロンプト
-character_setting = SYSTEM_PROMPT + "/n" + nowDateStr + " now."
+character_setting = SYSTEM_PROMPT + "/nCurrent time is " + nowDateStr + "."
 # チャットプロンプトテンプレート
 prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template(character_setting),
