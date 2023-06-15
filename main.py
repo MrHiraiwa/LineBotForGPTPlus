@@ -297,12 +297,34 @@ def handle_message(event):
     finally:
         return 'OK'
     
-def line_reply(reply_token, response, LINE_REPLY):
+from linebot.models import QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction
+
+def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None):
     if LINE_REPLY == 'Text':
-        message = TextSendMessage(text=response)
+        if quick_reply_items is not None:
+            # Create QuickReplyButton list from quick_reply_items
+            quick_reply_button_list = []
+            for item in quick_reply_items:
+                action_type, label, action_data = item
+                if action_type == 'message':
+                    action = MessageAction(label=label, text=action_data)
+                elif action_type == 'location':
+                    action = LocationAction(label=label)
+                elif action_type == 'uri':
+                    action = URIAction(label=label, uri=action_data)
+                else:
+                    print(f"Unknown action type: {action_type}")
+                    continue
+                quick_reply_button_list.append(QuickReplyButton(action=action))
+
+            # Create QuickReply
+            quick_reply = QuickReply(items=quick_reply_button_list)
+
+            # Add QuickReply to TextSendMessage
+            message = TextSendMessage(text=response, quick_reply=quick_reply)
+        else:
+            message = TextSendMessage(text=response)
     elif LINE_REPLY == 'Audio':
-        # ここで、responseは音声データのURLを指していると想定します。
-        # AudioSendMessageの引数は、音声データのURLと音声の長さ（ミリ秒単位）です。
         message = AudioSendMessage(original_content_url=response, duration=240000)
     else:
         print(f"Unknown REPLY type: {REPLY}")
@@ -312,6 +334,7 @@ def line_reply(reply_token, response, LINE_REPLY):
         reply_token,
         message
     )
+
     
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
