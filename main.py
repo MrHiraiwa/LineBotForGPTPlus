@@ -334,7 +334,7 @@ def handle_message(event):
                     line_push(user_id, response, message_type, None, duration)
                 return 'OK'
     
-        line_reply(reply_token, response, LINE_REPLY, quick_reply_item)
+        line_reply(reply_token, response, LINE_REPLY, quick_reply_items)
     
         # Save memory state to Firestore
         memory_state = memory.get_state()
