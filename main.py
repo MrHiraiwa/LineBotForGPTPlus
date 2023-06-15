@@ -272,14 +272,14 @@ def handle_message(event):
             memory.set_state(memory_state)
         
         if user_message.strip() == FORGET_KEYWORDS:
-            line_reply(reply_token, FORGET_MESSAGE)
+            line_text_reply(reply_token, FORGET_MESSAGE)
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
     
         response = conversation.predict(input=display_name + ":" + user_message)
     
-        line_reply(reply_token, response)
+        line_text_reply(reply_token, response)
     
         # Save memory state to Firestore
         memory_state = memory.get_state()
@@ -288,12 +288,12 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, ERROR_MESSAGE)
+        line_text_reply(reply_token, ERROR_MESSAGE)
         raise
     finally:
         return 'OK'
     
-def line_reply(reply_token, response):
+def line_text_reply(reply_token, response):
     line_bot_api.reply_message(
         reply_token,
         TextSendMessage(text=response)
