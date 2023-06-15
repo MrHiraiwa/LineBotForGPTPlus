@@ -1,8 +1,11 @@
 flask
 gunicorn
 google-cloud-firestore
+google-api-python-client
+google-cloud-texttospeech
+google-cloud-storage
+langid
 openai
 langchain
 line-bot-sdk
-google-api-python-client
 tiktoken
