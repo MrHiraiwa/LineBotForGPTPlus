@@ -313,9 +313,9 @@ def handle_message(event):
             save_user_memory(user_id, memory_state)
             return 'OK'
         
-        if any(word in userMessage for word in FORGET_KEYWORDS) and exec_functions == False:
+        if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 be_quick_reply = ['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY]
-                headMessage = headMessage + FORGET_GUIDE_MESSAGE                
+                head_message = head_message + FORGET_GUIDE_MESSAGE                
                 
         response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
