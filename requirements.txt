@@ -9,3 +9,4 @@ openai
 langchain
 line-bot-sdk
 tiktoken
+pydub
