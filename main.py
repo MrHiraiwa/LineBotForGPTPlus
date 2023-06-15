@@ -37,6 +37,7 @@ from voice import convert_audio_to_m4a, text_to_speech, delete_local_file, set_b
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 admin_password = os.environ["ADMIN_PASSWORD"]
+jst = pytz.timezone('Asia/Tokyo')
 nowDate = datetime.now(jst) 
 nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z') + "\n"
 REQUIRED_ENV_VARS = [
