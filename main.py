@@ -61,7 +61,7 @@ DEFAULT_ENV_VARS = {
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
     'GPT_MODEL': 'gpt-3.5-turbo',
     'FORGET_KEYWORDS': '忘れて,わすれて',
-    'FORGET_GUIDE_MESSAGE': '  ',
+    'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
