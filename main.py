@@ -63,7 +63,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': '  ',
     'FORGET_MESSAGE': '記憶を消去しました。',
-    'FORGET_QUICK_REPLY': '忘れて',
+    'FORGET_QUICK_REPLY': '😱記憶を消去',
     'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
     'LINE_REPLY': 'Text',
     'VOICE_GENDER': 'female',
