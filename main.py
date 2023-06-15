@@ -88,7 +88,7 @@ def reload_settings():
     else:
         FORGET_KEYWORDS = []
     FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
-    FORGET_QUICK_REPLY get_setting('FORGET_QUICK_REPLY')
+    FORGET_QUICK_REPLY = get_setting('FORGET_QUICK_REPLY')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
     VOICE_GENDER = get_setting('VOICE_GENDER')
