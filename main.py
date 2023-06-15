@@ -9,7 +9,7 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage, AudioMessage,
+    MessageEvent, TextMessage, AudioMessage, TextSendMessage,
 )
 from langchain.prompts.chat import (
     ChatPromptTemplate,
