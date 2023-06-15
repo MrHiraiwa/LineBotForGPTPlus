@@ -6,14 +6,14 @@ from tempfile import NamedTemporaryFile
 
 
 # Environment variables should be used to securely store the API keys
-OPENAI_APIKEY = os.getenv('OPENAI_APIKEY')
-LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+CHANNEL_ACCESS_TOKEN = os.getenv('CHANNEL_ACCESS_TOKEN')
 
 def get_audio(message_id):
     url = f'https://api-data.line.me/v2/bot/message/{message_id}/content'
 
     headers = {
-        'Authorization': f'Bearer {LINE_ACCESS_TOKEN}',
+        'Authorization': f'Bearer {CHANNEL_ACCESS_TOKEN}',
     }
 
     response = requests.get(url, headers=headers, timeout=30)
@@ -38,7 +38,7 @@ def speech_to_text(file_path):
         }
 
         headers = {
-            'Authorization': f'Bearer {OPENAI_APIKEY}'
+            'Authorization': f'Bearer {OPENAI_API_KEY}'
         }
 
         files = {
