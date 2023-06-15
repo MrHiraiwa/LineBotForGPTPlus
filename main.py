@@ -36,11 +36,12 @@ admin_password = os.environ["ADMIN_PASSWORD"]
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
-    "LINE_REPLY",
     "GPT_MODEL",
     "FORGET_KEYWORDS",
     "FORGET_MESSAGE",
     "ERROR_MESSAGE",
+    "LINE_REPLY",
+    "VOICE_GENDER",
     "BACKET_NAME",
     "FILE_AGE",
 ]
@@ -48,11 +49,12 @@ REQUIRED_ENV_VARS = [
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
-    'LINE_REPLY': 'Text',
     'GPT_MODEL': 'gpt-3.5-turbo',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
+    'LINE_REPLY': 'Text',
+    'VOICE_GENDER': 'female',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
     'FILE_AGE': '7'
 }
@@ -60,16 +62,15 @@ DEFAULT_ENV_VARS = {
 db = firestore.Client()
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, LINE_REPLY, GPT_MODEL
+    global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
     global FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE
-    global BACKET_NAME, FILE_AGE
+    global LINE_REPLY, VOICE_GENDER, BACKET_NAME, FILE_AGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
     else:
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
-    LINE_REPLY = get_setting('LINE_REPLY')
     GPT_MODEL = get_setting('GPT_MODEL')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
@@ -78,6 +79,8 @@ def reload_settings():
         FORGET_KEYWORDS = []
     FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
+    LINE_REPLY = get_setting('LINE_REPLY')
+    VOICE_GENDER = get_setting('VOICE_GENDER')
     BACKET_NAME = get_setting('BACKET_NAME')
     FILE_AGE = get_setting('FILE_AGE')
     
