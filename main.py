@@ -33,13 +33,15 @@ admin_password = os.environ["ADMIN_PASSWORD"]
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
-    "GPT_MODEL"
+    "GPT_MODEL",
+    "FORGET_KEYWORDS"
 ]
 
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
-    'GPT_MODEL': 'gpt-3.5-turbo'
+    'GPT_MODEL': 'gpt-3.5-turbo',
+    'FORGET_KEYWORDS': '忘れて,わすれて'
 }
 
 db = firestore.Client()
@@ -53,6 +55,11 @@ def reload_settings():
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
+    FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
+    if FORGET_KEYWORDS:
+        FORGET_KEYWORDS = FORGET_KEYWORDS.split(',')
+    else:
+        FORGET_KEYWORDS = []
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -249,7 +256,7 @@ def handle_message(event):
         message_id = event.message.id
         exec_audio = False
         
-        elif message_type == 'audio':
+        if message_type == 'audio':
             exec_audio = True
             user_message = get_audio(message_id)
         
