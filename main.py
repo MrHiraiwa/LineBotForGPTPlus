@@ -298,8 +298,9 @@ def handle_message(event):
         raise
     finally:
         return 'OK'
-    
-from linebot.models import QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction
+
+#呼び出しサンプル
+#line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
 
 def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None):
     if LINE_REPLY == 'Text':
