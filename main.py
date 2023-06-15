@@ -308,7 +308,7 @@ def handle_message(event):
             save_user_memory(user_id, memory_state)
             return 'OK'
     
-        response = conversation.predict(input=nowDateStr + " "  display_name + ":" + user_message)
+        response = conversation.predict(input=nowDateStr + " " + display_name + ":" + user_message)
         
         if quick_reply_items is None and exec_functions == False:            
             if LINE_REPLY == "Audio" or "Both":
