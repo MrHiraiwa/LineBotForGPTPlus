@@ -34,14 +34,18 @@ REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
     "GPT_MODEL",
-    "FORGET_KEYWORDS"
+    "FORGET_KEYWORDS",
+    "FORGET_MESSAGE",
+    "ERROR_MESSAGE"
 ]
 
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
     'GPT_MODEL': 'gpt-3.5-turbo',
-    'FORGET_KEYWORDS': '忘れて,わすれて'
+    'FORGET_KEYWORDS': '忘れて,わすれて',
+    'FORGET_MESSAGE': '記憶を消去しました。',
+    'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。'
 }
 
 db = firestore.Client()
@@ -60,6 +64,8 @@ def reload_settings():
         FORGET_KEYWORDS = FORGET_KEYWORDS.split(',')
     else:
         FORGET_KEYWORDS = []
+    FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
+    ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -265,8 +271,8 @@ def handle_message(event):
         if memory_state is not None:
             memory.set_state(memory_state)
         
-        if user_message.strip() == "忘れて":
-            line_reply(reply_token, "記憶を消去しました。")
+        if user_message.strip() == FORGET_KEYWORDS:
+            line_reply(reply_token, FORGET_MESSAGE)
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
@@ -282,7 +288,7 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, "エラーが発生しました。")
+        line_reply(reply_token, ERROR_MESSAGE)
         raise
     finally:
         return 'OK'
