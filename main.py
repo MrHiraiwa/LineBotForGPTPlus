@@ -9,7 +9,7 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent, TextMessage, AudioMessage, TextSendMessage,
 )
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -23,6 +23,8 @@ from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 
+from whisper import get_audio
+
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
@@ -31,19 +33,25 @@ admin_password = os.environ["ADMIN_PASSWORD"]
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
-    "GPT_MODEL"
+    "GPT_MODEL",
+    "FORGET_KEYWORDS",
+    "FORGET_MESSAGE",
+    "ERROR_MESSAGE"
 ]
 
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
-    'GPT_MODEL': 'gpt-3.5-turbo'
+    'GPT_MODEL': 'gpt-3.5-turbo',
+    'FORGET_KEYWORDS': '忘れて,わすれて',
+    'FORGET_MESSAGE': '記憶を消去しました。',
+    'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。'
 }
 
 db = firestore.Client()
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
+    global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL, FORGET_KEYWORDS, FORGET_MESSAGE, ERROR_MESSAGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -51,6 +59,13 @@ def reload_settings():
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
+    FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
+    if FORGET_KEYWORDS:
+        FORGET_KEYWORDS = FORGET_KEYWORDS.split(',')
+    else:
+        FORGET_KEYWORDS = []
+    FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
+    ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -183,7 +198,6 @@ prompt = ChatPromptTemplate.from_messages([
 # チャットモデル
 llm = ChatOpenAI(
     model_name=GPT_MODEL,
-    max_tokens=256,
     temperature=1,
     streaming=True
 )
@@ -235,29 +249,38 @@ def callback():
         abort(400)
     return "OK"
 
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=(TextMessage, AudioMessage))
 def handle_message(event):
     try:
         user_id = event.source.user_id
         profile = get_profile(user_id)
         display_name = profile.display_name
-        user_message = event.message.text
+        user_message = []
         reply_token = event.reply_token
+        message_type = event.message.type
+        message_id = event.message.id
+        exec_audio = False
+        
+        if message_type == 'text':
+            user_message = event.message.text
+        elif message_type == 'audio':
+            exec_audio = True
+            user_message = get_audio(message_id)
         
         # Get memory state from Firestore
         memory_state = get_user_memory(user_id)
         if memory_state is not None:
             memory.set_state(memory_state)
         
-        if user_message.strip() == "忘れて":
-            line_reply(reply_token, "記憶を消去しました。")
+        if user_message.strip() == FORGET_KEYWORDS:
+            line_text_reply(reply_token, FORGET_MESSAGE)
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
     
         response = conversation.predict(input=display_name + ":" + user_message)
     
-        line_reply(reply_token, response)
+        line_text_reply(reply_token, response)
     
         # Save memory state to Firestore
         memory_state = memory.get_state()
@@ -266,12 +289,12 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, "エラーが発生しました。")
+        line_text_reply(reply_token, ERROR_MESSAGE)
         raise
     finally:
         return 'OK'
     
-def line_reply(reply_token, response):
+def line_text_reply(reply_token, response):
     line_bot_api.reply_message(
         reply_token,
         TextSendMessage(text=response)
