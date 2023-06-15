@@ -354,7 +354,7 @@ def handle_message(event):
 
 def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_duration=None):
     if LINE_REPLY == 'Text':
-        if quick_reply_items is not None:
+        if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
             quick_reply_button_list = []
             for item in quick_reply_items:
@@ -391,7 +391,7 @@ def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_
 
 def line_push(user_id, response, message_type, quick_reply_items=None, audio_duration=None):
     if message_type == 'text':
-        if quick_reply_items is not None:
+        if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
             quick_reply_button_list = []
             for item in quick_reply_items:
