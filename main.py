@@ -26,7 +26,7 @@ import tiktoken
 import pickle
 
 from whisper import get_audio
-from voice import convert_audio_to_m4a, text_to_speech, send_audio_to_line, delete_local_file, set_bucket_lifecycle, send_audio_to_line_reply
+from voice import convert_audio_to_m4a, text_to_speech, delete_local_file, set_bucket_lifecycle
 
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
