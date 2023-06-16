@@ -320,7 +320,10 @@ def handle_message(event):
         
         if len(quick_reply_items) == 0 and exec_functions == False:            
             if LINE_REPLY == "Audio" or "Both":
-                put_audio(userId, message_id, BACKET_NAME, FILE_AGE)
+                public_url, local_path, duration = put_audio(userId, message_id, BACKET_NAME, FILE_AGE)
+                success = send_audio_to_line_reply(public_url, replyToken, duration)
+                if success:
+                    delete_local_file(local_path)
                 if LINE_REPLY == "Both":
                     line_push(user_id, response, message_type, None, duration)
                 return 'OK'
