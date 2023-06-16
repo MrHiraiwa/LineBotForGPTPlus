@@ -248,6 +248,7 @@ memory = CustomConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, re
 # 会話チェーン
 conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=False)
 
+@firestore.transactional
 def get_user_memory(user_id):
     doc_ref = db.collection('memory').document(user_id)
     doc = doc_ref.get()
@@ -257,6 +258,7 @@ def get_user_memory(user_id):
     else:
         return None
 
+@firestore.transactional
 def save_user_memory(user_id, memory):
     doc_ref = db.collection('memory').document(user_id)
     memory_state = pickle.dumps(memory)
@@ -301,7 +303,6 @@ def handle_message(event):
             exec_audio = True
             user_message = get_audio(message_id)
         
-        @firestore.transactional
         # Get memory state from Firestore
         memory_state = get_user_memory(user_id)
         if memory_state is not None:
