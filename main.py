@@ -379,7 +379,7 @@ def line_reply(reply_token, response, send_message_type, quick_reply_items=None,
     elif send_message_type == 'audio':
         message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
-        print(f"Unknown REPLY type: {REPLY}")
+        print(f"Unknown REPLY type: {send_message_type}")
         return
 
     line_bot_api.reply_message(
@@ -416,7 +416,7 @@ def line_push(user_id, response, send_message_type, quick_reply_items=None, audi
     elif send_message_type == 'audio':
         message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
-        print(f"Unknown REPLY type: {message_type}")
+        print(f"Unknown REPLY type: {send_message_type}")
         return
 
     line_bot_api.push_message(user_id, message)
