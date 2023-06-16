@@ -283,6 +283,7 @@ def callback():
 @handler.add(MessageEvent, message=(TextMessage, AudioMessage))
 def handle_message(event):
     try:
+        reload_settings()
         user_id = event.source.user_id
         profile = get_profile(user_id)
         display_name = profile.display_name
