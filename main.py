@@ -301,6 +301,7 @@ def handle_message(event):
             exec_audio = True
             user_message = get_audio(message_id)
         
+        @firestore.transactional
         # Get memory state from Firestore
         memory_state = get_user_memory(user_id)
         if memory_state is not None:
