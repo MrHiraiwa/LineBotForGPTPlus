@@ -307,7 +307,7 @@ def handle_message(event):
             memory.set_state(memory_state)
         
         if user_message.strip() == FORGET_QUICK_REPLY:
-            line_reply(reply_token, FORGET_MESSAGE, 'Text')
+            line_reply(reply_token, FORGET_MESSAGE, 'text')
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
