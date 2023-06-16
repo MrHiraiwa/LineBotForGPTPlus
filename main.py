@@ -32,7 +32,7 @@ import tiktoken
 import pickle
 
 from whisper import get_audio
-from voice import convert_audio_to_m4a, text_to_speech, delete_local_file, set_bucket_lifecycle, bucket_exists
+from voice import put_audio
 
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -320,16 +320,7 @@ def handle_message(event):
         
         if len(quick_reply_items) == 0 and exec_functions == False:            
             if LINE_REPLY == "Audio" or "Both":
-                if bucket_exists(BACKET_NAME):
-                    set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
-                else:
-                    print(f"Bucket {BACKET_NAME} does not exist.")
-                    return 'OK'
-                blob_path = f'{userId}/{message_id}.m4a'
-                public_url, local_path, duration = text_to_speech(botReply, BACKET_NAME, blob_path)
-                success = send_audio_to_line_reply(public_url, replyToken, duration)
-                if success:
-                    delete_local_file(local_path)
+                put_audio(userId, message_id, BACKET_NAME, FILE_AGE)
                 if LINE_REPLY == "Both":
                     line_push(user_id, response, message_type, None, duration)
                 return 'OK'
