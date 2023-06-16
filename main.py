@@ -318,18 +318,25 @@ def handle_message(event):
                 
         response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
-        if len(quick_reply_items) == 0 and exec_functions == False:
-            if LINE_REPLY == "Audio" or LINE_REPLY == "Both":
-                public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
-                success = line_reply(reply_token, public_url, 'Audio', None, duration)
-                if success:
-                    delete_local_file(local_path)
-                if LINE_REPLY == "Both":
-                    line_push(user_id, response, 'text')
-                return 'OK'
-    
-        line_reply(reply_token, response, LINE_REPLY, quick_reply_items)
-    
+        success = []
+        public_url = []
+        local_path = []
+        duration = []
+        if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
+            public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
+            if  LINE_REPLY == "Both":
+                success = line_push(user_id, public_url, 'Audio', None, duration)
+                LINE_REPLY = "Text":
+            elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
+                response = public_url
+            else:
+                LINE_REPLY = "Text":
+                    
+        line_reply(reply_token, response, LINE_REPLY, quick_reply_items, duration)
+        
+        if success:
+            delete_local_file(local_path) 
+            
         # Save memory state to Firestore
         memory_state = memory.get_state()
         save_user_memory(user_id, memory_state)
