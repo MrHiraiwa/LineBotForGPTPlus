@@ -326,11 +326,11 @@ def handle_message(event):
             public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
             if  LINE_REPLY == "Both":
                 success = line_push(user_id, public_url, 'Audio', None, duration)
-                LINE_REPLY = "Text":
+                LINE_REPLY = "Text"
             elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                 response = public_url
             else:
-                LINE_REPLY = "Text":
+                LINE_REPLY = "Text"
                     
         line_reply(reply_token, response, LINE_REPLY, quick_reply_items, duration)
         
