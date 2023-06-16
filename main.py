@@ -322,7 +322,7 @@ def handle_message(event):
         public_url = []
         local_path = []
         duration = []
-        send_message_type = []
+        send_message_type = "text"
         if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
             public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
             if  LINE_REPLY == "Both":
@@ -330,8 +330,6 @@ def handle_message(event):
                 send_message_type = "text"
             elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                 response = public_url
-            else:
-                send_message_type = "text"
                     
         line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
         
