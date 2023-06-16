@@ -294,7 +294,7 @@ def handle_message(event):
         exec_functions = False
         quick_reply_items = []
         head_message = ""
-        
+        print(f"LINE_REPLY: {LINE_REPLY}")
         if message_type == 'text':
             user_message = event.message.text
         elif message_type == 'audio':
