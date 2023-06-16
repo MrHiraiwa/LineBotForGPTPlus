@@ -417,7 +417,7 @@ def line_push(user_id, response, message_type, quick_reply_items=None, audio_dur
     elif message_type == 'audio':
         message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
-        print(f"Unknown REPLY type: {LINE_REPLY}")
+        print(f"Unknown REPLY type: {message_type}")
         return
 
     line_bot_api.push_message(user_id, message)
