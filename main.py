@@ -318,7 +318,7 @@ def handle_message(event):
                 
         response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
-        if quick_reply_items is None and exec_functions == False:            
+        if len(quick_reply_items) == 0 and exec_functions == False:            
             if LINE_REPLY == "Audio" or "Both":
                 if bucket_exists(BACKET_NAME):
                     set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
