@@ -326,7 +326,7 @@ def handle_message(event):
                     print(f"Bucket {BACKET_NAME} does not exist.")
                     return 'OK'
                 blob_path = f'{userId}/{message_id}.m4a'
-                public_url, local_path, duration = text_to_speech(botReply, BACKET_NAME, blob_path, or_chinese, or_english, voice_speed, VOICE_GENDER)
+                public_url, local_path, duration = text_to_speech(botReply, BACKET_NAME, blob_path)
                 success = send_audio_to_line_reply(public_url, replyToken, duration)
                 if success:
                     delete_local_file(local_path)
