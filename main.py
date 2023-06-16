@@ -330,6 +330,7 @@ def handle_message(event):
                 send_message_type = 'text'
             elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                 response = public_url
+                send_message_type = 'audio'
                     
         line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
         
