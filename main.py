@@ -322,17 +322,18 @@ def handle_message(event):
         public_url = []
         local_path = []
         duration = []
+        send_message_type = []
         if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
             public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
             if  LINE_REPLY == "Both":
                 success = line_push(user_id, public_url, 'audio', None, duration)
-                LINE_REPLY = "Text"
+                send_message_type = "text"
             elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                 response = public_url
             else:
-                LINE_REPLY = "Text"
+                send_message_type = "text"
                     
-        line_reply(reply_token, response, LINE_REPLY, quick_reply_items, duration)
+        line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
         
         if success:
             delete_local_file(local_path) 
@@ -352,8 +353,8 @@ def handle_message(event):
 #呼び出しサンプル
 #line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
 
-def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_duration=None):
-    if LINE_REPLY == 'Text':
+def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
+    if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
             quick_reply_button_list = []
@@ -377,7 +378,7 @@ def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_
             message = TextSendMessage(text=response, quick_reply=quick_reply)
         else:
             message = TextSendMessage(text=response)
-    elif LINE_REPLY == 'Audio':
+    elif send_message_type == 'audio':
         message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
         print(f"Unknown REPLY type: {REPLY}")
@@ -389,8 +390,8 @@ def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_
     )
 
 
-def line_push(user_id, response, message_type, quick_reply_items=None, audio_duration=None):
-    if message_type == 'text':
+def line_push(user_id, response, send_message_type, quick_reply_items=None, audio_duration=None):
+    if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
             quick_reply_button_list = []
@@ -414,7 +415,7 @@ def line_push(user_id, response, message_type, quick_reply_items=None, audio_dur
             message = TextSendMessage(text=response, quick_reply=quick_reply)
         else:
             message = TextSendMessage(text=response)
-    elif message_type == 'audio':
+    elif send_message_type == 'audio':
         message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
         print(f"Unknown REPLY type: {message_type}")
