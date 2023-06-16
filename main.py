@@ -116,8 +116,8 @@ def get_setting(key):
         save_default_settings()
         return DEFAULT_ENV_VARS.get(key, "")
     
-def get_setting_user(userid, key):
-    doc_ref = db.collection(u'users').document(userid) 
+def get_setting_user(user_id, key):
+    doc_ref = db.collection(u'users').document(user_id) 
     doc = doc_ref.get()
 
     if doc.exists:
@@ -320,7 +320,7 @@ def handle_message(event):
         
         if len(quick_reply_items) == 0 and exec_functions == False:            
             if LINE_REPLY == "Audio" or "Both":
-                public_url, local_path, duration = put_audio(userId, message_id, BACKET_NAME, FILE_AGE)
+                public_url, local_path, duration = put_audio(user_id, message_id, BACKET_NAME, FILE_AGE)
                 success = send_audio_to_line_reply(public_url, replyToken, duration)
                 if success:
                     delete_local_file(local_path)
