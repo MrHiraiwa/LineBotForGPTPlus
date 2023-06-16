@@ -199,3 +199,11 @@ def set_bucket_lifecycle(bucket_name, age):
     bucket.patch()
 
     #print(f"Lifecycle rule set for bucket {bucket_name}.")
+    
+def bucket_exists(bucket_name):
+    """Check if a bucket exists."""
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(bucket_name)
+
+    return bucket.exists()
