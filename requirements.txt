@@ -6,7 +6,7 @@ google-cloud-texttospeech
 google-cloud-storage
 langid
 openai
-langchain
+langchain==0.0.200
 line-bot-sdk
 tiktoken
 pydub

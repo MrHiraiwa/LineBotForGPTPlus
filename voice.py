@@ -31,7 +31,7 @@ def convert_audio_to_m4a(input_path, output_path):
     #print("stdout:", result.stdout)
     #print("stderr:", result.stderr)
 
-def text_to_speech(text, bucket_name, destination_blob_name, or_chinese, or_english, voice_speed, gender='female'):
+def text_to_speech(text, bucket_name, destination_blob_name, or_chinese='MANDARIN', or_english='AMERICAN', voice_speed='normal', gender='female'):
     client = texttospeech.TextToSpeechClient()
     synthesis_input = texttospeech.SynthesisInput(text=text)
     
@@ -51,25 +51,25 @@ def text_to_speech(text, bucket_name, destination_blob_name, or_chinese, or_engl
             name = "ja-JP-Neural2-C"
         else:
             name = "ja-JP-Neural2-B"    
-    elif detected_lang == 'en' and or_english == 'en-US':
+    elif detected_lang == 'en' and or_english == 'AMERICAN':
         language_code = "en-US"
         if gender.lower() == 'male':
             name = "en-US-Neural2-A"
         else:
             name = "en-US-Neural2-C"
-    elif detected_lang == 'en' and or_english == 'en-AU':
+    elif detected_lang == 'en' and or_english == 'AUSTRALIAN':
         language_code = "en-AU"
         if gender.lower() == 'male':
             name = "en-AU-Neural2-B"
         else:
             name = "en-AU-Neural2-A"
-    elif detected_lang == 'en' and or_english == 'en-IN':
+    elif detected_lang == 'en' and or_english == 'INDIAN':
         language_code = "en-IN"
         if gender.lower() == 'male':
             name = "en-IN-Standard-B"
         else:
             name = "en-IN-Standard-A"
-    elif detected_lang == 'en' and or_english == 'en-GB':
+    elif detected_lang == 'en' and or_english == 'BRIDISH':
         language_code = "en-GB"
         if gender.lower() == 'male':
             name = "en-GB-Neural2-B"
@@ -199,3 +199,23 @@ def set_bucket_lifecycle(bucket_name, age):
     bucket.patch()
 
     #print(f"Lifecycle rule set for bucket {bucket_name}.")
+    
+def bucket_exists(bucket_name):
+    """Check if a bucket exists."""
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(bucket_name)
+
+    return bucket.exists()
+
+
+
+def put_audio(userId, message_id, response, BACKET_NAME, FILE_AGE):
+    if bucket_exists(BACKET_NAME):
+        set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
+    else:
+        print(f"Bucket {BACKET_NAME} does not exist.")
+        return 'OK'
+    blob_path = f'{userId}/{message_id}.m4a'
+    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path)
+    return public_url, local_path, duration

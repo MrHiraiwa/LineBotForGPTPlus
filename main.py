@@ -32,7 +32,7 @@ import tiktoken
 import pickle
 
 from whisper import get_audio
-from voice import convert_audio_to_m4a, text_to_speech, delete_local_file, set_bucket_lifecycle
+from voice import put_audio
 
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -116,8 +116,8 @@ def get_setting(key):
         save_default_settings()
         return DEFAULT_ENV_VARS.get(key, "")
     
-def get_setting_user(userid, key):
-    doc_ref = db.collection(u'users').document(userid) 
+def get_setting_user(user_id, key):
+    doc_ref = db.collection(u'users').document(user_id) 
     doc = doc_ref.get()
 
     if doc.exists:
@@ -282,6 +282,7 @@ def callback():
 
 @handler.add(MessageEvent, message=(TextMessage, AudioMessage))
 def handle_message(event):
+    reload_settings()
     try:
         user_id = event.source.user_id
         profile = get_profile(user_id)
@@ -294,7 +295,6 @@ def handle_message(event):
         exec_functions = False
         quick_reply_items = []
         head_message = ""
-        
         if message_type == 'text':
             user_message = event.message.text
         elif message_type == 'audio':
@@ -307,7 +307,7 @@ def handle_message(event):
             memory.set_state(memory_state)
         
         if user_message.strip() == FORGET_QUICK_REPLY:
-            line_reply(reply_token, FORGET_MESSAGE, LINE_REPLY)
+            line_reply(reply_token, FORGET_MESSAGE, 'text')
             memory_state = []
             save_user_memory(user_id, memory_state)
             return 'OK'
@@ -318,24 +318,25 @@ def handle_message(event):
                 
         response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
-        if quick_reply_items is None and exec_functions == False:            
-            if LINE_REPLY == "Audio" or "Both":
-                if bucket_exists(BACKET_NAME):
-                    set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
-                else:
-                    print(f"Bucket {BACKET_NAME} does not exist.")
-                    return 'OK'
-                blob_path = f'{userId}/{message_id}.m4a'
-                public_url, local_path, duration = text_to_speech(botReply, BACKET_NAME, blob_path, or_chinese, or_english, voice_speed, VOICE_GENDER)
-                success = send_audio_to_line_reply(public_url, replyToken, duration)
-                if success:
-                    delete_local_file(local_path)
-                if LINE_REPLY == "Both":
-                    line_push(user_id, response, message_type, None, duration)
-                return 'OK'
-    
-        line_reply(reply_token, response, LINE_REPLY, quick_reply_items)
-    
+        success = []
+        public_url = []
+        local_path = []
+        duration = []
+        send_message_type = 'text'
+        if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
+            public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
+            if  LINE_REPLY == "Both":
+                success = line_push(user_id, public_url, 'audio', None, duration)
+                send_message_type = 'text'
+            elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
+                response = public_url
+                send_message_type = 'audio'
+                    
+        line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
+        
+        if success:
+            delete_local_file(local_path) 
+            
         # Save memory state to Firestore
         memory_state = memory.get_state()
         save_user_memory(user_id, memory_state)
@@ -343,7 +344,7 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, ERROR_MESSAGE, LINE_REPLY)
+        line_reply(reply_token, ERROR_MESSAGE, 'text')
         raise
     finally:
         return 'OK'
@@ -351,8 +352,8 @@ def handle_message(event):
 #呼び出しサンプル
 #line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
 
-def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_duration=None):
-    if LINE_REPLY == 'Text':
+def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
+    if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
             quick_reply_button_list = []
@@ -376,10 +377,10 @@ def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_
             message = TextSendMessage(text=response, quick_reply=quick_reply)
         else:
             message = TextSendMessage(text=response)
-    elif LINE_REPLY == 'Audio':
+    elif send_message_type == 'audio':
         message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
-        print(f"Unknown REPLY type: {REPLY}")
+        print(f"Unknown REPLY type: {send_message_type}")
         return
 
     line_bot_api.reply_message(
@@ -388,8 +389,8 @@ def line_reply(reply_token, response, LINE_REPLY, quick_reply_items=None, audio_
     )
 
 
-def line_push(user_id, response, message_type, quick_reply_items=None, audio_duration=None):
-    if message_type == 'text':
+def line_push(user_id, response, send_message_type, quick_reply_items=None, audio_duration=None):
+    if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
             quick_reply_button_list = []
@@ -413,10 +414,10 @@ def line_push(user_id, response, message_type, quick_reply_items=None, audio_dur
             message = TextSendMessage(text=response, quick_reply=quick_reply)
         else:
             message = TextSendMessage(text=response)
-    elif message_type == 'audio':
+    elif send_message_type == 'audio':
         message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
-        print(f"Unknown REPLY type: {LINE_REPLY}")
+        print(f"Unknown REPLY type: {send_message_type}")
         return
 
     line_bot_api.push_message(user_id, message)
