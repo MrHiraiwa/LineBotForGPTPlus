@@ -319,9 +319,7 @@ def handle_message(event):
         response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
         if len(quick_reply_items) == 0 and exec_functions == False:
-            print(f"LINE_REPLY: {LINE_REPLY}")
             if LINE_REPLY == "Audio" or LINE_REPLY == "Both":
-                print(f"LINE_REPLY: {LINE_REPLY}")
                 public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
                 success = line_reply(reply_token, public_url, 'Audio', None, duration)
                 if success:
