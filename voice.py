@@ -5,6 +5,8 @@ import subprocess
 from pydub.utils import mediainfo
 import langid
 
+from main import send_audio_to_line_reply 
+
 LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
 
 
@@ -218,6 +220,7 @@ def get_audio(userId, message_id, BACKET_NAME, FILE_AGE):
         return 'OK'
     blob_path = f'{userId}/{message_id}.m4a'
     public_url, local_path, duration = text_to_speech(botReply, BACKET_NAME, blob_path)
+    success = send_audio_to_line_reply(public_url, replyToken, duration)
     if success:
         delete_local_file(local_path)
-    return public_url, local_path, duration
+    return 'OK'
