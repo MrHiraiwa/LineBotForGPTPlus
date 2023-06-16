@@ -282,8 +282,8 @@ def callback():
 
 @handler.add(MessageEvent, message=(TextMessage, AudioMessage))
 def handle_message(event):
+    reload_settings()
     try:
-        reload_settings()
         user_id = event.source.user_id
         profile = get_profile(user_id)
         display_name = profile.display_name
@@ -344,7 +344,7 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, ERROR_MESSAGE, LINE_REPLY)
+        line_reply(reply_token, ERROR_MESSAGE, 'Text')
         raise
     finally:
         return 'OK'
