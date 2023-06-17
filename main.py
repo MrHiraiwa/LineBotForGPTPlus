@@ -541,50 +541,50 @@ def handle_message(event):
                 exec_functions = True
                 translate_language = "OFF"
                 user['translate_language'] = translate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TLANSLATE_MESSAGE
+                TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "CHAINESE"
                 user['translate_language'] = translate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TLANSLATE_MESSAGE
+                TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "ENGLISH"
                 user['translate_language'] = translate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TLANSLATE_MESSAGE
+                TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "INDONESIAN"
                 user['translate_language'] = translate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TLANSLATE_MESSAGE
+                TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "JAPANESE"
                 user['translate_language'] = translate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TLANSLATE_MESSAGE
+                TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "KOREAN"
                 user['translate_language'] = translate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TLANSLATE_MESSAGE
+                TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "THAI"
                 user['translate_language'] = translate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TLANSLATE_MESSAGE
+                TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
                 
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
