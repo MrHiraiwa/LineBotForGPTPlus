@@ -58,6 +58,12 @@ REQUIRED_ENV_VARS = [
     "CHANGE_TO_AUDIO_QUICK_REPLY",
     "CHANGE_TO_AUDIO_MESSAGE",
     "AUDIO_GENDER",
+    "AUDIO_SPEED_KEYWORDS",
+    "AUDIO_SPEED_GUIDE_MESSAGE",
+    "AUDIO_SPEED_MESSAGE",
+    "AUDIO_SPEED_SLOW_QUICK_REPLY",
+    "AUDIO_SPEED_NORMAL_QUICK_REPLY",
+    "AUDIO_SPEED_FAST_QUICK_REPLY",
     "OR_ENGLISH_KEYWORDS",
     "OR_ENGLISH_GUIDE_MESSAGE",
     "OR_ENGLISH_MESSAGE",
@@ -91,6 +97,12 @@ DEFAULT_ENV_VARS = {
     'CHANGE_TO_AUDIO_QUICK_REPLY': '🗣️音声で返信',
     'CHANGE_TO_AUDIO_MESSAGE': '返信を音声に変更しました。',
     'AUDIO_GENDER': 'female',
+    'AUDIO_SPEED_KEYWORDS': '音声速度',
+    'AUDIO_SPEED_GUIDE_MESSAGE': 'ユーザーに「画面下の「遅い」又は「普通」又は「早い」の項目をタップすると私の音声速度の設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'AUDIO_SPEED_MESSAGE': '音声の速度を{audio_speed}にしました。',
+    'AUDIO_SPEED_SLOW_QUICK_REPLY': '🐢遅い',
+    'AUDIO_SPEED_NORMAL_QUICK_REPLY': '🚶普通',
+    'AUDIO_SPEED_FAST_QUICK_REPLY': '🏃‍♀️早い',
     'OR_ENGLISH_KEYWORDS': '英語音声', 
     'OR_ENGLISH_GUIDE_MESSAGE': 'ユーザーに「画面下の「アメリカ英語」又は「イギリス英語」又は「オーストラリア英語」又は「インド英語」の項目をタップすると私の英語音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
     'OR_ENGLISH_MESSAGE': '英語の音声を{or_english}英語にしました。',
@@ -114,7 +126,8 @@ def reload_settings():
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
-    global LINE_REPLY, AUDIO_GENDER, BACKET_NAME, FILE_AGE
+    global LINE_REPLY, BACKET_NAME, FILE_AGE
+    global AUDIO_GENDER, AUDIO_SPEED_KEYWORDS, AUDIO_SPEED_GUIDE_MESSAGE, AUDIO_SPEED_MESSAGE, AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY
     global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, OR_ENGLISH_MESSAGE
     global OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY
     global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
@@ -146,6 +159,16 @@ def reload_settings():
     CHANGE_TO_AUDIO_QUICK_REPLY = get_setting('CHANGE_TO_AUDIO_QUICK_REPLY')
     CHANGE_TO_AUDIO_MESSAGE = get_setting('CHANGE_TO_AUDIO_MESSAGE')
     AUDIO_GENDER = get_setting('AUDIO_GENDER')
+    AUDIO_SPEED_KEYWORDS = get_setting('AUDIO_SPEED_KEYWORDS')
+    if AUDIO_SPEED_KEYWORDS:
+        AUDIO_SPEED_KEYWORDS = VOICE_SPEED_KEYWORDS.split(',')
+    else:
+        AUDIO_SPEED_KEYWORDS = []
+    AUDIO_SPEED_GUIDE_MESSAGE = get_setting('AUDIO_SPEED_GUIDE_MESSAGE')
+    AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE')
+    AUDIO_SPEED_SLOW_QUICK_REPLY = get_setting('AUDIO_SPEED_SLOW_QUICK_REPLY')
+    AUDIO_SPEED_NORMAL_QUICK_REPLY = get_setting('AUDIO_SPEED_NORMAL_QUICK_REPLY')
+    AUDIO_SPEED_FAST_QUICK_REPLY = get_setting('AUDIO_SPEED_FAST_QUICK_REPLY')
     OR_ENGLISH_KEYWORDS = get_setting('OR_ENGLISH_KEYWORDS')
     if OR_ENGLISH_KEYWORDS:
         OR_ENGLISH_KEYWORDS = OR_ENGLISH_KEYWORDS.split(',')
@@ -450,6 +473,27 @@ def handle_message(event):
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
                 user_message = OR_ENGLISH_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
+            elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_speed = "slow"
+                user['audio_speed'] = audio_speed
+                AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
+                user_message = AUDIO_SPEED_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_speed = "normal"
+                user['audio_speed'] = audio_speed
+                AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
+                user_message = AUDIO_SPEED_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_speed = "fast"
+                user['audio_speed'] = audio_speed
+                AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
+                user_message = AUDIO_SPEED_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
             
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
@@ -478,7 +522,7 @@ def handle_message(event):
             send_message_type = 'text'
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                    public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
+                    public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, gender)
                     if  LINE_REPLY == "Both":
                         success = line_push(user_id, public_url, 'audio', None, duration)
                         send_message_type = 'text'
