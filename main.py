@@ -713,7 +713,8 @@ def handle_message(event):
                 if any(word in userMessage for word in BOT_NAME) or exec_functions == True:
                     pass
                 else:
-                    response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
+                    memory.save_context(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
+                    memory_state = pickle.dumps(memory.get_state())
                     transaction.update(doc_ref, {'memory_state': memory_state})
                     return 'OK'
             
