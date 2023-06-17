@@ -60,10 +60,7 @@ REQUIRED_ENV_VARS = [
     "AUDIO_GENDER",
     "OR_ENGLISH_KEYWORDS",
     "OR_ENGLISH_GUIDE_MESSAGE",
-    "CHANGE_TO_AMERICAN_MESSAGE",
-    "CHANGE_TO_BRIDISH_MESSAGE",
-    "CHANGE_TO_AUSTRALIAN_MESSAGE",
-    "CHANGE_TO_INDIAN_MESSAGE",
+    "OR_ENGLISH_MESSAGE",
     "OR_ENGLISH_AMERICAN_QUICK_REPLY",
     "OR_ENGLISH_BRIDISH_QUICK_REPLY",
     "OR_ENGLISH_AUSTRALIAN_QUICK_REPLY",
@@ -97,10 +94,7 @@ DEFAULT_ENV_VARS = {
     'AUDIO_GENDER': 'female',
     'OR_ENGLISH_KEYWORDS': '英語音声', 
     'OR_ENGLISH_GUIDE_MESSAGE': 'ユーザーに「画面下の「アメリカ英語」又は「イギリス英語」又は「オーストラリア英語」又は「インド英語」の項目をタップすると私の英語音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
-    'CHANGE_TO_AMERICAN_MESSAGE': '英語の音声をアメリカ英語にしました。',
-    'CHANGE_TO_BRIDISH_MESSAGE': '英語の音声をイギリス英語にしました。',
-    'CHANGE_TO_AUSTRALIAN_MESSAGE': '英語の音声をオーストラリア英語にしました。',
-    'CHANGE_TO_INDIAN_MESSAGE': '英語の音声をインド英語にしました。',
+    'OR_ENGLISH_MESSAGE': '英語の音声を{or_english}英語にしました。',
     'OR_ENGLISH_AMERICAN_QUICK_REPLY': '🗽アメリカ英語',
     'OR_ENGLISH_BRIDISH_QUICK_REPLY': '🏰イギリス英語',
     'OR_ENGLISH_AUSTRALIAN_QUICK_REPLY': '🦘オーストラリア英語',
@@ -123,7 +117,7 @@ def reload_settings():
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
     global LINE_REPLY, AUDIO_GENDER, BACKET_NAME, FILE_AGE
-    global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, CHANGE_TO_AMERICAN_MESSAGE, CHANGE_TO_BRIDISH_MESSAGE, CHANGE_TO_AUSTRALIAN_MESSAGE, CHANGE_TO_INDIAN_MESSAGE
+    global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, OR_ENGLISH_MESSAGE
     global OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY
     global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, CHANGE_TO_MANDARIN_MESSAGE, CHANGE_TO_CANTONESE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
     BOT_NAME = get_setting('BOT_NAME')
@@ -160,10 +154,7 @@ def reload_settings():
     else:
         OR_ENGLISH_KEYWORDS = []
     OR_ENGLISH_GUIDE_MESSAGE = get_setting('OR_ENGLISH_GUIDE_MESSAGE')
-    CHANGE_TO_AMERICAN_MESSAGE = get_setting('CHANGE_TO_AMERICAN_MESSAGE')
-    CHANGE_TO_BRIDISH_MESSAGE = get_setting('CHANGE_TO_BRIDISH_MESSAGE')
-    CHANGE_TO_AUSTRALIAN_MESSAGE = get_setting('CHANGE_TO_AUSTRALIAN_MESSAGE')
-    CHANGE_TO_INDIAN_MESSAGE = get_setting('CHANGE_TO_INDIAN_MESSAGE')
+    OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
     OR_ENGLISH_AMERICAN_QUICK_REPLY = get_setting('OR_ENGLISH_AMERICAN_QUICK_REPLY')
     OR_ENGLISH_BRIDISH_QUICK_REPLY = get_setting('OR_ENGLISH_BRIDISH_QUICK_REPLY')
     OR_ENGLISH_AUSTRALIAN_QUICK_REPLY = get_setting('OR_ENGLISH_AUSTRALIAN_QUICK_REPLY')
@@ -344,7 +335,6 @@ def callback():
 
 @handler.add(MessageEvent, message=(TextMessage, AudioMessage))
 def handle_message(event):
-    reload_settings()
     try:
         user_id = event.source.user_id
         profile = get_profile(user_id)
@@ -403,7 +393,7 @@ def handle_message(event):
 
             if memory_state is not None:
                 memory.set_state(memory_state)
-        
+            reload_settings()
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'memory_state': []})
@@ -419,6 +409,42 @@ def handle_message(event):
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
                 user_message = CHANGE_TO_AUDIO_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_chinese = "MANDARIN"
+                user['or_chinese'] = or_chinese
+                user_message = CHANGE_TO_MANDARIN_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_chinese = "CANTONESE"
+                user['or_chinese'] = or_chinese
+                user_message = CHANGE_TO_CANTONESE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "AMERICAN"
+                user['or_english'] = or_english
+                user_message = CHANGE_TO_AMERICAN_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "BRIDISH"
+                user['or_english'] = or_english
+                user_message = CHANGE_TO_BRIDISH_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "BRIDISH"
+                user['or_english'] = or_english
+                user_message = CHANGE_TO_AUSTRALIAN_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "INDIAN"
+                user['or_english'] = or_english
+                user_message = CHANGE_TO_INDIAN_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
