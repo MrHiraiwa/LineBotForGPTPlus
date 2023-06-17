@@ -621,7 +621,7 @@ def handle_message(event):
             
             if not translate_language == "OFF":
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(translate_language=translate_language)
-                head_message = head_message + TRANSLATE_GUIDE_MESSAGE
+                head_message = head_message + TRANSLATE_ORDER
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
