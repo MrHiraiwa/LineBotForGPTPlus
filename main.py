@@ -742,7 +742,7 @@ def handle_message(event):
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
         return 'Not a valid JSON', 200 
-    except Exception as e
+    except Exception as e:
         print(f"Error in lineBot: {e}")
         line_reply(reply_token, ERROR_MESSAGE + f": {e}", 'text')
         raise
