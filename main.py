@@ -663,15 +663,17 @@ def handle_message(event):
         return 'OK'
     
 def response_filter(response):
-            date_pattern = r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3,4}"
-            response = re.sub(date_pattern, "", response).strip()
-            name_pattern1 = r"^"+ bot_name + ":"
-            response = re.sub(name_pattern1, "", response).strip()
-            name_pattern2 = r"^"+ display_name + ":"
-            response = re.sub(name_pattern2, "", response).strip()
-            dot_pattern = r"^、"
-            response = re.sub(dot_pattern, "", response).strip()
-    
+    date_pattern = r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3,4}"
+    response = re.sub(date_pattern, "", response).strip()
+    name_pattern1 = r"^"+ bot_name + ":"
+    response = re.sub(name_pattern1, "", response).strip()
+    name_pattern2 = r"^"+ display_name + ":"
+    response = re.sub(name_pattern2, "", response).strip()
+    dot_pattern = r"^、"
+    response = re.sub(dot_pattern, "", response).strip()
+    dot_pattern = r"^ "
+    response = re.sub(dot_pattern, "", response).strip()
+    return response     
     
 def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
     if send_message_type == 'text':
