@@ -51,10 +51,12 @@ REQUIRED_ENV_VARS = [
     "FORGET_QUICK_REPLY",
     "ERROR_MESSAGE",
     "LINE_REPLY",
+    "TEXT_OR_AUDIO_KEYWORDS",
+    "TEXT_OR_AUDIO_GUIDE_MESSAGE",
     "CHANGE_TO_TEXT_QUICK_REPLY",
     "CHANGE_TO_TEXT_MESSAGE",
-    "CHANGE_TO_VOICE_QUICK_REPLY",
-    "CHANGE_TO_VOICE_MESSAGE",
+    "CHANGE_TO_AUDIO_QUICK_REPLY",
+    "CHANGE_TO_AUDIO_MESSAGE",
     "VOICE_GENDER",
     "BACKET_NAME",
     "FILE_AGE",
@@ -70,10 +72,12 @@ DEFAULT_ENV_VARS = {
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
     'LINE_REPLY': 'Text',
+    'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
+    'TEXT_OR_AUDIO_GUIDE_MESSAGE': 'ユーザーに「画面下の「文字で返信」又は「音声で返信」の項目をタップすると私の音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
     'CHANGE_TO_TEXT_QUICK_REPLY': '📝文字で返信',
     'CHANGE_TO_TEXT_MESSAGE': '返信を文字に変更しました。',
-    'CHANGE_TO_VOICE_QUICK_REPLY': '🗣️音声で返信',
-    'CHANGE_TO_VOICE_MESSAGE': '返信を音声に変更しました。',
+    'CHANGE_TO_AUDIO_QUICK_REPLY': '🗣️音声で返信',
+    'CHANGE_TO_AUDIO_MESSAGE': '返信を音声に変更しました。',
     'VOICE_GENDER': 'female',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
     'FILE_AGE': '7'
@@ -84,7 +88,8 @@ db = firestore.Client()
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
-    global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_VOICE_QUICK_REPLY, CHANGE_TO_VOICE_MESSAGE
+    global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
+    global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
     global LINE_REPLY, VOICE_GENDER, BACKET_NAME, FILE_AGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -103,6 +108,8 @@ def reload_settings():
     FORGET_QUICK_REPLY = get_setting('FORGET_QUICK_REPLY')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
+    TEXT_OR_AUDIO_KEYWORDS = get_setting('TEXT_OR_AUDIO_KEYWORDS')
+    TEXT_OR_AUDIO_GUIDE_MESSAGE = get_setting('TEXT_OR_AUDIO_GUIDE_MESSAGE')
     CHANGE_TO_TEXT_QUICK_REPLY = get_setting('CHANGE_TO_TEXT_QUICK_REPLY')
     CHANGE_TO_TEXT_MESSAGE = get_setting('CHANGE_TO_TEXT_MESSAGE')
     CHANGE_TO_VOICE_QUICK_REPLY = get_setting('CHANGE_TO_VOICE_QUICK_REPLY')
@@ -344,17 +351,21 @@ def handle_message(event):
                 line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
-            elif CHANGE_TO_VOICE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
-                line_reply(reply_token, CHANGE_TO_VOICE_MESSAGE, 'text')
+                line_reply(reply_token, CHANGE_TO_AUDIO_MESSAGE, 'text')
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
             
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
-                    head_message = head_message + FORGET_GUIDE_MESSAGE                
+                    head_message = head_message + FORGET_GUIDE_MESSAGE
+            if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
+                quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
+                head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
