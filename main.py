@@ -512,6 +512,11 @@ def handle_message(event):
                 quick_reply_items.append(['message', OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_INDIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY])
                 head_message = head_message + OR_ENGLISH_GUIDE_MESSAGE
+            if any(word in user_message for word in AUDIO_SPEED_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                quick_reply_items.append(['message',  VOICE_SPEED_SLOW_QUICK_REPLY, VOICE_SPEED_SLOW_QUICK_REPLY])
+                quick_reply_items.append(['message',  VOICE_SPEED_NORMAL_QUICK_REPLY, VOICE_SPEED_NORMAL_QUICK_REPLY])
+                quick_reply_items.append(['message', VOICE_SPEED_FAST_QUICK_REPLY, VOICE_SPEED_FAST_QUICK_REPLY])
+                head_message = head_message + VOICE_SPEED_GUIDE_MESSAGE
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
