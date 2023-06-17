@@ -435,6 +435,7 @@ def handle_message(event):
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
             
+            print(f"message_type: {message_type}")
             if message_type == 'text':
                 user_message = event.message.text
             elif message_type == 'audio':
