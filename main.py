@@ -667,8 +667,12 @@ def response_filter(response):
     response = re.sub(date_pattern, "", response).strip()
     name_pattern1 = r"^"+ bot_name + ":"
     response = re.sub(name_pattern1, "", response).strip()
-    name_pattern2 = r"^"+ display_name + ":"
+    name_pattern2 = r"^"+ bot_name + "："
     response = re.sub(name_pattern2, "", response).strip()
+    name_pattern3 = r"^"+ display_name + ":"
+    response = re.sub(name_pattern3, "", response).strip()
+    name_pattern4 = r"^"+ display_name + "："
+    response = re.sub(name_pattern4, "", response).strip()
     dot_pattern = r"^、"
     response = re.sub(dot_pattern, "", response).strip()
     dot_pattern = r"^ "
