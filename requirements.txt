@@ -4,6 +4,8 @@ google-cloud-firestore
 google-api-python-client
 google-cloud-texttospeech
 google-cloud-storage
+google-search-results
+wolframalpha
 langid
 openai
 langchain
