@@ -380,7 +380,7 @@ def handle_message(event):
             
             # Save memory state to Firestore
             memory_state = pickle.dumps(memory.get_state())
-            transaction.update(doc_ref, {'memory_state': memory_state.tobytes()})
+            transaction.update(doc_ref, {'memory_state': memory_state})
 
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
