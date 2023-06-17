@@ -466,7 +466,7 @@ def handle_message(event):
                 else:
                     user_message = STICKER_MESSAGE + "\n" + ', '.join(keywords)
             elif message_type =='image':
-                vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
+                vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 head_message = str(vision_results)
                 user_message = OCR_MESSAGE
             elif message_type == 'location':
