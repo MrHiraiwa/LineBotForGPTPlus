@@ -31,7 +31,7 @@ def convert_audio_to_m4a(input_path, output_path):
     #print("stdout:", result.stdout)
     #print("stderr:", result.stderr)
 
-def text_to_speech(text, bucket_name, destination_blob_name, or_chinese='MANDARIN', or_english='AMERICAN', voice_speed='normal', gender='female'):
+def text_to_speech(text, bucket_name, destination_blob_name, or_chinese, or_english, voice_speed, gender):
     client = texttospeech.TextToSpeechClient()
     synthesis_input = texttospeech.SynthesisInput(text=text)
     
@@ -210,12 +210,12 @@ def bucket_exists(bucket_name):
 
 
 
-def put_audio(userId, message_id, response, BACKET_NAME, FILE_AGE):
+def put_audio(userId, message_id, response, BACKET_NAME, FILE_AGE, or_chinese='MANDARIN', or_english='AMERICAN', voice_speed='normal', gender='female'):
     if bucket_exists(BACKET_NAME):
         set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
     else:
         print(f"Bucket {BACKET_NAME} does not exist.")
         return 'OK'
     blob_path = f'{userId}/{message_id}.m4a'
-    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path)
+    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, or_chinese, or_english, voice_speed, gender)
     return public_url, local_path, duration
