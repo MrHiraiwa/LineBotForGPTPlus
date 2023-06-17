@@ -421,7 +421,7 @@ def handle_message(event):
             or_chinese = 'MANDARIN'
             or_english = 'en-US'
             voice_speed = 'normal'
-            tlanslate_language = 'OFF'
+            translate_language = 'OFF'
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -439,7 +439,7 @@ def handle_message(event):
                 or_chinese = user['or_chinese']
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
-                tlanslate_language = user['tlanslate_language']
+                translate_language = user['translate_language']
             else:
                 user = {
                     'memory_state': memory_state,
@@ -450,7 +450,7 @@ def handle_message(event):
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
                     'voice_speed' : voice_speed,
-                    'tlanslate_language' : tlanslate_language
+                    'translate_language' : translate_language
                 }
                 transaction.set(doc_ref, user)
 
@@ -538,51 +538,51 @@ def handle_message(event):
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_OFF_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "OFF"
-                user['tlanslate_language'] = tlanslate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                translate_language = "OFF"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TLANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "CHAINESE"
-                user['tlanslate_language'] = tlanslate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                translate_language = "CHAINESE"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TLANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "ENGLISH"
-                user['tlanslate_language'] = tlanslate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                translate_language = "ENGLISH"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TLANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "INDONESIAN"
-                user['tlanslate_language'] = tlanslate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                translate_language = "INDONESIAN"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TLANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "JAPANESE"
-                user['tlanslate_language'] = tlanslate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                translate_language = "JAPANESE"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TLANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "KOREAN"
-                user['tlanslate_language'] = tlanslate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                translate_language = "KOREAN"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TLANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "T"
-                user['tlanslate_language'] = tlanslate_language
-                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                translate_language = "THAI"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TLANSLATE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
                 
@@ -619,7 +619,7 @@ def handle_message(event):
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
             
             if not translate_language == "OFF":
-                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(tlanslate_language=tlanslate_language)
+                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(translate_language=translate_language)
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
