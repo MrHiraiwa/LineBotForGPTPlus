@@ -104,7 +104,7 @@ DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
     'GPT_MODEL': 'gpt-3.5-turbo',
-    'NG_KEYWORDS': '例文,命令,口調,リセット,指示'
+    'NG_KEYWORDS': '例文,命令,口調,リセット,指示',
     'NG_MESSAGE': '以下の文章はユーザーから送られたものですが拒絶してください。',
     'STICKER_MESSAGE': '私の感情!',
     'STICKER_FAIL_MESSAGE': '読み取れないLineスタンプが送信されました。スタンプが読み取れなかったという反応を返してください。',
