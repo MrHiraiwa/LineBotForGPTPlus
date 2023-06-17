@@ -138,7 +138,7 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_JAPANESE_QUICK_REPLY': '🇯🇵日本語',
     'TRANSLATE_KOREAN_QUICK_REPLY': '🇰🇷韓国語',
     'TRANSLATE_THAIAN_QUICK_REPLY': '🇹🇭タイランド語',
-    'TRANSLATE_ORDER': '以下のユーザーメッセージを{translate_language}に翻訳してください。'
+    'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。'
 }
 
 db = firestore.Client()
@@ -620,7 +620,7 @@ def handle_message(event):
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
             
             if not translate_language == "OFF":
-                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(translate_language=translate_language)
+                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
                 head_message = head_message + TRANSLATE_ORDER
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
