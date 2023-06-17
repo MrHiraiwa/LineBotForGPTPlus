@@ -626,7 +626,7 @@ def handle_message(event):
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
             
-            response = response_filter(response,bot_name,display_name)
+            response = response_filter(response,BOT_NAME,display_name)
             
             success = []
             public_url = []
