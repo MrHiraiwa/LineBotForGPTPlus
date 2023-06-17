@@ -624,7 +624,9 @@ def handle_message(event):
                 head_message = head_message + TRANSLATE_ORDER
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
-        
+            
+            response = response_filter(response)
+            
             success = []
             public_url = []
             local_path = []
@@ -659,10 +661,18 @@ def handle_message(event):
         raise
     finally:
         return 'OK'
-
-#呼び出しサンプル
-#line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
-
+    
+def response_filter(response):
+            date_pattern = r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3,4}"
+            response = re.sub(date_pattern, "", response).strip()
+            name_pattern1 = r"^"+ bot_name + ":"
+            response = re.sub(name_pattern1, "", response).strip()
+            name_pattern2 = r"^"+ display_name + ":"
+            response = re.sub(name_pattern2, "", response).strip()
+            dot_pattern = r"^、"
+            response = re.sub(dot_pattern, "", response).strip()
+    
+    
 def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
     if send_message_type == 'text':
         if quick_reply_items:
