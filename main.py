@@ -423,6 +423,7 @@ def handle_message(event):
             or_english = 'AMERICAN'
             voice_speed = 'normal'
             translate_language = 'OFF'
+            bot_name = BOT_NAME[0]
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -626,7 +627,7 @@ def handle_message(event):
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
             
-            response = response_filter(response,BOT_NAME,display_name)
+            response = response_filter(response, bot_name, display_name)
             
             success = []
             public_url = []
