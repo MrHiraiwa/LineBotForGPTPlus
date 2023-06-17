@@ -100,7 +100,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
-    'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
+    'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
     'TEXT_OR_AUDIO_GUIDE_MESSAGE': 'ユーザーに「画面下の「文字で返信」又は「音声で返信」の項目をタップすると私の音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
