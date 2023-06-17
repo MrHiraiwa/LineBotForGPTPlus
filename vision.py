@@ -60,7 +60,7 @@ def get_image(image_url, line_access_token):
 
 from linebot import LineBotApi
 
-def (message_id, CHANNEL_ACCESS_TOKEN):
+def vision_api(message_id, CHANNEL_ACCESS_TOKEN):
     line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
     message_content = line_bot_api.get_message_content(message_id)
     
