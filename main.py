@@ -36,6 +36,7 @@ import re
 from whisper import get_audio
 from voice import put_audio
 from vision import vision_api
+from maps import maps, maps_search
 
 # LINE Messaging APIの準備
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
