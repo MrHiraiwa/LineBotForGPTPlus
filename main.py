@@ -128,7 +128,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
-    'SEARCH_KEYWORDS': '検索,調べて,教えて,知ってる,どうやって,?,？',
+    'SEARCH_KEYWORDS': '検索,調べて,教えて,知ってる,どうやって,どこ,誰,何,?,？',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
