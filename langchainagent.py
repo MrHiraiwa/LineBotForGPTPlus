@@ -1,5 +1,4 @@
 from langchain import SerpAPIWrapper
-from langchain.utilities.wolfram_alpha import WolframAlphaAPIWrapper
 from langchain.agents import initialize_agent, Tool
 from langchain.agents import AgentType
 from langchain.chat_models import ChatOpenAI
@@ -13,11 +12,6 @@ tools = [
         name = "Search",
         func = search.run,
         description = "useful for when you need to answer questions about current events. You should ask targeted questions"
-    ),
-    Tool(
-        name = "WolframAlpha",
-        func = wolfram.run,
-        description = "useful for when you need to answer questions about math and science"
     )
 ]
 
