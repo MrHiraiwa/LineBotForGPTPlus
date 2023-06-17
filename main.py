@@ -419,7 +419,7 @@ def handle_message(event):
             start_free_day = datetime.now(jst)
             audio_or_text = 'Text'
             or_chinese = 'MANDARIN'
-            or_english = 'en-US'
+            or_english = 'AMERICAN'
             voice_speed = 'normal'
             translate_language = 'OFF'
             
