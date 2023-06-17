@@ -432,6 +432,12 @@ def handle_message(event):
                 user_message = event.message.text
             elif message_type == 'audio':
                 user_message = get_audio(message_id)
+            elif message_type == 'sticker':
+                keywords = event.keywords
+                if keywords == "":
+                    userMessage = FAIL_STICKER_MESSAGE
+                else:
+                    userMessage = STICKER_MESSAGE + "\n" + ', '.join(keywords)
                 
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
