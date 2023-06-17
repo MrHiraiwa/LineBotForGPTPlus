@@ -506,6 +506,7 @@ def handle_message(event):
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
                 translate_language = user['translate_language']
+                updated_date = user['updated_date_string'].astimezone(jst)
                 if nowDate.date() != updatedDate.date():
                     daily_usage = 0
                     
