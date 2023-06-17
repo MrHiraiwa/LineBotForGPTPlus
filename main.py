@@ -51,6 +51,10 @@ REQUIRED_ENV_VARS = [
     "FORGET_QUICK_REPLY",
     "ERROR_MESSAGE",
     "LINE_REPLY",
+    "CHANGE_TO_TEXT_QUICK_REPLY",
+    "CHANGE_TO_TEXT_MESSAGE",
+    "CHANGE_TO_VOICE_QUICK_REPLY",
+    "CHANGE_TO_VOICE_MESSAGE",
     "VOICE_GENDER",
     "BACKET_NAME",
     "FILE_AGE",
@@ -66,6 +70,10 @@ DEFAULT_ENV_VARS = {
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
     'LINE_REPLY': 'Text',
+    'CHANGE_TO_TEXT_QUICK_REPLY': '📝文字で返信',
+    'CHANGE_TO_TEXT_MESSAGE': '返信を文字に変更しました。',
+    'CHANGE_TO_VOICE_QUICK_REPLY': '🗣️音声で返信',
+    'CHANGE_TO_VOICE_MESSAGE': '返信を音声に変更しました。',
     'VOICE_GENDER': 'female',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
     'FILE_AGE': '7'
@@ -76,6 +84,7 @@ db = firestore.Client()
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
+    global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_VOICE_QUICK_REPLY, CHANGE_TO_VOICE_MESSAGE
     global LINE_REPLY, VOICE_GENDER, BACKET_NAME, FILE_AGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -94,6 +103,10 @@ def reload_settings():
     FORGET_QUICK_REPLY = get_setting('FORGET_QUICK_REPLY')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
+    CHANGE_TO_TEXT_QUICK_REPLY = get_setting('CHANGE_TO_TEXT_QUICK_REPLY')
+    CHANGE_TO_TEXT_MESSAGE = get_setting('CHANGE_TO_TEXT_MESSAGE')
+    CHANGE_TO_VOICE_QUICK_REPLY = get_setting('CHANGE_TO_VOICE_QUICK_REPLY')
+    CHANGE_TO_VOICE_MESSAGE = get_setting('CHANGE_TO_VOICE_MESSAGE')
     VOICE_GENDER = get_setting('VOICE_GENDER')
     BACKET_NAME = get_setting('BACKET_NAME')
     FILE_AGE = get_setting('FILE_AGE')
@@ -136,7 +149,6 @@ def save_default_settings():
     doc_ref = db.collection(u'settings').document('app_settings')
     doc_ref.set(DEFAULT_ENV_VARS, merge=True)
 
-
 def update_setting(key, value):
     doc_ref = db.collection(u'settings').document('app_settings')
     doc_ref.update({key: value})
@@ -145,7 +157,6 @@ reload_settings()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', default='YOUR-DEFAULT-SECRET-KEY')
-
 
 @app.route('/reset_logs', methods=['POST'])
 def reset_logs():
@@ -194,15 +205,13 @@ def login():
             lockout_time = datetime.now(jst) + timedelta(minutes=10) if attempts >= 5 else None
             attempts_doc_ref.set({'attempts': attempts, 'lockout_time': lockout_time})
             return render_template('login.html', message='Incorrect password. Please try again.')
-
+        
     return render_template('login.html')
-
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if 'is_admin' not in session or not session['is_admin']:
         return redirect(url_for('login'))
-    
     current_settings = {key: get_setting(key) or DEFAULT_ENV_VARS.get(key, '') for key in REQUIRED_ENV_VARS}
 
     if request.method == 'POST':
@@ -279,7 +288,7 @@ def handle_message(event):
         
         @firestore.transactional
         def update_in_transaction(transaction, doc_ref):
-            user_message = []
+            user_message = ""
             exec_functions = False
             quick_reply_items = []
             head_message = ""
@@ -287,7 +296,6 @@ def handle_message(event):
             if message_type == 'text':
                 user_message = event.message.text
             elif message_type == 'audio':
-                exec_audio = True
                 user_message = get_audio(message_id)
                 
             doc = doc_ref.get(transaction=transaction)
@@ -297,7 +305,7 @@ def handle_message(event):
                 updated_date_string = user['updated_date_string']
                 daily_usage = user['daily_usage']
                 start_free_day = user['start_free_day']
-                voice_or_text = user['voice_or_text']
+                audio_or_text = user['audio_or_text']
                 or_chinese = user['or_chinese']
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
@@ -306,7 +314,7 @@ def handle_message(event):
                 updated_date_string = nowDate
                 daily_usage = 0
                 start_free_day = datetime.now(jst)
-                voice_or_text = 'Text'
+                audio_or_text = 'Text'
                 or_chinese = 'MANDARIN'
                 or_english = 'en-US'
                 voice_speed = 'normal'
@@ -315,23 +323,35 @@ def handle_message(event):
                     'updated_date_string': updated_date_string,
                     'daily_usage': daily_usage,
                     'start_free_day': start_free_day,
-                    'voice_or_text' : voice_or_text,
+                    'audio_or_text' : audio_or_text,
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
                     'voice_speed' : voice_speed
                 }
                 transaction.set(doc_ref, user)
 
-            
             if memory_state is not None:
                 memory.set_state(memory_state)
         
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'memory_state': []})
-
                 return 'OK'
-        
+            elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_or_text = "Text"
+                user['audio_or_text'] = audio_or_text
+                line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
+                transaction.set(doc_ref, user, merge=True)
+                return 'OK'
+            elif CHANGE_TO_VOICE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_or_text = "Audio"
+                user['audio_or_text'] = audio_or_text
+                line_reply(reply_token, CHANGE_TO_VOICE_MESSAGE, 'text')
+                transaction.set(doc_ref, user, merge=True)
+                return 'OK'
+            
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                     head_message = head_message + FORGET_GUIDE_MESSAGE                
@@ -343,14 +363,15 @@ def handle_message(event):
             local_path = []
             duration = []
             send_message_type = 'text'
-            if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
-                if  LINE_REPLY == "Both":
-                    success = line_push(user_id, public_url, 'audio', None, duration)
-                    send_message_type = 'text'
-                elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
-                    response = public_url
-                    send_message_type = 'audio'
+            if audio_or_text == "Audio":
+                if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
+                    public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
+                    if  LINE_REPLY == "Both":
+                        success = line_push(user_id, public_url, 'audio', None, duration)
+                        send_message_type = 'text'
+                    elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
+                        response = public_url
+                        send_message_type = 'audio'
                     
             line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
         
@@ -359,7 +380,7 @@ def handle_message(event):
             
             # Save memory state to Firestore
             memory_state = pickle.dumps(memory.get_state())
-            transaction.update(doc_ref, {'memory_state': memory_state.tobytes()})
+            transaction.update(doc_ref, {'memory_state': memory_state})
 
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
@@ -370,7 +391,6 @@ def handle_message(event):
         raise
     finally:
         return 'OK'
-
 
 #呼び出しサンプル
 #line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
@@ -411,7 +431,6 @@ def line_reply(reply_token, response, send_message_type, quick_reply_items=None,
         message
     )
 
-
 def line_push(user_id, response, send_message_type, quick_reply_items=None, audio_duration=None):
     if send_message_type == 'text':
         if quick_reply_items:
@@ -442,9 +461,7 @@ def line_push(user_id, response, send_message_type, quick_reply_items=None, audi
     else:
         print(f"Unknown REPLY type: {send_message_type}")
         return
-
     line_bot_api.push_message(user_id, message)
-
     
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
