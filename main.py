@@ -428,7 +428,7 @@ def handle_message(event):
                 quick_reply_items.append(['message', OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_MANDARIN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_CHINESE_CANTONESE_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY])
                 head_message = head_message + OR_CHINESE_GUIDE_MESSAGE
-            if any(word in ususer_message for word in OR_ENGLISH_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            if any(word in user_message for word in OR_ENGLISH_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 quick_reply_items.append(['message', OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_AMERICAN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY])
