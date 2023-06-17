@@ -54,6 +54,7 @@ REQUIRED_ENV_VARS = [
     "STICKER_MESSAGE",
     "STICKER_FAIL_MESSAGE",
     "OCR_MESSAGE",
+    "MAPS_MESSAGE",
     "FORGET_KEYWORDS",
     "FORGET_GUIDE_MESSAGE",
     "FORGET_MESSAGE",
@@ -110,6 +111,7 @@ DEFAULT_ENV_VARS = {
     'STICKER_MESSAGE': '私の感情!',
     'STICKER_FAIL_MESSAGE': '読み取れないLineスタンプが送信されました。スタンプが読み取れなかったという反応を返してください。',
     'OCR_MESSAGE': '以下のテキストは写真に何が映っているかを文字列に変換したものです。この文字列を見て写真を見たかのように反応してください。',
+    'MAPS_MESSAGE': '地図検索を実行しました。',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
@@ -162,7 +164,7 @@ db = firestore.Client()
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
     global NG_MESSAGE, NG_KEYWORDS
-    global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE
+    global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, MAPS_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
@@ -189,6 +191,7 @@ def reload_settings():
     STICKER_MESSAGE = get_setting('STICKER_MESSAGE')
     STICKER_FAIL_MESSAGE = get_setting('STICKER_FAIL_MESSAGE')
     OCR_MESSAGE = get_setting('OCR_MESSAGE')
+    MAPS_MESSAGE = get_setting('MAPS_MESSAGE')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
         FORGET_KEYWORDS = FORGET_KEYWORDS.split(',')
@@ -466,6 +469,14 @@ def handle_message(event):
                 vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 head_message = str(vision_results)
                 user_message = OCR_MESSAGE
+            elif message_type == 'location':
+                exec_functions = True 
+                latitude =  event.message.latitude
+                longitude = event.message.longitude
+                result = maps_search(latitude, longitude, "")
+                head_message = result['message']
+                links = result['links']
+                user_message = MAPS_MESSAGE
                 
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
