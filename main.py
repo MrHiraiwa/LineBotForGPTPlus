@@ -78,7 +78,7 @@ DEFAULT_ENV_VARS = {
     'CHANGE_TO_TEXT_MESSAGE': '返信を文字に変更しました。',
     'CHANGE_TO_AUDIO_QUICK_REPLY': '🗣️音声で返信',
     'CHANGE_TO_AUDIO_MESSAGE': '返信を音声に変更しました。',
-    'VOICE_GENDER': 'female',
+    'AUDIO_GENDER': 'female',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
     'FILE_AGE': '7'
 }
@@ -90,7 +90,7 @@ def reload_settings():
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
-    global LINE_REPLY, VOICE_GENDER, BACKET_NAME, FILE_AGE
+    global LINE_REPLY, AUDIO_GENDER, BACKET_NAME, FILE_AGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -112,9 +112,9 @@ def reload_settings():
     TEXT_OR_AUDIO_GUIDE_MESSAGE = get_setting('TEXT_OR_AUDIO_GUIDE_MESSAGE')
     CHANGE_TO_TEXT_QUICK_REPLY = get_setting('CHANGE_TO_TEXT_QUICK_REPLY')
     CHANGE_TO_TEXT_MESSAGE = get_setting('CHANGE_TO_TEXT_MESSAGE')
-    CHANGE_TO_VOICE_QUICK_REPLY = get_setting('CHANGE_TO_VOICE_QUICK_REPLY')
-    CHANGE_TO_VOICE_MESSAGE = get_setting('CHANGE_TO_VOICE_MESSAGE')
-    VOICE_GENDER = get_setting('VOICE_GENDER')
+    CHANGE_TO_AUDIO_QUICK_REPLY = get_setting('CHANGE_TO_AUDIO_QUICK_REPLY')
+    CHANGE_TO_AUDIO_MESSAGE = get_setting('CHANGE_TO_AUDIO_MESSAGE')
+    AUDIO_GENDER = get_setting('AUDIO_GENDER')
     BACKET_NAME = get_setting('BACKET_NAME')
     FILE_AGE = get_setting('FILE_AGE')
     
