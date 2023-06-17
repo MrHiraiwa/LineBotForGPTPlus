@@ -335,6 +335,7 @@ def callback():
 
 @handler.add(MessageEvent, message=(TextMessage, AudioMessage))
 def handle_message(event):
+    reload_settings()
     try:
         user_id = event.source.user_id
         profile = get_profile(user_id)
@@ -393,7 +394,7 @@ def handle_message(event):
 
             if memory_state is not None:
                 memory.set_state(memory_state)
-            reload_settings()
+            
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'memory_state': []})
@@ -426,25 +427,29 @@ def handle_message(event):
                 exec_functions = True
                 or_english = "AMERICAN"
                 user['or_english'] = or_english
-                user_message = CHANGE_TO_AMERICAN_MESSAGE
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
-                user_message = CHANGE_TO_BRIDISH_MESSAGE
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
-                user_message = CHANGE_TO_AUSTRALIAN_MESSAGE
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "INDIAN"
                 user['or_english'] = or_english
-                user_message = CHANGE_TO_INDIAN_MESSAGE
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
