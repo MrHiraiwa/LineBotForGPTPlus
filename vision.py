@@ -56,3 +56,12 @@ def get_image(image_url, line_access_token):
     }
     response = requests.get(image_url, headers=headers)
     return response.content
+
+
+def vision_api(message_id,LINE_ACCESS_TOKEN):
+    image_url = 'https://api-data.line.me/v2/bot/message/' + message_id + '/content'
+    image = get_image(image_url, LINE_ACCESS_TOKEN) 
+    vision_results = analyze_image(image)
+    vision_results = vision_results_to_string(vision_results)
+    return vision_results
+
