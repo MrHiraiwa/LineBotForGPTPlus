@@ -11,12 +11,12 @@ tools = [
     Tool(
         name = "Google Search",
         func=google_search.run,
-        description="最新の話題について答える場合に利用することができます。また、今日の日付や今日の気温、天気、為替レートなど現在の状況についても確認することができます。入力は検索内容です。"
+        description="useful for when you need to answer questions about current events."
     ),
     Tool(
         name="Calculator",
         func=llm_math_chain.run,
-        description="計算をする場合に利用することができます。"
+        description="It can be used when doing calculations."
     )
 ]
 
