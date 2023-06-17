@@ -709,6 +709,14 @@ def handle_message(event):
                 (reply_token, MAX_DAILY_MESSAGE, 'text')
                 return 'OK'
             
+            if sourceType == "group" or sourceType == "room":
+                if any(word in userMessage for word in BOT_NAME) or exec_functions == True:
+                    pass
+                else:
+                    response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
+                    transaction.update(doc_ref, {'memory_state': memory_state})
+                    return 'OK'
+            
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
             
             response = response_filter(response, bot_name, display_name)
