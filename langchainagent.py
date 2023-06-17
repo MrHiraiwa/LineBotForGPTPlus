@@ -4,10 +4,10 @@ from langchain.chat_models import ChatOpenAI
 from langchain.utilities.google_search import GoogleSearchAPIWrapper
 from langchain import LLMMathChain
 
+llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo-0613")
+
 google_search = GoogleSearchAPIWrapper()
 llm_math_chain = LLMMathChain(llm=llm, verbose=True)
-
-llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo-0613")
 
 tools = [
     Tool(
