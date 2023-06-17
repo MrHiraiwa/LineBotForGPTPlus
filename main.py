@@ -67,8 +67,7 @@ REQUIRED_ENV_VARS = [
     "OR_ENGLISH_INDIAN_QUICK_REPLY",
     "OR_CHINESE_KEYWORDS",
     "OR_CHINESE_GUIDE_MESSAGE",
-    "CHANGE_TO_MANDARIN_MESSAGE",
-    "CHANGE_TO_CANTONESE_MESSAGE",
+    "OR_CHINESE_MESSAGE",
     "OR_CHINESE_MANDARIN_QUICK_REPLY",
     "OR_CHINESE_CANTONESE_QUICK_REPLY",
     "BACKET_NAME",
@@ -101,8 +100,7 @@ DEFAULT_ENV_VARS = {
     'OR_ENGLISH_INDIAN_QUICK_REPLY': '🐘インド英語',
     'OR_CHINESE_KEYWORDS': '中国語音声', 
     'OR_CHINESE_GUIDE_MESSAGE': 'ユーザーに「画面下の「北京語」又は「広東語」の項目をタップすると私の中国音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
-    'CHANGE_TO_MANDARIN_MESSAGE': '中国語の音声を北京語にしました。',
-    'CHANGE_TO_CANTONESE_MESSAGE': '中国語の音声を広東語にしました。',
+    'OR_CHINESE_MESSAGE': '中国語の音声を{or_chinese}英語にしました。',
     'OR_CHINESE_MANDARIN_QUICK_REPLY': '🏛️北京語',
     'OR_CHINESE_CANTONESE_QUICK_REPLY': '🌃広東語',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
@@ -119,7 +117,7 @@ def reload_settings():
     global LINE_REPLY, AUDIO_GENDER, BACKET_NAME, FILE_AGE
     global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, OR_ENGLISH_MESSAGE
     global OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY
-    global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, CHANGE_TO_MANDARIN_MESSAGE, CHANGE_TO_CANTONESE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
+    global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -165,8 +163,7 @@ def reload_settings():
     else:
         OR_CHINESE_KEYWORDS = []
     OR_CHINESE_GUIDE_MESSAGE = get_setting('OR_CHINESE_GUIDE_MESSAGE')
-    CHANGE_TO_MANDARIN_MESSAGE = get_setting('CHANGE_TO_MANDARIN_MESSAGE')
-    CHANGE_TO_CANTONESE_MESSAGE = get_setting('CHANGE_TO_CANTONESE_MESSAGE')
+    OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE')
     OR_CHINESE_MANDARIN_QUICK_REPLY = get_setting('OR_CHINESE_MANDARIN_QUICK_REPLY')
     OR_CHINESE_CANTONESE_QUICK_REPLY = get_setting('OR_CHINESE_CANTONESE_QUICK_REPLY')
     BACKET_NAME = get_setting('BACKET_NAME')
@@ -415,13 +412,15 @@ def handle_message(event):
                 exec_functions = True
                 or_chinese = "MANDARIN"
                 user['or_chinese'] = or_chinese
-                user_message = CHANGE_TO_MANDARIN_MESSAGE
+                OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
+                user_message = OR_CHINESE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_chinese = "CANTONESE"
                 user['or_chinese'] = or_chinese
-                user_message = CHANGE_TO_CANTONESE_MESSAGE
+                OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
+                user_message = OR_CHINESE_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
             elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
