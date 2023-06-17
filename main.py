@@ -292,14 +292,29 @@ def handle_message(event):
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
                 user = doc.to_dict()
-                memory_state = user['memory']
+                memory_state = user['memory_state']
+            else:
+                user = {
+                    'user_id': user_id,
+                    'memory_state': [],
+                    'updatedDateString': nowDate,
+                    'dailyUsage': 0,
+                    'start_free_day': start_free_day,
+                    'voice_or_text' : 'TEXT',
+                    'or_chinese' : 'MANDARIN',
+                    'or_english' : 'en-US',
+                    'voice_speed' : 'normal'
+                }
+                transaction.set(doc_ref, user)
             
             if memory_state is not None:
                 memory.set_state(memory_state)
         
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
-                memory_state = []
+                transaction.set(doc_ref, {**user, 'memory_state': []})
+
+                return 'OK'
         
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
@@ -328,7 +343,7 @@ def handle_message(event):
             
             # Save memory state to Firestore
              memory_state = pickle.dumps(memory.get_state())
-            transaction.update(doc_ref, {'memory': memory_state})
+            transaction.update(doc_ref, {'memory_state': memory_state})
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
         return 'Not a valid JSON', 200 
