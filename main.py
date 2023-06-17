@@ -30,6 +30,7 @@ from langchain.memory import (
 from langchain.chains import ConversationChain
 import tiktoken
 import pickle
+import re
 
 from whisper import get_audio
 from voice import put_audio
@@ -99,7 +100,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
-    'ERROR_MESSAGE': '現在アクセスが集中しているため、しばらくしてからもう一度お試しください。',
+    'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
     'TEXT_OR_AUDIO_GUIDE_MESSAGE': 'ユーザーに「画面下の「文字で返信」又は「音声で返信」の項目をタップすると私の音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
@@ -138,7 +139,7 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_JAPANESE_QUICK_REPLY': '🇯🇵日本語',
     'TRANSLATE_KOREAN_QUICK_REPLY': '🇰🇷韓国語',
     'TRANSLATE_THAIAN_QUICK_REPLY': '🇹🇭タイランド語',
-    'TRANSLATE_ORDER': '以下のユーザーメッセージを{translate_language}に翻訳してください。'
+    'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。'
 }
 
 db = firestore.Client()
@@ -422,6 +423,7 @@ def handle_message(event):
             or_english = 'AMERICAN'
             voice_speed = 'normal'
             translate_language = 'OFF'
+            bot_name = BOT_NAME[0]
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -619,12 +621,14 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
             
-            if not translate_language == "OFF":
-                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(translate_language=translate_language)
+            if translate_language != 'OFF':
+                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
                 head_message = head_message + TRANSLATE_ORDER
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
-        
+            
+            response = response_filter(response, bot_name, display_name)
+            
             success = []
             public_url = []
             local_path = []
@@ -659,10 +663,24 @@ def handle_message(event):
         raise
     finally:
         return 'OK'
-
-#呼び出しサンプル
-#line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
-
+    
+def response_filter(response,bot_name,display_name):
+    date_pattern = r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3,4}"
+    response = re.sub(date_pattern, "", response).strip()
+    name_pattern1 = r"^"+ bot_name + ":"
+    response = re.sub(name_pattern1, "", response).strip()
+    name_pattern2 = r"^"+ bot_name + "："
+    response = re.sub(name_pattern2, "", response).strip()
+    name_pattern3 = r"^"+ display_name + ":"
+    response = re.sub(name_pattern3, "", response).strip()
+    name_pattern4 = r"^"+ display_name + "："
+    response = re.sub(name_pattern4, "", response).strip()
+    dot_pattern = r"^、"
+    response = re.sub(dot_pattern, "", response).strip()
+    dot_pattern = r"^ "
+    response = re.sub(dot_pattern, "", response).strip()
+    return response     
+    
 def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
     if send_message_type == 'text':
         if quick_reply_items:
