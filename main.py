@@ -57,9 +57,38 @@ REQUIRED_ENV_VARS = [
     "CHANGE_TO_TEXT_MESSAGE",
     "CHANGE_TO_AUDIO_QUICK_REPLY",
     "CHANGE_TO_AUDIO_MESSAGE",
-    "VOICE_GENDER",
+    "AUDIO_GENDER",
+    "AUDIO_SPEED_KEYWORDS",
+    "AUDIO_SPEED_GUIDE_MESSAGE",
+    "AUDIO_SPEED_MESSAGE",
+    "AUDIO_SPEED_SLOW_QUICK_REPLY",
+    "AUDIO_SPEED_NORMAL_QUICK_REPLY",
+    "AUDIO_SPEED_FAST_QUICK_REPLY",
+    "OR_ENGLISH_KEYWORDS",
+    "OR_ENGLISH_GUIDE_MESSAGE",
+    "OR_ENGLISH_MESSAGE",
+    "OR_ENGLISH_AMERICAN_QUICK_REPLY",
+    "OR_ENGLISH_BRIDISH_QUICK_REPLY",
+    "OR_ENGLISH_AUSTRALIAN_QUICK_REPLY",
+    "OR_ENGLISH_INDIAN_QUICK_REPLY",
+    "OR_CHINESE_KEYWORDS",
+    "OR_CHINESE_GUIDE_MESSAGE",
+    "OR_CHINESE_MESSAGE",
+    "OR_CHINESE_MANDARIN_QUICK_REPLY",
+    "OR_CHINESE_CANTONESE_QUICK_REPLY",
     "BACKET_NAME",
     "FILE_AGE",
+    "TRANSLATE_KEYWORDS",
+    "TRANSLATE_GUIDE_MESSAGE",
+    "TRANSLATE_MESSAGE",
+    "TRANSLATE_OFF_QUICK_REPLY",
+    "TRANSLATE_CHAINESE_QUICK_REPLY",
+    "TRANSLATE_ENGLISH_QUICK_REPLY",
+    "TRANSLATE_INDONESIAN_QUICK_REPLY",
+    "TRANSLATE_JAPANESE_QUICK_REPLY",
+    "TRANSLATE_KOREAN_QUICK_REPLY",
+    "TRANSLATE_THAIAN_QUICK_REPLY",
+    "TRANSLATE_ORDER"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -79,8 +108,37 @@ DEFAULT_ENV_VARS = {
     'CHANGE_TO_AUDIO_QUICK_REPLY': '🗣️音声で返信',
     'CHANGE_TO_AUDIO_MESSAGE': '返信を音声に変更しました。',
     'AUDIO_GENDER': 'female',
+    'AUDIO_SPEED_KEYWORDS': '音声速度',
+    'AUDIO_SPEED_GUIDE_MESSAGE': 'ユーザーに「画面下の「遅い」又は「普通」又は「早い」の項目をタップすると私の音声速度の設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'AUDIO_SPEED_MESSAGE': '音声の速度を{audio_speed}にしました。',
+    'AUDIO_SPEED_SLOW_QUICK_REPLY': '🐢遅い',
+    'AUDIO_SPEED_NORMAL_QUICK_REPLY': '🚶普通',
+    'AUDIO_SPEED_FAST_QUICK_REPLY': '🏃‍♀️早い',
+    'OR_ENGLISH_KEYWORDS': '英語音声', 
+    'OR_ENGLISH_GUIDE_MESSAGE': 'ユーザーに「画面下の「アメリカ英語」又は「イギリス英語」又は「オーストラリア英語」又は「インド英語」の項目をタップすると私の英語音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'OR_ENGLISH_MESSAGE': '英語の音声を{or_english}英語にしました。',
+    'OR_ENGLISH_AMERICAN_QUICK_REPLY': '🗽アメリカ英語',
+    'OR_ENGLISH_BRIDISH_QUICK_REPLY': '🏰イギリス英語',
+    'OR_ENGLISH_AUSTRALIAN_QUICK_REPLY': '🦘オーストラリア英語',
+    'OR_ENGLISH_INDIAN_QUICK_REPLY': '🐘インド英語',
+    'OR_CHINESE_KEYWORDS': '中国語音声', 
+    'OR_CHINESE_GUIDE_MESSAGE': 'ユーザーに「画面下の「北京語」又は「広東語」の項目をタップすると私の中国音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'OR_CHINESE_MESSAGE': '中国語の音声を{or_chinese}英語にしました。',
+    'OR_CHINESE_MANDARIN_QUICK_REPLY': '🏛️北京語',
+    'OR_CHINESE_CANTONESE_QUICK_REPLY': '🌃広東語',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
-    'FILE_AGE': '7'
+    'FILE_AGE': '7',
+    'TRANSLATE_KEYWORDS': '翻訳モード',
+    'TRANSLATE_GUIDE_MESSAGE': 'ユーザーに「画面下の「中国語」又は「英語」又は「インドネシア語」又は「日本語」又は「韓国語」又は「タイランド語」の項目をタップすると私はあなたの言葉を指定した言葉に翻訳する」と案内してください。以下の文章はユーザーから送られたものです。',
+    'TRANSLATE_MESSAGE': '翻訳モードを{translate_language}にしました。',
+    'TRANSLATE_OFF_QUICK_REPLY': '🔇オフ',
+    'TRANSLATE_CHAINESE_QUICK_REPLY': '🇨🇳中国語',
+    'TRANSLATE_ENGLISH_QUICK_REPLY': '🇬🇧英語',
+    'TRANSLATE_INDONESIAN_QUICK_REPLY': '🇮🇩インドネシア語',
+    'TRANSLATE_JAPANESE_QUICK_REPLY': '🇯🇵日本語',
+    'TRANSLATE_KOREAN_QUICK_REPLY': '🇰🇷韓国語',
+    'TRANSLATE_THAIAN_QUICK_REPLY': '🇹🇭タイランド語',
+    'TRANSLATE_ORDER': '以下のユーザーメッセージを{translate_language}に翻訳してください。'
 }
 
 db = firestore.Client()
@@ -90,7 +148,13 @@ def reload_settings():
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
-    global LINE_REPLY, AUDIO_GENDER, BACKET_NAME, FILE_AGE
+    global LINE_REPLY, BACKET_NAME, FILE_AGE
+    global AUDIO_GENDER, AUDIO_SPEED_KEYWORDS, AUDIO_SPEED_GUIDE_MESSAGE, AUDIO_SPEED_MESSAGE, AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY
+    global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, OR_ENGLISH_MESSAGE
+    global OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY
+    global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
+    global TRANSLATE_KEYWORDS, TRANSLATE_GUIDE_MESSAGE, TRANSLATE_MESSAGE, TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY
+    global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -109,14 +173,63 @@ def reload_settings():
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
     TEXT_OR_AUDIO_KEYWORDS = get_setting('TEXT_OR_AUDIO_KEYWORDS')
+    if TEXT_OR_AUDIO_KEYWORDS:
+        TEXT_OR_AUDIO_KEYWORDS = TEXT_OR_AUDIO_KEYWORDS.split(',')
+    else:
+        TEXT_OR_AUDIO_KEYWORDS = []
     TEXT_OR_AUDIO_GUIDE_MESSAGE = get_setting('TEXT_OR_AUDIO_GUIDE_MESSAGE')
     CHANGE_TO_TEXT_QUICK_REPLY = get_setting('CHANGE_TO_TEXT_QUICK_REPLY')
     CHANGE_TO_TEXT_MESSAGE = get_setting('CHANGE_TO_TEXT_MESSAGE')
     CHANGE_TO_AUDIO_QUICK_REPLY = get_setting('CHANGE_TO_AUDIO_QUICK_REPLY')
     CHANGE_TO_AUDIO_MESSAGE = get_setting('CHANGE_TO_AUDIO_MESSAGE')
     AUDIO_GENDER = get_setting('AUDIO_GENDER')
+    AUDIO_SPEED_KEYWORDS = get_setting('AUDIO_SPEED_KEYWORDS')
+    if AUDIO_SPEED_KEYWORDS:
+        AUDIO_SPEED_KEYWORDS = AUDIO_SPEED_KEYWORDS.split(',')
+    else:
+        AUDIO_SPEED_KEYWORDS = []
+    AUDIO_SPEED_GUIDE_MESSAGE = get_setting('AUDIO_SPEED_GUIDE_MESSAGE')
+    AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE')
+    AUDIO_SPEED_SLOW_QUICK_REPLY = get_setting('AUDIO_SPEED_SLOW_QUICK_REPLY')
+    AUDIO_SPEED_NORMAL_QUICK_REPLY = get_setting('AUDIO_SPEED_NORMAL_QUICK_REPLY')
+    AUDIO_SPEED_FAST_QUICK_REPLY = get_setting('AUDIO_SPEED_FAST_QUICK_REPLY')
+    OR_ENGLISH_KEYWORDS = get_setting('OR_ENGLISH_KEYWORDS')
+    if OR_ENGLISH_KEYWORDS:
+        OR_ENGLISH_KEYWORDS = OR_ENGLISH_KEYWORDS.split(',')
+    else:
+        OR_ENGLISH_KEYWORDS = []
+    OR_ENGLISH_GUIDE_MESSAGE = get_setting('OR_ENGLISH_GUIDE_MESSAGE')
+    OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE')
+    OR_ENGLISH_AMERICAN_QUICK_REPLY = get_setting('OR_ENGLISH_AMERICAN_QUICK_REPLY')
+    OR_ENGLISH_BRIDISH_QUICK_REPLY = get_setting('OR_ENGLISH_BRIDISH_QUICK_REPLY')
+    OR_ENGLISH_AUSTRALIAN_QUICK_REPLY = get_setting('OR_ENGLISH_AUSTRALIAN_QUICK_REPLY')
+    OR_ENGLISH_INDIAN_QUICK_REPLY = get_setting('OR_ENGLISH_INDIAN_QUICK_REPLY')
+    OR_CHINESE_KEYWORDS = get_setting('OR_CHINESE_KEYWORDS')
+    if OR_CHINESE_KEYWORDS:
+        OR_CHINESE_KEYWORDS = OR_CHINESE_KEYWORDS.split(',')
+    else:
+        OR_CHINESE_KEYWORDS = []
+    OR_CHINESE_GUIDE_MESSAGE = get_setting('OR_CHINESE_GUIDE_MESSAGE')
+    OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE')
+    OR_CHINESE_MANDARIN_QUICK_REPLY = get_setting('OR_CHINESE_MANDARIN_QUICK_REPLY')
+    OR_CHINESE_CANTONESE_QUICK_REPLY = get_setting('OR_CHINESE_CANTONESE_QUICK_REPLY')
     BACKET_NAME = get_setting('BACKET_NAME')
     FILE_AGE = get_setting('FILE_AGE')
+    TRANSLATE_KEYWORDS = get_setting('TRANSLATE_KEYWORDS')
+    if TRANSLATE_KEYWORDS:
+        TRANSLATE_KEYWORDS = TRANSLATE_KEYWORDS.split(',')
+    else:
+        TRANSLATE_KEYWORDS = []
+    TRANSLATE_GUIDE_MESSAGE = get_setting('TRANSLATE_GUIDE_MESSAGE')
+    TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE')
+    TRANSLATE_OFF_QUICK_REPLY = get_setting('TRANSLATE_OFF_QUICK_REPLY')
+    TRANSLATE_CHAINESE_QUICK_REPLY = get_setting('TRANSLATE_CHAINESE_QUICK_REPLY')
+    TRANSLATE_ENGLISH_QUICK_REPLY = get_setting('TRANSLATE_ENGLISH_QUICK_REPLY')
+    TRANSLATE_INDONESIAN_QUICK_REPLY = get_setting('TRANSLATE_INDONESIAN_QUICK_REPLY')
+    TRANSLATE_JAPANESE_QUICK_REPLY = get_setting('TRANSLATE_JAPANESE_QUICK_REPLY')
+    TRANSLATE_KOREAN_QUICK_REPLY = get_setting('TRANSLATE_KOREAN_QUICK_REPLY')
+    TRANSLATE_THAIAN_QUICK_REPLY = get_setting('TRANSLATE_THAIAN_QUICK_REPLY')
+    TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -308,6 +421,7 @@ def handle_message(event):
             or_chinese = 'MANDARIN'
             or_english = 'en-US'
             voice_speed = 'normal'
+            translate_language = 'OFF'
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -325,6 +439,7 @@ def handle_message(event):
                 or_chinese = user['or_chinese']
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
+                translate_language = user['translate_language']
             else:
                 user = {
                     'memory_state': memory_state,
@@ -334,13 +449,14 @@ def handle_message(event):
                     'audio_or_text' : audio_or_text,
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
-                    'voice_speed' : voice_speed
+                    'voice_speed' : voice_speed,
+                    'translate_language' : translate_language
                 }
                 transaction.set(doc_ref, user)
 
             if memory_state is not None:
                 memory.set_state(memory_state)
-        
+            
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'memory_state': []})
@@ -357,7 +473,119 @@ def handle_message(event):
                 user['audio_or_text'] = audio_or_text
                 user_message = CHANGE_TO_AUDIO_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
-            
+            elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_chinese = "MANDARIN"
+                user['or_chinese'] = or_chinese
+                OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
+                user_message = OR_CHINESE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_chinese = "CANTONESE"
+                user['or_chinese'] = or_chinese
+                OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
+                user_message = OR_CHINESE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "AMERICAN"
+                user['or_english'] = or_english
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "BRIDISH"
+                user['or_english'] = or_english
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "BRIDISH"
+                user['or_english'] = or_english
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                or_english = "INDIAN"
+                user['or_english'] = or_english
+                OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
+                user_message = OR_ENGLISH_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_speed = "slow"
+                user['audio_speed'] = audio_speed
+                AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
+                user_message = AUDIO_SPEED_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_speed = "normal"
+                user['audio_speed'] = audio_speed
+                AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
+                user_message = AUDIO_SPEED_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                exec_functions = True
+                audio_speed = "fast"
+                user['audio_speed'] = audio_speed
+                AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
+                user_message = AUDIO_SPEED_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_OFF_QUICK_REPLY in user_message:
+                exec_functions = True
+                translate_language = "OFF"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
+                exec_functions = True
+                translate_language = "CHAINESE"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
+                exec_functions = True
+                translate_language = "ENGLISH"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
+                exec_functions = True
+                translate_language = "INDONESIAN"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
+                exec_functions = True
+                translate_language = "JAPANESE"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
+                exec_functions = True
+                translate_language = "KOREAN"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
+                exec_functions = True
+                translate_language = "THAI"
+                user['translate_language'] = translate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(translate_language=translate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+                
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                     head_message = head_message + FORGET_GUIDE_MESSAGE
@@ -365,6 +593,34 @@ def handle_message(event):
                 quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
                 quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_QUICK_REPLY])
                 head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
+            if any(word in user_message for word in OR_CHINESE_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                quick_reply_items.append(['message', OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_MANDARIN_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_CHINESE_CANTONESE_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY])
+                head_message = head_message + OR_CHINESE_GUIDE_MESSAGE
+            if any(word in user_message for word in OR_ENGLISH_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                quick_reply_items.append(['message', OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_AMERICAN_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_ENGLISH_INDIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY])
+                head_message = head_message + OR_ENGLISH_GUIDE_MESSAGE
+            if any(word in user_message for word in AUDIO_SPEED_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                quick_reply_items.append(['message', AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_SLOW_QUICK_REPLY])
+                quick_reply_items.append(['message', AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY])
+                quick_reply_items.append(['message', AUDIO_SPEED_FAST_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY])
+                head_message = head_message + VOICE_SPEED_GUIDE_MESSAGE
+            if any(word in user_message for word in TRANSLATE_KEYWORDS) and not exec_functions:
+                quick_reply_items.append(['message', TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_OFF_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_INDONESIAN_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_JAPANESE_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
+                head_message = head_message + TRANSLATE_GUIDE_MESSAGE
+            
+            if not translate_language == "OFF":
+                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(translate_language=translate_language)
+                head_message = head_message + TRANSLATE_GUIDE_MESSAGE
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
@@ -375,7 +631,7 @@ def handle_message(event):
             send_message_type = 'text'
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                    public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
+                    public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, gender)
                     if  LINE_REPLY == "Both":
                         success = line_push(user_id, public_url, 'audio', None, duration)
                         send_message_type = 'text'
@@ -397,7 +653,7 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, ERROR_MESSAGE, 'text')
+        line_reply(reply_token, ERROR_MESSAGE + f": {e}", 'text')
         raise
     finally:
         return 'OK'
