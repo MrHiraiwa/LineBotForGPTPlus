@@ -285,13 +285,14 @@ def handle_message(event):
             user_message = get_audio(message_id)
             
         db = firestore.Client()
-        doc_ref = db.collection(u'users').document(userId)
+        doc_ref = db.collection(u'users').document(user_id)
         
         @firestore.transactional
         def update_in_transaction(transaction, doc_ref):
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
-                memory_state = pickle.loads(doc.to_dict()['memory'])
+                user = doc.to_dict()
+                memory_state = user['memory']
             
             if memory_state is not None:
                 memory.set_state(memory_state)
@@ -326,8 +327,8 @@ def handle_message(event):
                 delete_local_file(local_path) 
             
             # Save memory state to Firestore
-             memory_state = pickle.dumps(memory)
-            transaction.set(doc_ref, {**user, 'memory': memory_state)
+             memory_state = pickle.dumps(memory.get_state())
+            transaction.update(doc_ref, {'memory': memory_state})
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
         return 'Not a valid JSON', 200 
@@ -337,6 +338,7 @@ def handle_message(event):
         raise
     finally:
         return 'OK'
+
 
 #呼び出しサンプル
 #line_reply(reply_token, 'Please reply', 'Text', [['message', 'Yes', 'Yes'], ['message', 'No', 'No'], ['uri', 'Visit website', 'https://example.com']])
