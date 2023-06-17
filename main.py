@@ -722,8 +722,8 @@ def handle_message(event):
                 (reply_token, MAX_DAILY_MESSAGE, 'text')
                 return 'OK'
             
-            if sourceType == "group" or sourceType == "room":
-                if any(word in userMessage for word in BOT_NAME) or exec_functions == True:
+            if source_type == "group" or source_type == "room":
+                if any(word in user_message for word in BOT_NAME) or exec_functions == True:
                     pass
                 else:
                     memory.save_context(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
