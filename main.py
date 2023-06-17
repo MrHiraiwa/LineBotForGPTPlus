@@ -57,7 +57,23 @@ REQUIRED_ENV_VARS = [
     "CHANGE_TO_TEXT_MESSAGE",
     "CHANGE_TO_AUDIO_QUICK_REPLY",
     "CHANGE_TO_AUDIO_MESSAGE",
-    "VOICE_GENDER",
+    "AUDIO_GENDER",
+    "OR_ENGLISH_KEYWORDS",
+    "OR_ENGLISH_GUIDE_MESSAGE",
+    "CHANGE_TO_AMERICAN_MESSAGE",
+    "CHANGE_TO_BRIDISH_MESSAGE",
+    "CHANGE_TO_AUSTRALIAN_MESSAGE",
+    "CHANGE_TO_INDIAN_MESSAGE",
+    "OR_ENGLISH_AMERICAN_QUICK_REPLY",
+    "OR_ENGLISH_BRIDISH_QUICK_REPLY",
+    "OR_ENGLISH_AUSTRALIAN_QUICK_REPLY",
+    "OR_ENGLISH_INDIAN_QUICK_REPLY",
+    "OR_CHINESE_KEYWORDS",
+    "OR_CHINESE_GUIDE_MESSAGE",
+    "CHANGE_TO_MANDARIN_MESSAGE",
+    "CHANGE_TO_CANTONESE_MESSAGE",
+    "OR_CHINESE_MANDARIN_QUICK_REPLY",
+    "OR_CHINESE_CANTONESE_QUICK_REPLY",
     "BACKET_NAME",
     "FILE_AGE",
 ]
@@ -79,6 +95,22 @@ DEFAULT_ENV_VARS = {
     'CHANGE_TO_AUDIO_QUICK_REPLY': '🗣️音声で返信',
     'CHANGE_TO_AUDIO_MESSAGE': '返信を音声に変更しました。',
     'AUDIO_GENDER': 'female',
+    'OR_ENGLISH_KEYWORDS': '英語音声', 
+    'OR_ENGLISH_GUIDE_MESSAGE': 'ユーザーに「画面下の「アメリカ英語」又は「イギリス英語」又は「オーストラリア英語」又は「インド英語」の項目をタップすると私の英語音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'CHANGE_TO_AMERICAN_MESSAGE': '英語の音声をアメリカ英語にしました。',
+    'CHANGE_TO_BRIDISH_MESSAGE': '英語の音声をイギリス英語にしました。',
+    'CHANGE_TO_AUSTRALIAN_MESSAGE': '英語の音声をオーストラリア英語にしました。',
+    'CHANGE_TO_INDIAN_MESSAGE': '英語の音声をインド英語にしました。',
+    'OR_ENGLISH_AMERICAN_QUICK_REPLY': '🗽アメリカ英語',
+    'OR_ENGLISH_BRIDISH_QUICK_REPLY': '🏰イギリス英語',
+    'OR_ENGLISH_AUSTRALIAN_QUICK_REPLY': '🦘オーストラリア英語',
+    'OR_ENGLISH_INDIAN_QUICK_REPLY': '🐘インド英語',
+    'OR_CHINESE_KEYWORDS': '中国語音声', 
+    'OR_CHINESE_GUIDE_MESSAGE': 'ユーザーに「画面下の「北京語」又は「広東語」の項目をタップすると私の中国音声設定が変更される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'CHANGE_TO_MANDARIN_MESSAGE': '中国語の音声を北京語にしました。',
+    'CHANGE_TO_CANTONESE_MESSAGE': '中国語の音声を広東語にしました。',
+    'OR_CHINESE_MANDARIN_QUICK_REPLY': '🏛️北京語',
+    'OR_CHINESE_CANTONESE_QUICK_REPLY': '🌃広東語',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
     'FILE_AGE': '7'
 }
@@ -91,6 +123,9 @@ def reload_settings():
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
     global LINE_REPLY, AUDIO_GENDER, BACKET_NAME, FILE_AGE
+    global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, CHANGE_TO_AMERICAN_MESSAGE, CHANGE_TO_BRIDISH_MESSAGE, CHANGE_TO_AUSTRALIAN_MESSAGE, CHANGE_TO_INDIAN_MESSAGE,
+    global OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY
+    global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, CHANGE_TO_MANDARIN_MESSAGE, CHANGE_TO_CANTONESE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY,
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -115,6 +150,30 @@ def reload_settings():
     CHANGE_TO_AUDIO_QUICK_REPLY = get_setting('CHANGE_TO_AUDIO_QUICK_REPLY')
     CHANGE_TO_AUDIO_MESSAGE = get_setting('CHANGE_TO_AUDIO_MESSAGE')
     AUDIO_GENDER = get_setting('AUDIO_GENDER')
+    OR_ENGLISH_KEYWORDS = get_setting('OR_ENGLISH_KEYWORDS')
+    if OR_ENGLISH_KEYWORDS:
+        OR_ENGLISH_KEYWORDS = OR_ENGLISH_KEYWORDS.split(',')
+    else:
+        OR_ENGLISH_KEYWORDS = []
+    OR_ENGLISH_GUIDE_MESSAGE = get_setting('OR_ENGLISH_GUIDE_MESSAGE')
+    CHANGE_TO_AMERICAN_MESSAGE = get_setting('CHANGE_TO_AMERICAN_MESSAGE')
+    CHANGE_TO_BRIDISH_MESSAGE = get_setting('CHANGE_TO_BRIDISH_MESSAGE')
+    CHANGE_TO_AUSTRALIAN_MESSAGE = get_setting('CHANGE_TO_AUSTRALIAN_MESSAGE')
+    CHANGE_TO_INDIAN_MESSAGE = get_setting('CHANGE_TO_INDIAN_MESSAGE')
+    OR_ENGLISH_AMERICAN_QUICK_REPLY = get_setting('OR_ENGLISH_AMERICAN_QUICK_REPLY')
+    OR_ENGLISH_BRIDISH_QUICK_REPLY = get_setting('OR_ENGLISH_BRIDISH_QUICK_REPLY')
+    OR_ENGLISH_AUSTRALIAN_QUICK_REPLY = get_setting('OR_ENGLISH_AUSTRALIAN_QUICK_REPLY')
+    OR_ENGLISH_INDIAN_QUICK_REPLY = get_setting('OR_ENGLISH_INDIAN_QUICK_REPLY')
+    OR_CHINESE_KEYWORDS = get_setting('OR_CHINESE_KEYWORDS')
+    if OR_CHINESE_KEYWORDS:
+        OR_CHINESE_KEYWORDS = OR_CHINESE_KEYWORDS.split(',')
+    else:
+        OR_CHINESE_KEYWORDS = []
+    OR_CHINESE_GUIDE_MESSAGE = get_setting('OR_CHINESE_GUIDE_MESSAGE')
+    CHANGE_TO_MANDARIN_MESSAGE = get_setting('CHANGE_TO_MANDARIN_MESSAGE')
+    CHANGE_TO_CANTONESE_MESSAGE = get_setting('CHANGE_TO_CANTONESE_MESSAGE')
+    OR_CHINESE_MANDARIN_QUICK_REPLY = get_setting('OR_CHINESE_MANDARIN_QUICK_REPLY')
+    OR_CHINESE_CANTONESE_QUICK_REPLY = get_setting('OR_CHINESE_CANTONESE_QUICK_REPLY')
     BACKET_NAME = get_setting('BACKET_NAME')
     FILE_AGE = get_setting('FILE_AGE')
     
@@ -365,6 +424,16 @@ def handle_message(event):
                 quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
                 quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_QUICK_REPLY])
                 head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
+            if any(word in user_message for word in OR_CHINESE_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                quick_reply_items.append(['message', OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_MANDARIN_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_CHINESE_CANTONESE_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY])
+                head_message = head_message + OR_CHINESE_GUIDE_MESSAGE
+            if any(word in ususer_message for word in OR_ENGLISH_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                quick_reply_items.append(['message', OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_AMERICAN_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY])
+                quick_reply_items.append(['message', OR_ENGLISH_INDIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY])
+                head_message = head_message + OR_ENGLISH_GUIDE_MESSAGE
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
