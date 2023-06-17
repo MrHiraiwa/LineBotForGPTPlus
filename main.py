@@ -293,7 +293,7 @@ def handle_message(event):
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
                 user = doc.to_dict()
-                memory_state = user['memory_state']
+                memory_state = pickle.loads(bytes(doc.to_dict()['memory_state']))
                 updated_date_string = user['updated_date_string']
                 daily_usage = user['daily_usage']
                 start_free_day = user['start_free_day']
@@ -359,7 +359,8 @@ def handle_message(event):
             
             # Save memory state to Firestore
             memory_state = pickle.dumps(memory.get_state())
-            transaction.update(doc_ref, {'memory_state': memory_state})
+            transaction.update(doc_ref, {'memory_state': memory_state.tobytes()})
+
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
         return 'Not a valid JSON', 200 
