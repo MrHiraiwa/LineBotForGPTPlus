@@ -270,25 +270,26 @@ def handle_message(event):
         user_id = event.source.user_id
         profile = get_profile(user_id)
         display_name = profile.display_name
-        user_message = []
         reply_token = event.reply_token
         message_type = event.message.type
         message_id = event.message.id
-        exec_audio = False
-        exec_functions = False
-        quick_reply_items = []
-        head_message = ""
-        if message_type == 'text':
-            user_message = event.message.text
-        elif message_type == 'audio':
-            exec_audio = True
-            user_message = get_audio(message_id)
             
         db = firestore.Client()
         doc_ref = db.collection(u'users').document(user_id)
         
         @firestore.transactional
         def update_in_transaction(transaction, doc_ref):
+            user_message = []
+            exec_functions = False
+            quick_reply_items = []
+            head_message = ""
+            
+            if message_type == 'text':
+                user_message = event.message.text
+            elif message_type == 'audio':
+                exec_audio = True
+                user_message = get_audio(message_id)
+                
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
                 user = doc.to_dict()
