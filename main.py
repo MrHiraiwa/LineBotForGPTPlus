@@ -458,6 +458,7 @@ def handle_message(event):
         reply_token = event.reply_token
         message_type = event.message.type
         message_id = event.message.id
+        source_type = event.source.type
             
         db = firestore.Client()
         doc_ref = db.collection(u'users').document(user_id)
