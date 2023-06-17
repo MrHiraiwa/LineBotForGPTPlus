@@ -46,6 +46,8 @@ REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
     "GPT_MODEL",
+    "STICKER_MESSAGE",
+    "STICKER_FAIL_MESSAGE",
     "FORGET_KEYWORDS",
     "FORGET_GUIDE_MESSAGE",
     "FORGET_MESSAGE",
@@ -97,6 +99,8 @@ DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
     'GPT_MODEL': 'gpt-3.5-turbo',
+    'STICKER_MESSAGE': '私の感情!',
+    'STICKER_FAIL_MESSAGE': '読み取れないLineスタンプが送信されました。スタンプが読み取れなかったという反応を返してください。',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
@@ -148,6 +152,7 @@ db = firestore.Client()
 
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
+    global STICKER_MESSAGE, STICKER_FAIL_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
@@ -165,6 +170,8 @@ def reload_settings():
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
+    STICKER_MESSAGE = get_setting('STICKER_MESSAGE')
+    STICKER_FAIL_MESSAGE = get_setting('STICKER_FAIL_MESSAGE')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
         FORGET_KEYWORDS = FORGET_KEYWORDS.split(',')
@@ -433,9 +440,9 @@ def handle_message(event):
             elif message_type == 'audio':
                 user_message = get_audio(message_id)
             elif message_type == 'sticker':
-                keywords = event.keywords
+                keywords = event.message.keywords
                 if keywords == "":
-                    userMessage = FAIL_STICKER_MESSAGE
+                    userMessage = STICKER_FAIL_MESSAGE
                 else:
                     userMessage = STICKER_MESSAGE + "\n" + ', '.join(keywords)
                 
