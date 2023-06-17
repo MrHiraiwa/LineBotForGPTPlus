@@ -131,13 +131,13 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_KEYWORDS': '翻訳モード',
     'TRANSLATE_GUIDE_MESSAGE': 'ユーザーに「画面下の「中国語」又は「英語」又は「インドネシア語」又は「日本語」又は「韓国語」又は「タイランド語」の項目をタップすると私はあなたの言葉を指定した言葉に翻訳する」と案内してください。以下の文章はユーザーから送られたものです。',
     'TRANSLATE_MESSAGE': '翻訳モードを{translate_language}にしました。',
-    'TRANSLATE_OFF_QUICK_REPLY': 'オフ',
-    'TRANSLATE_CHAINESE_QUICK_REPLY': '中国語',
-    'TRANSLATE_ENGLISH_QUICK_REPLY': '英語',
-    'TRANSLATE_INDONESIAN_QUICK_REPLY': 'インドネシア語',
-    'TRANSLATE_JAPANESE_QUICK_REPLY': '日本語',
-    'TRANSLATE_KOREAN_QUICK_REPLY': '韓国語',
-    'TRANSLATE_THAIAN_QUICK_REPLY': 'タイランド語',
+    'TRANSLATE_OFF_QUICK_REPLY': '🔇オフ',
+    'TRANSLATE_CHAINESE_QUICK_REPLY': '🇨🇳中国語',
+    'TRANSLATE_ENGLISH_QUICK_REPLY': '🇬🇧英語',
+    'TRANSLATE_INDONESIAN_QUICK_REPLY': '🇮🇩インドネシア語',
+    'TRANSLATE_JAPANESE_QUICK_REPLY': '🇯🇵日本語',
+    'TRANSLATE_KOREAN_QUICK_REPLY': '🇰🇷韓国語',
+    'TRANSLATE_THAIAN_QUICK_REPLY': '🇹🇭タイランド語',
     'TRANSLATE_ORDER': '以下のユーザーメッセージを{translate_language}に翻訳してください。'
 }
 
