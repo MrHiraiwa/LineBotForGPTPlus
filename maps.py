@@ -9,7 +9,7 @@ from linebot.exceptions import LineBotApiError
 maps = Blueprint('maps', __name__)
 
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
-LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
+CHANNEL_ACCESS_TOKEN = os.getenv('CHANNEL_ACCESS_TOKEN')
 
 def find_place_by_geo_info(latitude, longitude, keyword):
     places_api_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
@@ -26,7 +26,7 @@ def find_place_by_geo_info(latitude, longitude, keyword):
     data = response.json()
     return data
 
-line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)  # ご自身のアクセストークンに置き換えてください
+line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)  # ご自身のアクセストークンに置き換えてください
 
 def maps_search(latitude, longitude, keyword, push_flex=False, user_id=None):
     data = find_place_by_geo_info(latitude, longitude, keyword)
