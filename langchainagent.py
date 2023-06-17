@@ -11,7 +11,7 @@ llm_math_chain = LLMMathChain(llm=llm, verbose=True)
 
 tools = [
     Tool(
-        name = "Google Search",
+        name = "Search",
         func=google_search.run,
         description="useful for when you need to answer questions about current events."
     ),
