@@ -580,7 +580,7 @@ def handle_message(event):
                 transaction.set(doc_ref, user, merge=True)
             elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
                 exec_functions = True
-                tlanslate_language = "THAIAN"
+                tlanslate_language = "T"
                 user['tlanslate_language'] = tlanslate_language
                 TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
                 user_message = TLANSLATE_MESSAGE
