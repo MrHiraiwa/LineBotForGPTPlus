@@ -618,7 +618,7 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
             
-            if not translate_language = "OFF":
+            if not translate_language == "OFF":
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(tlanslate_language=tlanslate_language)
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
                 
