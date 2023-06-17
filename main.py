@@ -247,23 +247,6 @@ memory = CustomConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, re
 
 # 会話チェーン
 conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=False)
-
-def get_user_memory(user_id):
-    doc_ref = db.collection('memory').document(user_id)
-    doc = doc_ref.get()
-    if doc.exists:
-        memory_state = pickle.loads(doc.to_dict()['memory'])
-        return memory_state
-    else:
-        return None
-
-def save_user_memory(user_id, memory):
-    doc_ref = db.collection('memory').document(user_id)
-    memory_state = pickle.dumps(memory)
-    doc_ref.set({
-        'memory': memory_state
-    })
-
     
 @app.route("/", methods=["POST"])
 def callback():
@@ -300,46 +283,56 @@ def handle_message(event):
         elif message_type == 'audio':
             exec_audio = True
             user_message = get_audio(message_id)
-        
-        # Get memory state from Firestore
-        memory_state = get_user_memory(user_id)
-        if memory_state is not None:
-            memory.set_state(memory_state)
-        
-        if user_message.strip() == FORGET_QUICK_REPLY:
-            line_reply(reply_token, FORGET_MESSAGE, 'text')
-            memory_state = []
-            save_user_memory(user_id, memory_state)
-            return 'OK'
-        
-        if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
-                quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
-                head_message = head_message + FORGET_GUIDE_MESSAGE                
-                
-        response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
-        
-        success = []
-        public_url = []
-        local_path = []
-        duration = []
-        send_message_type = 'text'
-        if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-            public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
-            if  LINE_REPLY == "Both":
-                success = line_push(user_id, public_url, 'audio', None, duration)
-                send_message_type = 'text'
-            elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
-                response = public_url
-                send_message_type = 'audio'
-                    
-        line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
-        
-        if success:
-            delete_local_file(local_path) 
             
-        # Save memory state to Firestore
-        memory_state = memory.get_state()
-        save_user_memory(user_id, memory_state)
+        db = firestore.Client()
+        doc_ref = db.collection(u'users').document(userId)
+        
+        @firestore.transactional
+        def update_in_transaction(transaction, doc_ref):
+            doc = doc_ref.get(transaction=transaction)
+            if doc.exists:
+                memory_state = pickle.loads(doc.to_dict()['memory'])
+            
+            # Get memory state from Firestore
+            memory_state = get_user_memory(user_id)
+            if memory_state is not None:
+                memory.set_state(memory_state)
+        
+            if user_message.strip() == FORGET_QUICK_REPLY:
+                line_reply(reply_token, FORGET_MESSAGE, 'text')
+                memory_state = []
+                save_user_memory(user_id, memory_state)
+                return 'OK'
+        
+            if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
+                    quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
+                    head_message = head_message + FORGET_GUIDE_MESSAGE                
+                
+            response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
+        
+            success = []
+            public_url = []
+            local_path = []
+            duration = []
+            send_message_type = 'text'
+            if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
+                public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE)
+                if  LINE_REPLY == "Both":
+                    success = line_push(user_id, public_url, 'audio', None, duration)
+                    send_message_type = 'text'
+                elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
+                    response = public_url
+                    send_message_type = 'audio'
+                    
+            line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
+        
+            if success:
+                delete_local_file(local_path) 
+            
+            # Save memory state to Firestore
+             memory_state = pickle.dumps(memory)
+            transaction.set(doc_ref, {**user, 'memory': memory_state)
+        return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
         return 'Not a valid JSON', 200 
     except Exception as e:
