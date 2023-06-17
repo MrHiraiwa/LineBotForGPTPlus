@@ -465,7 +465,8 @@ def handle_message(event):
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 memory_state = pickle.dumps([])
-                transaction.set(doc_ref, {**user, 'memory_state': memory_state})
+                user['memory_state'] = memory_state
+                transaction.set(doc_ref, user, merge=True)
                 return 'OK'
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions == True
