@@ -346,21 +346,15 @@ def handle_message(event):
                 transaction.set(doc_ref, {**user, 'memory_state': []})
                 return 'OK'
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
-                exec_functions = True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
                 user_message = CHANGE_TO_TEXT_MESSAGE
-                #line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
                 transaction.set(doc_ref, user, merge=True)
-                #return 'OK'
             elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
-                exec_functions = True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
                 user_message = CHANGE_TO_AUDIO_MESSAGE
-                #line_reply(reply_token, CHANGE_TO_AUDIO_MESSAGE, 'text')
                 transaction.set(doc_ref, user, merge=True)
-                #return 'OK'
             
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
