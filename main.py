@@ -653,7 +653,7 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, f"Error in lineBot: {e}", 'text')
+        line_reply(reply_token, ERROR_MESSAGE + f": {e}", 'text')
         raise
     finally:
         return 'OK'
