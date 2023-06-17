@@ -288,7 +288,7 @@ def handle_message(event):
         
         @firestore.transactional
         def update_in_transaction(transaction, doc_ref):
-            user_message = []
+            user_message = ""
             exec_functions = False
             quick_reply_items = []
             head_message = ""
@@ -296,7 +296,6 @@ def handle_message(event):
             if message_type == 'text':
                 user_message = event.message.text
             elif message_type == 'audio':
-                exec_audio = True
                 user_message = get_audio(message_id)
                 
             doc = doc_ref.get(transaction=transaction)
@@ -343,14 +342,14 @@ def handle_message(event):
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
                 line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
-                transaction.set(doc_ref, user, 'audio_or_text': audio_or_text)
+                transaction.set(doc_ref, user, merge=True)
                 return 'OK'
-            elif CHANGE_TO_VOICE_QUICK_REPLY in userMessage and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif CHANGE_TO_VOICE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
                 line_reply(reply_token, CHANGE_TO_VOICE_MESSAGE, 'text')
-                transaction.set(doc_ref, user, 'audio_or_text': audio_or_text)
+                transaction.set(doc_ref, user, merge=True)
                 return 'OK'
             
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
