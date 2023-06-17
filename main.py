@@ -506,6 +506,9 @@ def handle_message(event):
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
                 translate_language = user['translate_language']
+                if nowDate.date() != updatedDate.date():
+                    daily_usage = 0
+                    
             else:
                 user = {
                     'memory_state': memory_state,
@@ -709,6 +712,8 @@ def handle_message(event):
             
             response = response_filter(response, bot_name, display_name)
             
+            daily_usage += 1
+            
             success = []
             public_url = []
             local_path = []
@@ -731,13 +736,13 @@ def handle_message(event):
             
             # Save memory state to Firestore
             memory_state = pickle.dumps(memory.get_state())
-            transaction.update(doc_ref, {'memory_state': memory_state})
+            transaction.update(doc_ref, {'memory_state': memory_state, 'daily_usage': daily_usage})
 
 
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
         return 'Not a valid JSON', 200 
-    except Exception as e:
+    except Exception as e
         print(f"Error in lineBot: {e}")
         line_reply(reply_token, ERROR_MESSAGE + f": {e}", 'text')
         raise
