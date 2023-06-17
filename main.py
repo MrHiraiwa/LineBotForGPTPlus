@@ -442,9 +442,9 @@ def handle_message(event):
             elif message_type == 'sticker':
                 keywords = event.message.keywords
                 if keywords == "":
-                    userMessage = STICKER_FAIL_MESSAGE
+                    user_message = STICKER_FAIL_MESSAGE
                 else:
-                    userMessage = STICKER_MESSAGE + "\n" + ', '.join(keywords)
+                    user_message = STICKER_MESSAGE + "\n" + ', '.join(keywords)
                 
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
