@@ -300,6 +300,15 @@ def handle_message(event):
             quick_reply_items = []
             head_message = ""
             
+            memory_state = []
+            updated_date_string = nowDate
+            daily_usage = 0
+            start_free_day = datetime.now(jst)
+            audio_or_text = 'Text'
+            or_chinese = 'MANDARIN'
+            or_english = 'en-US'
+            voice_speed = 'normal'
+            
             if message_type == 'text':
                 user_message = event.message.text
             elif message_type == 'audio':
@@ -317,14 +326,6 @@ def handle_message(event):
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
             else:
-                memory_state = []
-                updated_date_string = nowDate
-                daily_usage = 0
-                start_free_day = datetime.now(jst)
-                audio_or_text = 'Text'
-                or_chinese = 'MANDARIN'
-                or_english = 'en-US'
-                voice_speed = 'normal'
                 user = {
                     'memory_state': memory_state,
                     'updated_date_string': updated_date_string,
