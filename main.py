@@ -293,14 +293,20 @@ def handle_message(event):
             if doc.exists:
                 user = doc.to_dict()
                 memory_state = user['memory_state']
+                updated_date_string = user['updated_date_string']
+                daily_usage = user['daily_usage']
+                start_free_day = user['start_free_day']
+                voice_or_text = user['voice_or_text']
+                or_chinese = user['or_chinese']
+                or_english = user['or_english']
+                voice_speed = user['voice_speed']
             else:
                 user = {
-                    'user_id': user_id,
                     'memory_state': [],
-                    'updatedDateString': nowDate,
-                    'dailyUsage': 0,
-                    'start_free_day': start_free_day,
-                    'voice_or_text' : 'TEXT',
+                    'updated_date_string': nowDate,
+                    'daily_usage': 0,
+                    'start_free_day': datetime.now(jst),
+                    'voice_or_text' : 'Text',
                     'or_chinese' : 'MANDARIN',
                     'or_english' : 'en-US',
                     'voice_speed' : 'normal'
@@ -342,7 +348,7 @@ def handle_message(event):
                 delete_local_file(local_path) 
             
             # Save memory state to Firestore
-             memory_state = pickle.dumps(memory.get_state())
+            memory_state = pickle.dumps(memory.get_state())
             transaction.update(doc_ref, {'memory_state': memory_state})
         return update_in_transaction(db.transaction(), doc_ref)
     except KeyError:
