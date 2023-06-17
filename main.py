@@ -364,7 +364,7 @@ def handle_message(event):
                     head_message = head_message + FORGET_GUIDE_MESSAGE
             if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
-                quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
+                quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, TEXT_OR_AUDIO_GUIDE_MESSAGE])
                 head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
