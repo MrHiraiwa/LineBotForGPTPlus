@@ -301,17 +301,26 @@ def handle_message(event):
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
             else:
+                memory_state = []
+                updated_date_string = nowDate
+                daily_usage = 0
+                start_free_day = datetime.now(jst)
+                voice_or_text = 'Text'
+                or_chinese = 'MANDARIN'
+                or_english = 'en-US'
+                voice_speed = 'normal'
                 user = {
-                    'memory_state': [],
-                    'updated_date_string': nowDate,
-                    'daily_usage': 0,
-                    'start_free_day': datetime.now(jst),
-                    'voice_or_text' : 'Text',
-                    'or_chinese' : 'MANDARIN',
-                    'or_english' : 'en-US',
-                    'voice_speed' : 'normal'
+                    'memory_state': memory_state,
+                    'updated_date_string': updated_date_string,
+                    'daily_usage': daily_usage,
+                    'start_free_day': start_free_day,
+                    'voice_or_text' : voice_or_text,
+                    'or_chinese' : or_chinese,
+                    'or_english' : or_english,
+                    'voice_speed' : voice_speed
                 }
                 transaction.set(doc_ref, user)
+
             
             if memory_state is not None:
                 memory.set_state(memory_state)
