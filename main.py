@@ -133,7 +133,7 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_KEYWORDS': '翻訳モード',
     'TRANSLATE_GUIDE_MESSAGE': 'ユーザーに「画面下の「中国語」又は「英語」又は「インドネシア語」又は「日本語」又は「韓国語」又は「タイランド語」の項目をタップすると私はあなたの言葉を指定した言葉に翻訳する」と案内してください。以下の文章はユーザーから送られたものです。',
     'TRANSLATE_MESSAGE': '翻訳モードを{translate_language}にしました。',
-    'TRANSLATE_OFF_MESSAGE': '翻訳モードを終了しました。{display_name}の返信に同じ言語で答えてください。'
+    'TRANSLATE_OFF_MESSAGE': '翻訳モードを終了しました。{display_name}の返信に同じ言語で答えてください。',
     'TRANSLATE_OFF_QUICK_REPLY': '🔇オフ',
     'TRANSLATE_CHAINESE_QUICK_REPLY': '🇨🇳中国語',
     'TRANSLATE_ENGLISH_QUICK_REPLY': '🇬🇧英語',
