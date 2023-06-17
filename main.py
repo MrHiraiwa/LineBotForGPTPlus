@@ -78,6 +78,17 @@ REQUIRED_ENV_VARS = [
     "OR_CHINESE_CANTONESE_QUICK_REPLY",
     "BACKET_NAME",
     "FILE_AGE",
+    "TRANSLATE_KEYWORDS",
+    "TRANSLATE_GUIDE_MESSAGE",
+    "TRANSLATE_MESSAGE",
+    "TRANSLATE_OFF_QUICK_REPLY",
+    "TRANSLATE_CHAINESE_QUICK_REPLY",
+    "TRANSLATE_ENGLISH_QUICK_REPLY",
+    "TRANSLATE_INDONESIAN_QUICK_REPLY",
+    "TRANSLATE_JAPANESE_QUICK_REPLY",
+    "TRANSLATE_KOREAN_QUICK_REPLY",
+    "TRANSLATE_THAIAN_QUICK_REPLY",
+    "TRANSLATE_ORDER"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -116,7 +127,18 @@ DEFAULT_ENV_VARS = {
     'OR_CHINESE_MANDARIN_QUICK_REPLY': '🏛️北京語',
     'OR_CHINESE_CANTONESE_QUICK_REPLY': '🌃広東語',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
-    'FILE_AGE': '7'
+    'FILE_AGE': '7',
+    'TRANSLATE_KEYWORDS': '翻訳モード',
+    'TRANSLATE_GUIDE_MESSAGE': 'ユーザーに「画面下の「中国語」又は「英語」又は「インドネシア語」又は「日本語」又は「韓国語」又は「タイランド語」の項目をタップすると私はあなたの言葉を指定した言葉に翻訳する」と案内してください。以下の文章はユーザーから送られたものです。',
+    'TRANSLATE_MESSAGE': '翻訳モードを{translate_language}にしました。',
+    'TRANSLATE_OFF_QUICK_REPLY': 'オフ',
+    'TRANSLATE_CHAINESE_QUICK_REPLY': '中国語',
+    'TRANSLATE_ENGLISH_QUICK_REPLY': '英語',
+    'TRANSLATE_INDONESIAN_QUICK_REPLY': 'インドネシア語',
+    'TRANSLATE_JAPANESE_QUICK_REPLY': '日本語',
+    'TRANSLATE_KOREAN_QUICK_REPLY': '韓国語',
+    'TRANSLATE_THAIAN_QUICK_REPLY': 'タイランド語',
+    'TRANSLATE_ORDER': '以下のユーザーメッセージを{translate_language}に翻訳してください。'
 }
 
 db = firestore.Client()
@@ -131,6 +153,8 @@ def reload_settings():
     global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, OR_ENGLISH_MESSAGE
     global OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY
     global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
+    global TRANSLATE_KEYWORDS, TRANSLATE_GUIDE_MESSAGE, TRANSLATE_MESSAGE, TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY
+    global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -191,6 +215,21 @@ def reload_settings():
     OR_CHINESE_CANTONESE_QUICK_REPLY = get_setting('OR_CHINESE_CANTONESE_QUICK_REPLY')
     BACKET_NAME = get_setting('BACKET_NAME')
     FILE_AGE = get_setting('FILE_AGE')
+    TRANSLATE_KEYWORDS = get_setting('TRANSLATE_KEYWORDS')
+    if TRANSLATE_KEYWORDS:
+        TRANSLATE_KEYWORDS = TRANSLATE_KEYWORDS.split(',')
+    else:
+        TRANSLATE_KEYWORDS = []
+    TRANSLATE_GUIDE_MESSAGE = get_setting('TRANSLATE_GUIDE_MESSAGE')
+    TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE')
+    TRANSLATE_OFF_QUICK_REPLY = get_setting('TRANSLATE_OFF_QUICK_REPLY')
+    TRANSLATE_CHAINESE_QUICK_REPLY = get_setting('TRANSLATE_CHAINESE_QUICK_REPLY')
+    TRANSLATE_ENGLISH_QUICK_REPLY = get_setting('TRANSLATE_ENGLISH_QUICK_REPLY')
+    TRANSLATE_INDONESIAN_QUICK_REPLY = get_setting('TRANSLATE_INDONESIAN_QUICK_REPLY')
+    TRANSLATE_JAPANESE_QUICK_REPLY = get_setting('TRANSLATE_JAPANESE_QUICK_REPLY')
+    TRANSLATE_KOREAN_QUICK_REPLY = get_setting('TRANSLATE_KOREAN_QUICK_REPLY')
+    TRANSLATE_THAIAN_QUICK_REPLY = get_setting('TRANSLATE_THAIAN_QUICK_REPLY')
+    TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -382,6 +421,7 @@ def handle_message(event):
             or_chinese = 'MANDARIN'
             or_english = 'en-US'
             voice_speed = 'normal'
+            tlanslate_language = 'OFF'
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -399,6 +439,7 @@ def handle_message(event):
                 or_chinese = user['or_chinese']
                 or_english = user['or_english']
                 voice_speed = user['voice_speed']
+                tlanslate_language = user['tlanslate_language']
             else:
                 user = {
                     'memory_state': memory_state,
@@ -408,7 +449,8 @@ def handle_message(event):
                     'audio_or_text' : audio_or_text,
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
-                    'voice_speed' : voice_speed
+                    'voice_speed' : voice_speed,
+                    'tlanslate_language' : tlanslate_language
                 }
                 transaction.set(doc_ref, user)
 
@@ -494,7 +536,56 @@ def handle_message(event):
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
                 transaction.set(doc_ref, user, merge=True)
-            
+            elif TRANSLATE_OFF_QUICK_REPLY in user_message:
+                exec_functions = True
+                tlanslate_language = "OFF"
+                user['tlanslate_language'] = tlanslate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
+                exec_functions = True
+                tlanslate_language = "CHAINESE"
+                user['tlanslate_language'] = tlanslate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
+                exec_functions = True
+                tlanslate_language = "ENGLISH"
+                user['tlanslate_language'] = tlanslate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
+                exec_functions = True
+                tlanslate_language = "INDONESIAN"
+                user['tlanslate_language'] = tlanslate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
+                exec_functions = True
+                tlanslate_language = "JAPANESE"
+                user['tlanslate_language'] = tlanslate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
+                exec_functions = True
+                tlanslate_language = "KOREAN"
+                user['tlanslate_language'] = tlanslate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+            elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
+                exec_functions = True
+                tlanslate_language = "THAIAN"
+                user['tlanslate_language'] = tlanslate_language
+                TLANSLATE_MESSAGE = get_setting('TLANSLATE_MESSAGE').format(tlanslate_language=tlanslate_language)
+                user_message = TLANSLATE_MESSAGE
+                transaction.set(doc_ref, user, merge=True)
+                
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                     head_message = head_message + FORGET_GUIDE_MESSAGE
@@ -513,10 +604,23 @@ def handle_message(event):
                 quick_reply_items.append(['message', OR_ENGLISH_INDIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY])
                 head_message = head_message + OR_ENGLISH_GUIDE_MESSAGE
             if any(word in user_message for word in AUDIO_SPEED_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
-                quick_reply_items.append(['message',  VOICE_SPEED_SLOW_QUICK_REPLY, VOICE_SPEED_SLOW_QUICK_REPLY])
-                quick_reply_items.append(['message',  VOICE_SPEED_NORMAL_QUICK_REPLY, VOICE_SPEED_NORMAL_QUICK_REPLY])
-                quick_reply_items.append(['message', VOICE_SPEED_FAST_QUICK_REPLY, VOICE_SPEED_FAST_QUICK_REPLY])
+                quick_reply_items.append(['message', AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_SLOW_QUICK_REPLY])
+                quick_reply_items.append(['message', AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY])
+                quick_reply_items.append(['message', AUDIO_SPEED_FAST_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY])
                 head_message = head_message + VOICE_SPEED_GUIDE_MESSAGE
+            if any(word in user_message for word in TRANSLATE_KEYWORDS) and not exec_functions:
+                quick_reply_items.append(['message', TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_OFF_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_INDONESIAN_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_JAPANESE_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY])
+                quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
+                head_message = head_message + TRANSLATE_GUIDE_MESSAGE
+            
+            if not translate_language = "OFF":
+                TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(tlanslate_language=tlanslate_language)
+                head_message = head_message + TRANSLATE_GUIDE_MESSAGE
                 
             response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
         
