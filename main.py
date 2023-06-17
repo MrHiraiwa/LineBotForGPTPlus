@@ -293,16 +293,12 @@ def handle_message(event):
             if doc.exists:
                 memory_state = pickle.loads(doc.to_dict()['memory'])
             
-            # Get memory state from Firestore
-            memory_state = get_user_memory(user_id)
             if memory_state is not None:
                 memory.set_state(memory_state)
         
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 memory_state = []
-                save_user_memory(user_id, memory_state)
-                return 'OK'
         
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                     quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
