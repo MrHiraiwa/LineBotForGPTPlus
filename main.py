@@ -66,6 +66,7 @@ REQUIRED_ENV_VARS = [
     "FORGET_MESSAGE",
     "FORGET_QUICK_REPLY",
     "SEARCH_KEYWORDS",
+    "SEARCH_MESSAGE",
     "ERROR_MESSAGE",
     "LINE_REPLY",
     "TEXT_OR_AUDIO_KEYWORDS",
@@ -129,6 +130,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'SEARCH_KEYWORDS': '検索,調べて,教えて,知ってる,どうやって,どこ,誰,何,?,？',
+    'SEARCH_MESSAGE': '以下の検索結果を{display_name}に報告してください。URLが含まれる場合はURLを提示してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
@@ -180,7 +182,7 @@ def reload_settings():
     global NG_MESSAGE, NG_KEYWORDS
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, MAPS_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
-    global SEARCH_KEYWORDS
+    global SEARCH_KEYWORDS, SEARCH_MESSAGE
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
     global LINE_REPLY, BACKET_NAME, FILE_AGE
@@ -225,6 +227,7 @@ def reload_settings():
         SEARCH_KEYWORDS = SEARCH_KEYWORDS.split(',')
     else:
         SEARCH_KEYWORDS = []
+    SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
     TEXT_OR_AUDIO_KEYWORDS = get_setting('TEXT_OR_AUDIO_KEYWORDS')
@@ -670,7 +673,8 @@ def handle_message(event):
             
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
                 result = langchain_agent(user_message)
-                head_message = head_message + result
+                SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
+                head_message = head_message + SEARCH_MESSAGE + "\n" + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
