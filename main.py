@@ -428,6 +428,9 @@ class CustomConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
     def set_state(self, state):
         self.__dict__.update(state)
 
+class ResetMemoryException(Exception):
+    pass
+
 # メモリ
 #memory = ConversationBufferWindowMemory(k=3, return_messages=True)
 # memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
@@ -545,7 +548,7 @@ def handle_message(event):
                 memory_state = pickle.dumps([])
                 user['memory_state'] = memory_state
                 transaction.set(doc_ref, user, merge=True)
-                return 'OK'
+                raise ResetMemoryException
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions == True
                 audio_or_text = "Text"
@@ -767,6 +770,8 @@ def handle_message(event):
 
 
         return update_in_transaction(db.transaction(), doc_ref)
+    except ResetMemoryException:
+        return 'OK'
     except KeyError:
         return 'Not a valid JSON', 200 
     except Exception as e:
