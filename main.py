@@ -503,7 +503,7 @@ def handle_message(event):
             elif message_type =='image':
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 str_vision_results = str(vision_results)
-                str_vision_results = OCR_BOTGUIDE_MESSAGE + \n + str_vision_results
+                str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
                 result = langchain_agent(str_vision_results)
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
                 head_message = head_message + OCR_MESSAGE
