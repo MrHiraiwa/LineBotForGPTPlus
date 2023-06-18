@@ -5,8 +5,11 @@ from langchain.utilities.google_search import GoogleSearchAPIWrapper
 from langchain import LLMMathChain
 import wikipedia
 
+wikipedia.set_lang('ja')
+
 llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo-0613")
 
+wikipedia_search = Wikipedia.search()
 google_search = GoogleSearchAPIWrapper()
 llm_math_chain = LLMMathChain(llm=llm, verbose=True)
 
@@ -15,6 +18,11 @@ tools = [
         name = "Search",
         func=google_search.run,
         description="useful for when you need to answer questions about current events."
+    ),
+    Tool(
+        name="WIkipedia",
+        func=wikipedia_search.run,
+        description="You can search in encyclopedias."
     ),
     Tool(
         name="Calculator",
