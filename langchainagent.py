@@ -9,7 +9,7 @@ wikipedia.set_lang('ja')
 
 llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo-0613")
 
-wikipedia_search = wikipedia()
+wikipedia_search = wikipedia.page()
 google_search = GoogleSearchAPIWrapper()
 llm_math_chain = LLMMathChain(llm=llm, verbose=True)
 
