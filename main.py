@@ -542,7 +542,7 @@ def handle_message(event):
             
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
-                conversation.clear()
+                CustomConversationSummaryBufferMemory.clear()
                 memory_state = pickle.dumps([])
                 user['memory_state'] = memory_state
                 transaction.set(doc_ref, user, merge=True)
