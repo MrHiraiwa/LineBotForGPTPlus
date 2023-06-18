@@ -509,7 +509,7 @@ def handle_message(event):
                 str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
                 result = langchain_agent(str_vision_results)
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
-                head_message = head_message + OCR_MESSAGE
+                head_message = head_message + OCR_MESSAGE + "\n" + result
                 user_message = OCR_USER_MESSAGE
             elif message_type == 'location':
                 exec_functions = True 
