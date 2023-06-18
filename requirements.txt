@@ -5,6 +5,7 @@ google-api-python-client
 google-cloud-texttospeech
 google-cloud-storage
 google-search-results
+wikipedia
 langid
 openai
 langchain
