@@ -125,7 +125,7 @@ DEFAULT_ENV_VARS = {
     'STICKER_MESSAGE': '私の感情!',
     'STICKER_FAIL_MESSAGE': '読み取れないLineスタンプが送信されました。スタンプが読み取れなかったという反応を返してください。',
     'OCR_MESSAGE': ' 以下の写真の解析結果を{display_name}に報告してください。 。',
-    'OCR_BOTGUIDE_MESSAGE': '以下のテキストは写真に何が映っているかを文字列に変換したものです。何が写っているかを文章で説明してください。
+    'OCR_BOTGUIDE_MESSAGE': '以下のテキストは写真に何が映っているかを文字列に変換したものです。何が写っているかを文章で説明してください。',
     'MAPS_MESSAGE': '地図検索を実行しました。',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
