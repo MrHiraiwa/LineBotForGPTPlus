@@ -130,7 +130,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'SEARCH_KEYWORDS': '検索,調べて,教えて,知ってる,どうやって,どこ,誰,何,?,？',
-    'SEARCH_MESSAGE': '以下の検索結果を{display_name}に報告してください。。URLが含まれる場合はURLを提示してください。',
+    'SEARCH_MESSAGE': '以下の検索結果を{display_name}に報告してください。URLが含まれる場合はURLを提示してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
@@ -673,6 +673,7 @@ def handle_message(event):
             
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
                 result = langchain_agent(user_message)
+                SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
                 head_message = head_message + SEARCH_MESSAGE + "\n" + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
