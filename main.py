@@ -60,6 +60,7 @@ REQUIRED_ENV_VARS = [
     "STICKER_MESSAGE",
     "STICKER_FAIL_MESSAGE",
     "OCR_MESSAGE",
+    "OCR_BOTGUIDE_MESSAGE",
     "MAPS_MESSAGE",
     "FORGET_KEYWORDS",
     "FORGET_GUIDE_MESSAGE",
@@ -123,7 +124,8 @@ DEFAULT_ENV_VARS = {
     'NG_MESSAGE': '以下の文章はユーザーから送られたものですが拒絶してください。',
     'STICKER_MESSAGE': '私の感情!',
     'STICKER_FAIL_MESSAGE': '読み取れないLineスタンプが送信されました。スタンプが読み取れなかったという反応を返してください。',
-    'OCR_MESSAGE': '以下のテキストは写真に何が映っているかを文字列に変換したものです。この文字列を見て写真を見たかのように反応してください。',
+    'OCR_MESSAGE': ' 以下の写真の解析結果を{display_name}に報告してください。 。',
+    'OCR_BOTGUIDE_MESSAGE': '以下のテキストは写真に何が映っているかを文字列に変換したものです。何が写っているかを文章で説明してください。
     'MAPS_MESSAGE': '地図検索を実行しました。',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
@@ -180,7 +182,7 @@ def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
     global MAX_TOKEN_NUM, MAX_DAILY_USAGE, GROUP_MAX_DAILY_USAGE, FREE_LIMIT_DAY, MAX_DAILY_MESSAGE
     global NG_MESSAGE, NG_KEYWORDS
-    global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, MAPS_MESSAGE
+    global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, MAPS_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global SEARCH_KEYWORDS, SEARCH_MESSAGE
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
@@ -213,6 +215,7 @@ def reload_settings():
     STICKER_MESSAGE = get_setting('STICKER_MESSAGE')
     STICKER_FAIL_MESSAGE = get_setting('STICKER_FAIL_MESSAGE')
     OCR_MESSAGE = get_setting('OCR_MESSAGE')
+    OCR_BOTGUIDE_MESSAGE = get_setting('OCR_BOTGUIDE_MESSAGE')
     MAPS_MESSAGE = get_setting('MAPS_MESSAGE')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
@@ -499,8 +502,11 @@ def handle_message(event):
                     user_message = STICKER_MESSAGE + "\n" + ', '.join(keywords)
             elif message_type =='image':
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
-                head_message = str(vision_results)
-                user_message = OCR_MESSAGE
+                str_vision_results = str(vision_results)
+                str_vision_results = OCR_BOTGUIDE_MESSAGE + \n + str_vision_results
+                result = langchain_agent(str_vision_results)
+                OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
+                head_message = head_message + OCR_MESSAGE
             elif message_type == 'location':
                 exec_functions = True 
                 latitude =  event.message.latitude
