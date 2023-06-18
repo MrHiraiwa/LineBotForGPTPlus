@@ -129,7 +129,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
-    'SEARCH_KEYWORDS': '検索,調べて,教えて,知ってる,どう,どこ,誰,何,?,？',
+    'SEARCH_KEYWORDS': '検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓',
     'SEARCH_MESSAGE': '以下の検索結果を{display_name}に報告してください。URLが含まれる場合はURLを提示してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
