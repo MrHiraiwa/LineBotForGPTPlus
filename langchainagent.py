@@ -2,7 +2,7 @@ from langchain.agents import initialize_agent, Tool
 from langchain.agents import AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.utilities import GoogleSearchAPIWrapper
-from langchain.scheme import SystemMessage
+from langchain.schema import SystemMessage
 
 llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo-0613")
 
