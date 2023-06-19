@@ -1,7 +1,7 @@
 from langchain.agents import initialize_agent, Tool
 from langchain.agents import AgentType
 from langchain.chat_models import ChatOpenAI
-from langchain.utilities.google_search import GoogleSearchAPIWrapper
+from langchain.utilities import GoogleSearchAPIWrapper
 
 llm = ChatOpenAI(temperature=0.0)
 
