@@ -18,6 +18,11 @@ tools = [
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
 def langchain_agent(question):
-    result = mrkl.run(question)
-    return result
-  
+    try:
+        result = mrkl.run(question)
+        return result
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        # 何らかのデフォルト値やエラーメッセージを返す
+        return "An error occurred while processing the question"
+
