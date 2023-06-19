@@ -3,7 +3,7 @@ from langchain.agents import AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.utilities.google_search import GoogleSearchAPIWrapper
 
-llm = ChatOpenAI(temperature=0.0, model="gpt-3.5-turbo-0613")
+llm = ChatOpenAI(temperature=0.0)
 
 google_search = GoogleSearchAPIWrapper()
 
