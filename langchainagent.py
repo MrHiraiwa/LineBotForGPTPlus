@@ -17,7 +17,7 @@ tools = [
 ]
 
 system_message = SystemMessage(content="""You are a helpful AI assistant.""")
-mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True,{"system_message":system_message})
+mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True, agent_kwargs={"system_message":system_message},)
 
 def langchain_agent(question):
     result = mrkl.run(question)
