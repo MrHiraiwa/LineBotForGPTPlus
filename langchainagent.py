@@ -11,7 +11,7 @@ tools = [
     Tool(
         name = "Search",
         func=search.run,
-        description="useful for when you need to answer questions about current events."
+        description="useful for when you need to answer questions about current events. it is single-input tool Search."
     ),
 ]
 
