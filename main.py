@@ -22,11 +22,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from langchain.llms import OpenAI
-from langchain.memory import (
-    ConversationBufferWindowMemory,
-    ConversationTokenBufferMemory,
-    ConversationSummaryBufferMemory,
-)
+from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain
 import tiktoken
 import pickle
@@ -426,7 +422,7 @@ llm = ChatOpenAI(
     streaming=True
 )
 
-class CustomConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
+class CustomConversationSummaryMemory(ConversationSummaryBufferMemory):
     def get_state(self):
         return self.__dict__
 
@@ -437,9 +433,7 @@ class ResetMemoryException(Exception):
     pass
 
 # メモリ
-#memory = ConversationBufferWindowMemory(k=3, return_messages=True)
-# memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
-memory = CustomConversationSummaryBufferMemory(llm=llm, max_token_limit=MAX_TOKEN_NUM, return_messages=True)
+memory = CustomConversationSummaryMemory(llm=llm, max_token_limit=MAX_TOKEN_NUM, return_messages=True)
 
 # 会話チェーン
 conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=False)
