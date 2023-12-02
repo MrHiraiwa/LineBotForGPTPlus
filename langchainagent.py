@@ -5,7 +5,7 @@ from langchain.utilities.google_search import GoogleSearchAPIWrapper
 import openai
 from datetime import datetime, time, timedelta
 
-def clock():
+def clock(dummy):
     nowDate = datetime.now(jst) 
     nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
     return nowDateStr
