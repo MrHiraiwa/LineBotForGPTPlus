@@ -21,8 +21,12 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.llms import OpenAI
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import (
+    ConversationBufferWindowMemory,
+    ConversationTokenBufferMemory,
+    ConversationSummaryBufferMemory,
+)
 from langchain.chains import ConversationChain
 import tiktoken
 import pickle
@@ -416,7 +420,7 @@ prompt = ChatPromptTemplate.from_messages([
     HumanMessagePromptTemplate.from_template("{input}")
 ])
 # チャットモデル
-llm = OpenAI(
+llm = ChatOpenAI(
     model_name=GPT_MODEL,
     temperature=1,
     streaming=True
