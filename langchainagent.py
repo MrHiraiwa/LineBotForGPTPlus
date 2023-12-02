@@ -23,7 +23,7 @@ tools = [
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
-def clock()
+def clock():
     nowDate = datetime.now(jst) 
     nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
     return nowDateStr
