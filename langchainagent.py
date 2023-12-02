@@ -5,6 +5,12 @@ from langchain.utilities.google_search import GoogleSearchAPIWrapper
 import openai
 from datetime import datetime, time, timedelta
 
+def clock():
+    nowDate = datetime.now(jst) 
+    nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
+    return nowDateStr
+
+
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
 google_search = GoogleSearchAPIWrapper()
@@ -22,11 +28,6 @@ tools = [
     ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
-
-def clock():
-    nowDate = datetime.now(jst) 
-    nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
-    return nowDateStr
 
 def langchain_agent(question):
     try:
