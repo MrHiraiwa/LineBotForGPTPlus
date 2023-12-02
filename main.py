@@ -421,7 +421,7 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 # チャットモデル
 llm = ChatOpenAI(
-    model=GPT_MODEL,
+    model_name=GPT_MODEL,
     temperature=1,
     streaming=True
 )
