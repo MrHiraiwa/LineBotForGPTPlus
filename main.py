@@ -1,4 +1,5 @@
 import os
+import openai
 import pytz
 from datetime import datetime, time, timedelta
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort
