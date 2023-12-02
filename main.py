@@ -1,6 +1,5 @@
 import os
 import pytz
-import openai 
 from datetime import datetime, time, timedelta
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort
 from google.cloud import firestore
