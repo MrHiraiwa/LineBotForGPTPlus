@@ -44,7 +44,7 @@ handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 admin_password = os.environ["ADMIN_PASSWORD"]
 jst = pytz.timezone('Asia/Tokyo')
 nowDate = datetime.now(jst) 
-nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z') + "\n"
+nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
