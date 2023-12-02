@@ -16,11 +16,14 @@ tools = [
     ),
     Tool(
         name = "Clock",
-        func=clock.run,
+        func=clock,
         description="useful for when you need to know what time it is."
     ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
+
+def clock()
+    return 
 
 def langchain_agent(question):
     try:
