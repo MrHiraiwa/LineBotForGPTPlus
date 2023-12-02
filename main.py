@@ -1,5 +1,4 @@
 import os
-import openai
 import pytz
 from datetime import datetime, time, timedelta
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort
@@ -22,7 +21,7 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.chat_models import ChatOpenAI
+from langchain.llms import OpenAI
 from langchain.memory import (
     ConversationBufferWindowMemory,
     ConversationTokenBufferMemory,
