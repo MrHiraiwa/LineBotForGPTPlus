@@ -28,6 +28,9 @@ from langchain.memory import (
     ConversationSummaryBufferMemory,
 )
 from langchain.chains import ConversationChain
+import tiktoken
+import pickle
+import re
 
 from whisper import get_audio
 from voice import put_audio
