@@ -4,8 +4,10 @@ from langchain.chat_models import ChatOpenAI
 from langchain.utilities.google_search import GoogleSearchAPIWrapper
 import openai
 from datetime import datetime, time, timedelta
+import pytz
 
 def clock(dummy):
+    jst = pytz.timezone('Asia/Tokyo')
     nowDate = datetime.now(jst) 
     nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
     return nowDateStr
