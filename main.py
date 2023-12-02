@@ -21,7 +21,7 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.chat_models import ChatOpenAI
+from langchain.llms import OpenAI
 from langchain.memory import (
     ConversationBufferWindowMemory,
     ConversationTokenBufferMemory,
@@ -420,8 +420,8 @@ prompt = ChatPromptTemplate.from_messages([
     HumanMessagePromptTemplate.from_template("{input}")
 ])
 # チャットモデル
-llm = ChatOpenAI(
-    model_name=GPT_MODEL,
+llm = OpenAI(
+    model=GPT_MODEL,
     temperature=1,
     streaming=True
 )
