@@ -24,7 +24,7 @@ tools = [
     Tool(
         name = "Clock",
         func=clock,
-        description="useful for when you need to know what time it is."
+        description="useful for when you need to know what time it is. it is single-input tool."
     ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
