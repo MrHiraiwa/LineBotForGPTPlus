@@ -2,6 +2,7 @@ from langchain.agents import initialize_agent, Tool
 from langchain.agents import AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.utilities.google_search import GoogleSearchAPIWrapper
+import openai
 
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
