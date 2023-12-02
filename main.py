@@ -422,8 +422,7 @@ prompt = ChatPromptTemplate.from_messages([
 # チャットモデル
 llm = ChatOpenAI(
     model=GPT_MODEL,
-    temperature=1,
-    streaming=True
+    temperature=1
 )
 
 class CustomConversationSummaryMemory(ConversationSummaryBufferMemory):
