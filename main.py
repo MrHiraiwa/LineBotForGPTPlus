@@ -7,7 +7,6 @@ from googleapiclient.discovery import build
 from linebot import (
     LineBotApi, WebhookHandler
 )
-from linebot.models import QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction
 from linebot.exceptions import (
     InvalidSignatureError
 )
@@ -29,9 +28,6 @@ from langchain.memory import (
     ConversationSummaryBufferMemory,
 )
 from langchain.chains import ConversationChain
-import tiktoken
-import pickle
-import re
 
 from whisper import get_audio
 from voice import put_audio
