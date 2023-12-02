@@ -14,6 +14,11 @@ tools = [
         func=google_search.run,
         description="useful for when you need to answer questions about current events. it is single-input tool Search."
     ),
+    Tool(
+        name = "Clock",
+        func=clock.run,
+        description="useful for when you need to know what time it is."
+    ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
