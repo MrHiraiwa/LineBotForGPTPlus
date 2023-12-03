@@ -1,5 +1,6 @@
 flask
 gunicorn
+pycryptodome
 google-cloud-firestore
 google-api-python-client
 google-cloud-texttospeech
