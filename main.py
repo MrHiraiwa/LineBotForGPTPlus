@@ -554,7 +554,7 @@ def handle_message(event):
                 memory_state = pickle.dumps([])
                 user['memory_state'] = memory_state
                 transaction.set(doc_ref, user, merge=True)
-                raise ResetMemoryException
+                return 'OK'
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions == True
                 audio_or_text = "Text"
