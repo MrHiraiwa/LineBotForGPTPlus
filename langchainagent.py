@@ -15,8 +15,8 @@ llm = ChatOpenAI(model="gpt-3.5-turbo")
 google_search = GoogleSearchAPIWrapper()
 wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
 
-def top5_results(query):
-    return google_search_results.results(query, 5)
+def google_search_results(query):
+    return google_search.results(query, 5)
 
 def clock(dummy):
     jst = pytz.timezone('Asia/Tokyo')
