@@ -779,7 +779,8 @@ def handle_message(event):
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         messages = public_url
                         send_message_type = 'audio'
-                    
+            print(f"{user_message}")
+            print("act6")        
             line_reply(reply_token, messages, send_message_type, quick_reply_items, duration)
         
             if success:
@@ -820,6 +821,8 @@ def messages_filter(messages,bot_name,display_name):
     return messages     
     
 def line_reply(reply_token, messages, send_message_type, quick_reply_items=None, audio_duration=None):
+    print(f"{user_message}")
+    print("act7")   
     if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
