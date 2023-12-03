@@ -35,7 +35,7 @@ def maps_search(latitude, longitude, keyword, push_flex=False, user_id=None):
     flex_contents = []  # Flexメッセージの内容を格納するリスト
 
     for i, result in enumerate(data['results']):
-        if i >= 20:
+        if i >= 4:
             break
         place_name = result['name']
         types = result['types']
