@@ -783,7 +783,7 @@ def handle_message(event):
                 callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
                 return 'OK'
             
-            user['messages'].append({'role': 'user', 'content': nowDateStr + " " + act_as + head_message + "\n" + display_name + ":" + user_message})
+            user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
 
             response_json = response.json()
 
