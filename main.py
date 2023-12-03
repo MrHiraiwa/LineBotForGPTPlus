@@ -557,7 +557,9 @@ def handle_message(event):
                     'voice_speed' : voice_speed,
                     'translate_language' : translate_language
                 }
+                print("act6")
                 transaction.set(doc_ref, user)
+                print("act7")
             
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
@@ -780,7 +782,7 @@ def handle_message(event):
                         messages = public_url
                         send_message_type = 'audio'
             print(f"{user_message}")
-            print("act6")        
+            print("act8")        
             line_reply(reply_token, messages, send_message_type, quick_reply_items, duration)
         
             if success:
@@ -822,7 +824,7 @@ def messages_filter(messages,bot_name,display_name):
     
 def line_reply(reply_token, messages, send_message_type, quick_reply_items=None, audio_duration=None):
     print(f"{user_message}")
-    print("act7")   
+    print("act9")   
     if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
