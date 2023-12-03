@@ -634,7 +634,7 @@ def handle_message(event):
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_OFF_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "OFF"
