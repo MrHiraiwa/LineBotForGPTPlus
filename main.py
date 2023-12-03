@@ -757,7 +757,7 @@ def handle_message(event):
             temp_messages_final = user['messages'].copy()
             temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
 
-            messages = user['messages']
+            messages = temp_messages_final
             
             daily_usage += 1
             
