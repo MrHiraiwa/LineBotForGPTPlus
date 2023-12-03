@@ -42,7 +42,7 @@ from vision import vision_api
 from maps import maps, maps_search
 from langchainagent import langchain_agent
 
-# LINE Messaging APIの準備
+openai_apikey = os.getenv('OPENAI_APIKEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 admin_password = os.environ["ADMIN_PASSWORD"]
@@ -774,7 +774,7 @@ def handle_message(event):
             try:
                 response = requests.post(
                     'https://api.openai.com/v1/chat/completions',
-                    headers={'Authorization': f'Bearer {OPENAI_APIKEY}'},
+                    headers={'Authorization': f'Bearer {openai_apikey}'},
                     json={'model': GPT_MODEL, 'messages': [systemRole()] + temp_messages_final},
                     timeout=50
                 )
