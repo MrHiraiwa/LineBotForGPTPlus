@@ -10,7 +10,7 @@ import pytz
 import requests
 from bs4 import BeautifulSoup
 
-llm = ChatOpenAI(model="gpt-3.5-turbo")
+llm = ChatOpenAI(model="gpt-3.5-turbo-16k")
 
 google_search = GoogleSearchAPIWrapper()
 wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(lang='ja', doc_content_chars_max=1000, load_all_available_meta=True))
