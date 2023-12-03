@@ -521,7 +521,11 @@ def handle_message(event):
                 user_message = MAPS_MESSAGE
                 
             doc = doc_ref.get(transaction=transaction)
+            
+            print("act3")
+            
             if doc.exists:
+                print("act4")
                 user = doc.to_dict()
                 user['messages'] = [{**msg, 'content': get_decrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
                 updated_date_string = user['updated_date_string']
@@ -537,6 +541,7 @@ def handle_message(event):
                     daily_usage = 0
                     
             else:
+                print("act5")
                 user = {
                     'messages': messages,
                     'updated_date_string': updated_date_string,
