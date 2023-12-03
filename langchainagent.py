@@ -4,7 +4,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.utilities.google_search import GoogleSearchAPIWrapper
 from langchain.tools import WikipediaQueryRun
 from langchain.utilities import WikipediaAPIWrapper
-from langchain.utilities import GooglePlacesAPIWrapper
 import openai
 from datetime import datetime, time, timedelta
 import pytz
@@ -15,7 +14,6 @@ llm = ChatOpenAI(model="gpt-3.5-turbo")
 
 google_search = GoogleSearchAPIWrapper()
 wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(lang='ja'))
-gplaceapi = GooglePlacesAPIWrapper()
 
 def google_search_results(query):
     return google_search.results(query, 5)
@@ -78,11 +76,6 @@ tools = [
         name = "Wikipedia",
         func=wikipedia,
         description="useful for when you need to Read dictionary page by specifying the word. it is single-input tool."
-    ),
-    Tool(
-        name = "GoogleMaps",
-        func=gplaceapi.run,
-        description="useful for when you need to find places by specifying the word. it is single-input tool."
     ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
