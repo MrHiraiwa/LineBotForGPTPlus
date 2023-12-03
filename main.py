@@ -774,9 +774,9 @@ def handle_message(event):
             if success:
                 delete_local_file(local_path) 
             
-            # Save memory state to Firestore
-            memory_state = pickle.dumps(memory.get_state())
-            transaction.update(doc_ref, {'memory_state': memory_state, 'daily_usage': daily_usage})
+            # Save messages to Firestore
+            transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+            transaction.update(doc_ref, {'messages': messages, 'daily_usage': daily_usage})
 
 
         return update_in_transaction(db.transaction(), doc_ref)
