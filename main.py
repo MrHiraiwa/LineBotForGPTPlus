@@ -785,7 +785,6 @@ def handle_message(event):
                 return 'OK'
             print("act15")
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
-            response = response_filter(response, bot_name, display_name)
 
             response_json = response.json()
 
@@ -795,7 +794,7 @@ def handle_message(event):
                 return 'OK' 
             print("act16")
             bot_reply = response_json['choices'][0]['message']['content'].strip()
-            
+            bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
             user['daily_usage'] += 1
             bot_reply = bot_reply + links
@@ -815,9 +814,9 @@ def handle_message(event):
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         messages = public_url
                         send_message_type = 'audio'
-            print(f"{reply_token},{response},{send_message_type},{quick_reply_items},{duration},")
+            print(f"{reply_token},{bot_reply},{send_message_type},{quick_reply_items},{duration},")
             print("act18")        
-            line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
+            line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
                 delete_local_file(local_path) 
