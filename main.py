@@ -496,6 +496,7 @@ def handle_message(event):
             voice_speed = 'normal'
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
+            links = ""
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -768,10 +769,35 @@ def handle_message(event):
             temp_messages_final = user['messages'].copy()
             temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
 
-            messages = temp_messages_final
+            messages = user['messages']
             
-            daily_usage += 1
+            try:
+                response = requests.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    headers={'Authorization': f'Bearer {OPENAI_APIKEY}'},
+                    json={'model': GPT_MODEL, 'messages': [systemRole()] + temp_messages_final},
+                    timeout=50
+                )
+            except requests.exceptions.Timeout:
+                print("OpenAI API timed out")
+                callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
+                return 'OK'
             
+            user['messages'].append({'role': 'user', 'content': nowDateStr + " " + act_as + head_message + "\n" + display_name + ":" + user_message})
+
+            response_json = response.json()
+
+            if response.status_code != 200 or 'error' in response_json:
+                print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
+                callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
+                return 'OK' 
+
+            bot_Reply = response_json['choices'][0]['message']['content'].strip()
+
+            user['messages'].append({'role': 'assistant', 'content': bot_reply})
+            user['daily_usage'] += 1
+            bot_reply = bot_reply + links
+                        
             success = []
             public_url = []
             local_path = []
