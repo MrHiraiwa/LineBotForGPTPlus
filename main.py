@@ -787,7 +787,7 @@ def handle_message(event):
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         messages = public_url
                         send_message_type = 'audio'
-            print(f"{user_message}")
+            print(f"{reply_token},{messages},{send_message_type},{quick_reply_items},{duration},")
             print("act15")        
             line_reply(reply_token, messages, send_message_type, quick_reply_items, duration)
         
