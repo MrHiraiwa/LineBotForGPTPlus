@@ -758,7 +758,7 @@ def handle_message(event):
                     transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
             print("act12")
-            temp_messages = nowDateStr + " " + headMessage + "\n" + display_name + ":" + user_message
+            temp_messages = nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
             total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 user['messages'].pop(0)
