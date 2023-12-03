@@ -785,6 +785,7 @@ def handle_message(event):
                 return 'OK'
             print("act15")
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
+            response = response_filter(response, bot_name, display_name)
 
             response_json = response.json()
 
@@ -794,7 +795,7 @@ def handle_message(event):
                 return 'OK' 
             print("act16")
             bot_reply = response_json['choices'][0]['message']['content'].strip()
-
+            
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
             user['daily_usage'] += 1
             bot_reply = bot_reply + links
