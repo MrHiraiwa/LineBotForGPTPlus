@@ -770,7 +770,7 @@ def handle_message(event):
             temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
 
             messages = user['messages']
-            
+            print("act14")
             try:
                 response = requests.post(
                     'https://api.openai.com/v1/chat/completions',
@@ -782,7 +782,7 @@ def handle_message(event):
                 print("OpenAI API timed out")
                 line_reply(reply_token, ERROR_MESSAGE, 'text')
                 return 'OK'
-            
+            print("act15")
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
 
             response_json = response.json()
@@ -791,7 +791,7 @@ def handle_message(event):
                 print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
                 line_reply(reply_token, ERROR_MESSAGE, 'text')
                 return 'OK' 
-
+            print("act16")
             bot_Reply = response_json['choices'][0]['message']['content'].strip()
 
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
@@ -803,7 +803,7 @@ def handle_message(event):
             local_path = []
             duration = []
             send_message_type = 'text'
-            print("act14")
+            print("act17")
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
                     public_url, local_path, duration = put_audio(user_id, message_id, messages, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
@@ -814,7 +814,7 @@ def handle_message(event):
                         messages = public_url
                         send_message_type = 'audio'
             print(f"{reply_token},{messages},{send_message_type},{quick_reply_items},{duration},")
-            print("act15")        
+            print("act18")        
             line_reply(reply_token, messages, send_message_type, quick_reply_items, duration)
         
             if success:
@@ -855,7 +855,7 @@ def messages_filter(messages,bot_name,display_name):
     return messages     
     
 def line_reply(reply_token, messages, send_message_type, quick_reply_items=None, audio_duration=None):
-    print("act16")   
+    print("act19")   
     if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
