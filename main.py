@@ -780,7 +780,7 @@ def handle_message(event):
                 )
             except requests.exceptions.Timeout:
                 print("OpenAI API timed out")
-                callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
+                line_reply(reply_token, ERROR_MESSAGE, 'text')
                 return 'OK'
             
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
@@ -789,7 +789,7 @@ def handle_message(event):
 
             if response.status_code != 200 or 'error' in response_json:
                 print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
-                callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
+                line_reply(reply_token, ERROR_MESSAGE, 'text')
                 return 'OK' 
 
             bot_Reply = response_json['choices'][0]['message']['content'].strip()
