@@ -14,3 +14,4 @@ pydub
 pytz
 requests
 beautifulsoup4
+wikipedia
