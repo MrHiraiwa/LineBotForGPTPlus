@@ -44,7 +44,7 @@ def maps_search(latitude, longitude, keyword, push_flex=False, user_id=None):
         price_level = result.get('price_level', 'N/A')
         vicinity = result['vicinity']
         map_url = f"https://www.google.com/maps/search/?api=1&query={result['geometry']['location']['lat']},{result['geometry']['location']['lng']}&query_place_id={result['place_id']}"
-        shop_info_text = f"場所名: {place_name}\nタイプ: {types}\n評価: {like}\nレビュー数: {user_ratings_total}\n価格レベル: {price_level}\n住所: {vicinity}\n"
+        shop_info_text = f"場所名: {place_name}\nタイプ: {types}\n評価: {like}\nレビュー数: {user_ratings_total}\n価格レベル: {price_level}\n住所: {vicinity}\nURL: {map_url} "
         shop_info_texts.append(shop_info_text)
 
         if push_flex and i < 10:
