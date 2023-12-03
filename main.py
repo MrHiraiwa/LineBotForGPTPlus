@@ -517,7 +517,7 @@ def handle_message(event):
             doc = doc_ref.get(transaction=transaction)
             if doc.exists:
                 user = doc.to_dict()
-                user[me'messages'] = [{**msg, 'content': get_decrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
+                user['messages'] = [{**msg, 'content': get_decrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
                 updated_date_string = user['updated_date_string']
                 daily_usage = user['daily_usage']
                 start_free_day = user['start_free_day']
