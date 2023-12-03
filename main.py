@@ -792,7 +792,7 @@ def handle_message(event):
                 line_reply(reply_token, ERROR_MESSAGE, 'text')
                 return 'OK' 
             print("act16")
-            bot_Reply = response_json['choices'][0]['message']['content'].strip()
+            bot_reply = response_json['choices'][0]['message']['content'].strip()
 
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
             user['daily_usage'] += 1
