@@ -65,7 +65,7 @@ tools = [
     Tool(
         name = "Scraping",
         func=scraping,
-        description="useful for when you need to know what time it is. it is single-input tool."
+        description="useful for when you need to read a web page by specifying the URL. it is single-input tool."
     ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
