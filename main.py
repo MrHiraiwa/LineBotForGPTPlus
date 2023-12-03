@@ -31,6 +31,8 @@ from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 import re
+from hashlib import md5
+import base64
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 
