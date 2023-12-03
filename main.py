@@ -444,7 +444,7 @@ def get_decrypted_message(enc_message, hashed_secret_key):
         return None
     
 @app.route("/", methods=["POST"])
-print(f"act1")
+print("act1")
 def callback():
     # get X-Line-Signature header value
     signature = request.headers["X-Line-Signature"]
@@ -460,7 +460,7 @@ def callback():
     return "OK"
 
 @handler.add(MessageEvent, message=(TextMessage, AudioMessage, LocationMessage, ImageMessage, StickerMessage))
-print(f"act2")
+print("act2")
 def handle_message(event):
     reload_settings()
     try:
