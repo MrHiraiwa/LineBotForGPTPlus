@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
 google_search = GoogleSearchAPIWrapper()
-wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(lang='ja'))
+wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(lang='ja', doc_content_chars_max=1000))
 
 def google_search_results(query):
     return google_search.results(query, 5)
