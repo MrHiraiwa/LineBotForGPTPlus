@@ -814,9 +814,9 @@ def handle_message(event):
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         messages = public_url
                         send_message_type = 'audio'
-            print(f"{reply_token},{messages},{send_message_type},{quick_reply_items},{duration},")
+            print(f"{reply_token},{response},{send_message_type},{quick_reply_items},{duration},")
             print("act18")        
-            line_reply(reply_token, messages, send_message_type, quick_reply_items, duration)
+            line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
         
             if success:
                 delete_local_file(local_path) 
@@ -838,25 +838,24 @@ def handle_message(event):
     finally:
         return 'OK'
     
-def messages_filter(messages,bot_name,display_name):
+def response_filter(response,bot_name,display_name):
     date_pattern = r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3,4}"
-    messages = re.sub(date_pattern, "", messages).strip()
+    response = re.sub(date_pattern, "", response).strip()
     name_pattern1 = r"^"+ bot_name + ":"
-    messages = re.sub(name_pattern1, "", messages).strip()
+    response = re.sub(name_pattern1, "", response).strip()
     name_pattern2 = r"^"+ bot_name + "："
-    messages = re.sub(name_pattern2, "", messages).strip()
+    response = re.sub(name_pattern2, "", response).strip()
     name_pattern3 = r"^"+ display_name + ":"
-    messages = re.sub(name_pattern3, "", messages).strip()
+    response = re.sub(name_pattern3, "", response).strip()
     name_pattern4 = r"^"+ display_name + "："
-    messages = re.sub(name_pattern4, "", messages).strip()
+    response = re.sub(name_pattern4, "", response).strip()
     dot_pattern = r"^、"
-    messages = re.sub(dot_pattern, "", messages).strip()
+    response = re.sub(dot_pattern, "", response).strip()
     dot_pattern = r"^ "
-    messages = re.sub(dot_pattern, "", messages).strip()
-    return messages     
+    response = re.sub(dot_pattern, "", response).strip()
+    return response     
     
-def line_reply(reply_token, messages, send_message_type, quick_reply_items=None, audio_duration=None):
-    print("act19")   
+def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
     if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
@@ -878,11 +877,11 @@ def line_reply(reply_token, messages, send_message_type, quick_reply_items=None,
             quick_reply = QuickReply(items=quick_reply_button_list)
 
             # Add QuickReply to TextSendMessage
-            message = TextSendMessage(text=messages, quick_reply=quick_reply)
+            message = TextSendMessage(text=response, quick_reply=quick_reply)
         else:
-            message = TextSendMessage(text=messages)
+            message = TextSendMessage(text=response)
     elif send_message_type == 'audio':
-        message = AudioSendMessage(original_content_url=messages, duration=audio_duration)
+        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
         print(f"Unknown REPLY type: {send_message_type}")
         return
@@ -892,7 +891,7 @@ def line_reply(reply_token, messages, send_message_type, quick_reply_items=None,
         message
     )
 
-def line_push(user_id, messages, send_message_type, quick_reply_items=None, audio_duration=None):
+def line_push(user_id, response, send_message_type, quick_reply_items=None, audio_duration=None):
     if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
@@ -914,11 +913,11 @@ def line_push(user_id, messages, send_message_type, quick_reply_items=None, audi
             quick_reply = QuickReply(items=quick_reply_button_list)
 
             # Add QuickReply to TextSendMessage
-            message = TextSendMessage(text=messages, quick_reply=quick_reply)
+            message = TextSendMessage(text=response, quick_reply=quick_reply)
         else:
-            message = TextSendMessage(text=messages)
+            message = TextSendMessage(text=response)
     elif send_message_type == 'audio':
-        message = AudioSendMessage(original_content_url=messages, duration=audio_duration)
+        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
     else:
         print(f"Unknown REPLY type: {send_message_type}")
         return
