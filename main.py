@@ -182,7 +182,11 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。'
 }
 
-db = firestore.Client()
+try:
+    db = firestore.Client()
+except Exception as e:
+    print(f"Error creating Firestore client: {e}")
+    raise
 
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
@@ -477,7 +481,7 @@ def handle_message(event):
         
         @firestore.transactional
         def update_in_transaction(transaction, doc_ref):
-            user_message = ""
+            user_message = []
             exec_functions = False
             quick_reply_items = []
             head_message = ""
@@ -521,7 +525,7 @@ def handle_message(event):
                 user_message = MAPS_MESSAGE
                 
             doc = doc_ref.get(transaction=transaction)
-            
+            print(f"{user_message}")
             print("act3")
             
             if doc.exists:
