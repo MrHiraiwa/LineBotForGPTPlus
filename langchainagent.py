@@ -13,7 +13,7 @@ from langchain.utilities import WikipediaAPIWrapper
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
 google_search = GoogleSearchAPIWrapper()
-wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper(lang='ja'))
 
 def google_search_results(query):
     return google_search.results(query, 5)
