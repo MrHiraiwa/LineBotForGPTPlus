@@ -7,6 +7,8 @@ from datetime import datetime, time, timedelta
 import pytz
 import requests
 from bs4 import BeautifulSoup
+from langchain.tools import WikipediaQueryRun
+from langchain.utilities import WikipediaAPIWrapper
 
 def clock(dummy):
     jst = pytz.timezone('Asia/Tokyo')
@@ -50,6 +52,7 @@ def scraping(links):
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
 google_search = GoogleSearchAPIWrapper()
+wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
 
 tools = [
     Tool(
@@ -66,6 +69,11 @@ tools = [
         name = "Scraping",
         func=scraping,
         description="useful for when you need to read a web page by specifying the URL. it is single-input tool."
+    ),
+    Tool(
+        name = "Wikipedia",
+        func=wikipedia,
+        description="useful for when you need to Read dictionary page by specifying the word. it is single-input tool."
     ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
