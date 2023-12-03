@@ -690,7 +690,8 @@ def handle_message(event):
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
-            
+
+            print("act8")
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
                 result = langchain_agent(user_message)
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
@@ -726,7 +727,8 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
-            
+
+            print("act9")
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
                 head_message = head_message + TRANSLATE_ORDER
@@ -737,7 +739,8 @@ def handle_message(event):
             if 'start_free_day' in user:
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
-                    
+
+            print("act10")
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
                     (reply_token, MAX_DAILY_MESSAGE, 'text')
@@ -745,7 +748,8 @@ def handle_message(event):
             elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
                 (reply_token, MAX_DAILY_MESSAGE, 'text')
                 return 'OK'
-            
+
+            print("act11")
             if source_type == "group" or source_type == "room":
                 if any(word in user_message for word in BOT_NAME) or exec_functions == True:
                     pass
@@ -753,13 +757,14 @@ def handle_message(event):
                     user['messages'].append({'role': 'user', 'content': display_name + ":" + user_message})
                     transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
-            
+            print("act12")
             temp_messages = nowDateStr + " " + headMessage + "\n" + display_name + ":" + user_message
             total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 user['messages'].pop(0)
                 total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
-                
+
+            print("act13")
             temp_messages_final = user['messages'].copy()
             temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
 
@@ -772,6 +777,7 @@ def handle_message(event):
             local_path = []
             duration = []
             send_message_type = 'text'
+            print("act14")
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
                     public_url, local_path, duration = put_audio(user_id, message_id, messages, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
@@ -782,7 +788,7 @@ def handle_message(event):
                         messages = public_url
                         send_message_type = 'audio'
             print(f"{user_message}")
-            print("act8")        
+            print("act15")        
             line_reply(reply_token, messages, send_message_type, quick_reply_items, duration)
         
             if success:
@@ -824,7 +830,7 @@ def messages_filter(messages,bot_name,display_name):
     
 def line_reply(reply_token, messages, send_message_type, quick_reply_items=None, audio_duration=None):
     print(f"{user_message}")
-    print("act9")   
+    print("act16")   
     if send_message_type == 'text':
         if quick_reply_items:
             # Create QuickReplyButton list from quick_reply_items
