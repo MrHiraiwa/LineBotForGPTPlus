@@ -829,7 +829,6 @@ def messages_filter(messages,bot_name,display_name):
     return messages     
     
 def line_reply(reply_token, messages, send_message_type, quick_reply_items=None, audio_duration=None):
-    print(f"{user_message}")
     print("act16")   
     if send_message_type == 'text':
         if quick_reply_items:
