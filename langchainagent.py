@@ -10,6 +10,14 @@ from bs4 import BeautifulSoup
 from langchain.tools import WikipediaQueryRun
 from langchain.utilities import WikipediaAPIWrapper
 
+llm = ChatOpenAI(model="gpt-3.5-turbo")
+
+google_search = GoogleSearchAPIWrapper()
+wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+
+def top5_results(query):
+    return google_search_results.results(query, 5)
+
 def clock(dummy):
     jst = pytz.timezone('Asia/Tokyo')
     nowDate = datetime.now(jst) 
@@ -48,16 +56,10 @@ def scraping(links):
 
     return contents
 
-
-llm = ChatOpenAI(model="gpt-3.5-turbo")
-
-google_search = GoogleSearchAPIWrapper()
-wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-
 tools = [
     Tool(
         name = "Search",
-        func=google_search.run,
+        func=google_search_results,
         description="useful for when you need to answer questions about current events. it is single-input tool Search."
     ),
     Tool(
