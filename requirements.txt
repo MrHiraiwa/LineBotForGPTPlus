@@ -12,3 +12,5 @@ line-bot-sdk
 tiktoken
 pydub
 pytz
+requests
+beautifulsoup4
