@@ -31,6 +31,8 @@ from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 import re
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
 
 from whisper import get_audio
 from voice import put_audio
