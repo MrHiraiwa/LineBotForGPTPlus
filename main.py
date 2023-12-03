@@ -823,7 +823,7 @@ def handle_message(event):
             
             # Save messages to Firestore
             transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
-            transaction.update(doc_ref, {'messages': messages, 'daily_usage': daily_usage})
+            transaction.update(doc_ref, {'daily_usage': daily_usage})
 
 
         return update_in_transaction(db.transaction(), doc_ref)
