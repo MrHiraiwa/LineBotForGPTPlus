@@ -13,7 +13,7 @@ def get_addresses(latitude, longitude, result_type="sublocality"):
             language='ja'
         )
         addresses = [result['formatted_address'] for result in results]
-        return addresses
+        return addresses[1]
     except ApiError as e:
         print(f"API Error: {e}")
     except HTTPError as e:
