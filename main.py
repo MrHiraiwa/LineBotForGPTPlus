@@ -40,7 +40,7 @@ from Crypto.Hash import SHA256
 from whisper import get_audio
 from voice import put_audio
 from vision import vision_api
-from maps import maps, get_addresses
+from maps import get_addresses
 from langchainagent import langchain_agent
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
