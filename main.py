@@ -139,7 +139,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'SEARCH_KEYWORDS': '今日,本日,まとめ,検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
-    'SEARCH_MESSAGE': '以下の検索結果を{display_name}に報告してください。URLが含まれる場合はURLを提示してください。',
+    'SEARCH_MESSAGE': '{display_name}の問いに対して以下の検索結果の情報が有益な場合は、情報を{display_name}に報告してください。URLが含まれる場合はURLを提示してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
