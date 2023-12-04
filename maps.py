@@ -5,7 +5,7 @@ from googlemaps.exceptions import ApiError, HTTPError, Timeout, TransportError
 GOOGLE_API_KEY = os.environ.get('GOOGLEMAP_API_KEY')
 gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
 
-def get_addresses(latitude, longitude, result_type="locality"):
+def get_addresses(latitude, longitude, result_type="sublocality"):
     try:
         results = gmaps.reverse_geocode(
             (latitude, longitude), 
