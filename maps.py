@@ -15,5 +15,5 @@ def get_addresses(latitude, longitude, result_type="political"):
     for result in results:
         addr = result['formatted_address']
         addresses.append(addr)
-        print(f"{addresses}")
+    print(f"{addresses}")
     return addresses
