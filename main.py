@@ -40,7 +40,7 @@ from Crypto.Hash import SHA256
 from whisper import get_audio
 from voice import put_audio
 from vision import vision_api
-from maps import maps, maps_search
+from maps import maps, get_addresses
 from langchainagent import langchain_agent
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -133,7 +133,7 @@ DEFAULT_ENV_VARS = {
     'OCR_MESSAGE': ' 画像を解析し文字に変換しました。以下の解析結果を{display_name}に報告してください 。',
     'OCR_BOTGUIDE_MESSAGE': '以下のテキストは画像を解析し文字列に変換したものです。画像に何が写っているかを文章で説明してください。',
     'OCR_USER_MESSAGE': '画像を送信しました。',
-    'MAPS_MESSAGE': '地図検索を実行しました。',
+    'MAPS_MESSAGE': '以下の住所周辺のおすすめのスポットを教えてください。',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
@@ -519,10 +519,8 @@ def handle_message(event):
                 exec_functions = True 
                 latitude =  event.message.latitude
                 longitude = event.message.longitude
-                result = maps_search(latitude, longitude, "")
-                head_message = result['message']
-                links = result['links']
-                user_message = MAPS_MESSAGE
+                result = get_addresses(latitude, longitude)
+                user_message = MAPS_MESSAGE + "\n" + result['message']
                 
             doc = doc_ref.get(transaction=transaction)
             
