@@ -1,3 +1,9 @@
+import googlemaps
+
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+
+gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
+
 def get_addresses(latitude, longitude, result_type="political"):
     results = gmaps.reverse_geocode(
         (latitude, longitude), 
