@@ -516,11 +516,14 @@ def handle_message(event):
                 head_message = head_message + OCR_MESSAGE + "\n" + result
                 user_message = OCR_USER_MESSAGE
             elif message_type == 'location':
+                print("{message_type}")
                 exec_functions = True 
                 latitude =  event.message.latitude
                 longitude = event.message.longitude
+                print("f{latitude},{longitude}")
                 result = get_addresses(latitude, longitude)
-                user_message = MAPS_MESSAGE + "\n" + result['message']
+                print("f{result}")
+                user_message = MAPS_MESSAGE + "\n" + result
                 
             doc = doc_ref.get(transaction=transaction)
             
