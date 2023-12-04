@@ -450,7 +450,6 @@ def get_decrypted_message(enc_message, hashed_secret_key):
     
 @app.route("/", methods=["POST"])
 def callback():
-    print("act1")
     # get X-Line-Signature header value
     signature = request.headers["X-Line-Signature"]
     # get request body as text
@@ -466,7 +465,6 @@ def callback():
 
 @handler.add(MessageEvent, message=(TextMessage, AudioMessage, LocationMessage, ImageMessage, StickerMessage))
 def handle_message(event):
-    print("act2")
     reload_settings()
     try:
         user_id = event.source.user_id
@@ -527,11 +525,8 @@ def handle_message(event):
                 user_message = MAPS_MESSAGE
                 
             doc = doc_ref.get(transaction=transaction)
-            print(f"{user_message}")
-            print("act3")
             
             if doc.exists:
-                print("act4")
                 user = doc.to_dict()
                 user['messages'] = [{**msg, 'content': get_decrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
                 updated_date_string = user['updated_date_string']
@@ -547,7 +542,6 @@ def handle_message(event):
                     daily_usage = 0
                     
             else:
-                print("act5")
                 user = {
                     'messages': messages,
                     'updated_date_string': updated_date_string,
@@ -559,9 +553,7 @@ def handle_message(event):
                     'voice_speed' : voice_speed,
                     'translate_language' : translate_language
                 }
-                print("act6")
                 transaction.set(doc_ref, user)
-                print("act7")
             
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
@@ -693,7 +685,6 @@ def handle_message(event):
                 user_message = TRANSLATE_MESSAGE
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
 
-            print("act8")
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
                 result = langchain_agent(user_message)
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
@@ -730,7 +721,6 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
 
-            print("act9")
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
                 head_message = head_message + TRANSLATE_ORDER
@@ -742,7 +732,6 @@ def handle_message(event):
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
 
-            print("act10")
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
                     (reply_token, MAX_DAILY_MESSAGE, 'text')
@@ -751,7 +740,6 @@ def handle_message(event):
                 (reply_token, MAX_DAILY_MESSAGE, 'text')
                 return 'OK'
 
-            print("act11")
             if source_type == "group" or source_type == "room":
                 if any(word in user_message for word in BOT_NAME) or exec_functions == True:
                     pass
@@ -759,19 +747,17 @@ def handle_message(event):
                     user['messages'].append({'role': 'user', 'content': display_name + ":" + user_message})
                     transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
-            print("act12")
+
             temp_messages = nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
             total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 user['messages'].pop(0)
                 total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
 
-            print("act13")
             temp_messages_final = user['messages'].copy()
             temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
 
             messages = user['messages']
-            print("act14")
             try:
                 response = requests.post(
                     'https://api.openai.com/v1/chat/completions',
@@ -783,7 +769,6 @@ def handle_message(event):
                 print("OpenAI API timed out")
                 line_reply(reply_token, ERROR_MESSAGE, 'text')
                 return 'OK'
-            print("act15")
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
 
             response_json = response.json()
@@ -792,7 +777,6 @@ def handle_message(event):
                 print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
                 line_reply(reply_token, ERROR_MESSAGE, 'text')
                 return 'OK' 
-            print("act16")
             bot_reply = response_json['choices'][0]['message']['content'].strip()
             bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
@@ -804,7 +788,6 @@ def handle_message(event):
             local_path = []
             duration = []
             send_message_type = 'text'
-            print("act17")
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
                     public_url, local_path, duration = put_audio(user_id, message_id, messages, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
@@ -814,8 +797,7 @@ def handle_message(event):
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         messages = public_url
                         send_message_type = 'audio'
-            print(f"{reply_token},{bot_reply},{send_message_type},{quick_reply_items},{duration},")
-            print("act18")        
+                        
             line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
