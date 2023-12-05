@@ -956,5 +956,72 @@ def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
     return profile
 
+@app.route('/webhook', methods=['POST'])
+def stripe_webhook():
+    db = firestore.Client()
+
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return Response(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return Response(status=400)
+
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+
+        # Get the user_id from the metadata
+        userId = session['metadata']['line_user_id']
+
+        # Get the Firestore document reference
+        doc_ref = db.collection('users').document(userId)
+
+        # Define the number of hours to subtract
+        hours_to_subtract = 9
+
+        # Create the datetime object
+        start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
+        
+        doc_ref.update({
+            'start_free_day': start_free_day
+        })
+    # Handle the invoice.payment_succeeded event
+    elif event['type'] == 'invoice.payment_succeeded':
+        invoice = event['data']['object']
+
+        # Get the user_id from the metadata
+        userId = invoice['metadata']['line_user_id']
+
+        # Get the Firestore document reference
+        doc_ref = db.collection('users').document(userId)
+
+        # You might want to adjust this depending on your timezone
+        start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
+
+        doc_ref.update({
+             'start_free_day': start_free_day
+        })
+
+    return Response(status=200)
+
+
+@app.route('/success', methods=['GET'])
+def success():
+    return render_template('success.html')
+
+@app.route('/cancel', methods=['GET'])
+def cancel():
+    return render_template('cancel.html')
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
