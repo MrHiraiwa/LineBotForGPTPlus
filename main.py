@@ -42,6 +42,7 @@ from voice import put_audio
 from vision import vision_api
 from maps import get_addresses
 from langchainagent import langchain_agent
+from payment import create_checkout_session
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -114,7 +115,13 @@ REQUIRED_ENV_VARS = [
     "TRANSLATE_JAPANESE_QUICK_REPLY",
     "TRANSLATE_KOREAN_QUICK_REPLY",
     "TRANSLATE_THAIAN_QUICK_REPLY",
-    "TRANSLATE_ORDER"
+    "TRANSLATE_ORDER",
+    "PAYMENT_KEYWORDS",
+    "PAYMENT_PRICE_ID",
+    "PAYMENT_GUIDE_MESSAGE",
+    "PAYMENT_FAIL_MESSAGE",
+    "PAYMENT_QUICK_REPLY",
+    "PAYMENT_RESULT_URL"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -180,7 +187,13 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_JAPANESE_QUICK_REPLY': '🇯🇵日本語',
     'TRANSLATE_KOREAN_QUICK_REPLY': '🇰🇷韓国語',
     'TRANSLATE_THAIAN_QUICK_REPLY': '🇹🇭タイランド語',
-    'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。'
+    'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。',
+    'PAYMENT_KEYWORDS': '💸支払い',
+    'PAYMENT_PRICE_ID': '環境変数にStripのSTRIPE_SECRET_KEYとSTRIPE_WEBHOOK_SECRETを設定しないと発動しません。',
+    'PAYMENT_GUIDE_MESSAGE': 'ユーザーに「画面下の「支払い」の項目をタップすると私の利用料の支払い画面が表示される」と案内して感謝の言葉を述べてください。以下の文章はユーザーから送られたものです。',
+    'PAYMENT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
+    'PAYMENT_QUICK_REPLY': '💸支払い',
+    'PAYMENT_RESULT_URL': 'http://example'
 }
 
 try:
@@ -304,6 +317,17 @@ def reload_settings():
     TRANSLATE_KOREAN_QUICK_REPLY = get_setting('TRANSLATE_KOREAN_QUICK_REPLY')
     TRANSLATE_THAIAN_QUICK_REPLY = get_setting('TRANSLATE_THAIAN_QUICK_REPLY')
     TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER')
+    FREE_LIMIT_DAY = int(get_setting('FREE_LIMIT_DAY') or 0)
+    PAYMENT_KEYWORDS = get_setting('PAYMENT_KEYWORDS')
+    if PAYMENT_KEYWORDS:
+        PAYMENT_KEYWORDS = PAYMENT_KEYWORDS.split(',')
+    else:
+        PAYMENT_KEYWORDS = []
+    PAYMENT_PRICE_ID = get_setting('PAYMENT_PRICE_ID')
+    PAYMENT_GUIDE_MESSAGE = get_setting('PAYMENT_GUIDE_MESSAGE')
+    PAYMENT_FAIL_MESSAGE = get_setting('PAYMENT_FAIL_MESSAGE')
+    PAYMENT_QUICK_REPLY = get_setting('PAYMENT_QUICK_REPLY')
+    PAYMENT_RESULT_URL = get_setting('PAYMENT_RESULT_URL')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -736,6 +760,14 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
+            if any(word in user_message for word in PAYMENT_KEYWORDS) and not exec_functions:
+                if source_type == "user":
+                    checkout_url = create_checkout_session(userId, PAYMENT_PRICE_ID, PAYMENT_RESULT_URL + '/success', PAYMENT_RESULT_URL + '/cansel')
+                    quick_reply_items.append(['uri', PAYMENT_QUICK_REPLY, checkout_url])
+                    head_message = head_message + PAYMENT_GUIDE_MESSAGE
+                else:
+                    line_reply(reply_token, PAYMENT_FAIL_MESSAGE, 'text')
+                    return 'OK'
 
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
