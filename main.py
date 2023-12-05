@@ -817,7 +817,7 @@ def handle_message(event):
                         send_message_type = 'text'
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         print("act5")
-                        messages = public_url
+                        bot_reply = public_url
                         send_message_type = 'audio'
             print("act6")            
             line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
