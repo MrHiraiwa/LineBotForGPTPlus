@@ -492,7 +492,7 @@ def handle_message(event):
             audio_or_text = 'Text'
             or_chinese = 'MANDARIN'
             or_english = 'AMERICAN'
-            voice_speed = 'normal'
+            audio_speed = 'normal'
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
             links = ""
@@ -532,7 +532,7 @@ def handle_message(event):
                 audio_or_text = user['audio_or_text']
                 or_chinese = user['or_chinese']
                 or_english = user['or_english']
-                voice_speed = user['voice_speed']
+                audio_speed = user['audio_speed']
                 translate_language = user['translate_language']
                 updated_date = user['updated_date_string'].astimezone(jst)
                 if nowDate.date() != updated_date.date():
@@ -547,7 +547,7 @@ def handle_message(event):
                     'audio_or_text' : audio_or_text,
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
-                    'voice_speed' : voice_speed,
+                    'audio_speed' : audio_speed,
                     'translate_language' : translate_language
                 }
                 transaction.set(doc_ref, user)
@@ -806,7 +806,7 @@ def handle_message(event):
             send_message_type = 'text'
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                    public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
+                    public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     if  LINE_REPLY == "Both":
                         success = line_push(user_id, public_url, 'audio', None, duration)
                         send_message_type = 'text'
