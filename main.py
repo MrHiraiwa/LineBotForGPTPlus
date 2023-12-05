@@ -723,10 +723,12 @@ def handle_message(event):
                 quick_reply_items.append(['message', OR_ENGLISH_INDIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY])
                 head_message = head_message + OR_ENGLISH_GUIDE_MESSAGE
             if any(word in user_message for word in AUDIO_SPEED_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+                print("act1")
                 quick_reply_items.append(['message', AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_SLOW_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_FAST_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY])
                 head_message = head_message + VOICE_SPEED_GUIDE_MESSAGE
+                print("act2")
             if any(word in user_message for word in TRANSLATE_KEYWORDS) and not exec_functions:
                 quick_reply_items.append(['message', TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_OFF_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY])
@@ -804,22 +806,15 @@ def handle_message(event):
             local_path = []
             duration = []
             send_message_type = 'text'
-            print("act1")
             if audio_or_text == "Audio":
-                print("act2")
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                    print(f"{user_id}, {message_id}, {bot_reply}, {BACKET_NAME}, {FILE_AGE}, {or_chinese}, {or_english}, {voice_speed}, {AUDIO_GENDER}")
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
-                    print(f"{public_url}, {local_path}, {duration}")
                     if  LINE_REPLY == "Both":
-                        print("act4")
                         success = line_push(user_id, public_url, 'audio', None, duration)
                         send_message_type = 'text'
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
-                        print("act5")
                         bot_reply = public_url
-                        send_message_type = 'audio'
-            print("act6")            
+                        send_message_type = 'audio'          
             line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
