@@ -2,8 +2,8 @@ import os
 import googlemaps
 from googlemaps.exceptions import ApiError, HTTPError, Timeout, TransportError
 
-GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
-gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
+google_api_key = os.environ.get('GOOGLE_API_KEY')
+gmaps = googlemaps.Client(key=google_api_key)
 
 def get_addresses(latitude, longitude, result_type="sublocality"):
     try:
