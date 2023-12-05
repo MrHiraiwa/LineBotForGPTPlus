@@ -804,16 +804,21 @@ def handle_message(event):
             local_path = []
             duration = []
             send_message_type = 'text'
+            print("act1")
             if audio_or_text == "Audio":
+                print("act2")
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
+                    print("act3")
                     public_url, local_path, duration = put_audio(user_id, message_id, messages, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
                     if  LINE_REPLY == "Both":
+                        print("act4")
                         success = line_push(user_id, public_url, 'audio', None, duration)
                         send_message_type = 'text'
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
+                        print("act5")
                         messages = public_url
                         send_message_type = 'audio'
-                        
+            print("act6")            
             line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
