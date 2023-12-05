@@ -1,5 +1,6 @@
 import os
 import pytz
+import requests
 from datetime import datetime, time, timedelta
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort
 from google.cloud import firestore
@@ -7,7 +8,6 @@ from googleapiclient.discovery import build
 from linebot import (
     LineBotApi, WebhookHandler
 )
-from linebot.models import QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction
 from linebot.exceptions import (
     InvalidSignatureError
 )
@@ -32,20 +32,25 @@ from langchain.chains import ConversationChain
 import tiktoken
 import pickle
 import re
+from hashlib import md5
+import base64
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
 
 from whisper import get_audio
 from voice import put_audio
 from vision import vision_api
-from maps import maps, maps_search
+from maps import get_addresses
 from langchainagent import langchain_agent
 
-# LINE Messaging APIの準備
+openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 admin_password = os.environ["ADMIN_PASSWORD"]
+secret_key = os.getenv('SECRET_KEY')
 jst = pytz.timezone('Asia/Tokyo')
 nowDate = datetime.now(jst) 
-nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z') + "\n"
+nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
@@ -60,6 +65,8 @@ REQUIRED_ENV_VARS = [
     "STICKER_MESSAGE",
     "STICKER_FAIL_MESSAGE",
     "OCR_MESSAGE",
+    "OCR_BOTGUIDE_MESSAGE",
+    "OCR_USER_MESSAGE",
     "MAPS_MESSAGE",
     "FORGET_KEYWORDS",
     "FORGET_GUIDE_MESSAGE",
@@ -123,14 +130,16 @@ DEFAULT_ENV_VARS = {
     'NG_MESSAGE': '以下の文章はユーザーから送られたものですが拒絶してください。',
     'STICKER_MESSAGE': '私の感情!',
     'STICKER_FAIL_MESSAGE': '読み取れないLineスタンプが送信されました。スタンプが読み取れなかったという反応を返してください。',
-    'OCR_MESSAGE': '以下のテキストは写真に何が映っているかを文字列に変換したものです。この文字列を見て写真を見たかのように反応してください。',
-    'MAPS_MESSAGE': '地図検索を実行しました。',
+    'OCR_MESSAGE': ' 画像を解析し文字に変換しました。以下の解析結果を{display_name}に報告してください 。',
+    'OCR_BOTGUIDE_MESSAGE': '以下のテキストは画像を解析し文字列に変換したものです。画像に何が写っているかを文章で説明してください。',
+    'OCR_USER_MESSAGE': '画像を送信しました。',
+    'MAPS_MESSAGE': '以下の住所周辺のおすすめのスポットを教えてください。',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
-    'SEARCH_KEYWORDS': '検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
-    'SEARCH_MESSAGE': '以下の検索結果を{display_name}に報告してください。URLが含まれる場合はURLを提示してください。',
+    'SEARCH_KEYWORDS': '今日,本日,まとめ,検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
+    'SEARCH_MESSAGE': '{display_name}の問いに対して以下の検索結果の情報が有益な場合は、情報を{display_name}に報告してください。URLが含まれる場合はURLを提示してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
@@ -174,13 +183,17 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。'
 }
 
-db = firestore.Client()
+try:
+    db = firestore.Client()
+except Exception as e:
+    print(f"Error creating Firestore client: {e}")
+    raise
 
 def reload_settings():
     global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
     global MAX_TOKEN_NUM, MAX_DAILY_USAGE, GROUP_MAX_DAILY_USAGE, FREE_LIMIT_DAY, MAX_DAILY_MESSAGE
     global NG_MESSAGE, NG_KEYWORDS
-    global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, MAPS_MESSAGE
+    global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global SEARCH_KEYWORDS, SEARCH_MESSAGE
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
@@ -213,6 +226,8 @@ def reload_settings():
     STICKER_MESSAGE = get_setting('STICKER_MESSAGE')
     STICKER_FAIL_MESSAGE = get_setting('STICKER_FAIL_MESSAGE')
     OCR_MESSAGE = get_setting('OCR_MESSAGE')
+    OCR_BOTGUIDE_MESSAGE = get_setting('OCR_BOTGUIDE_MESSAGE')
+    OCR_USER_MESSAGE = get_setting('OCR_USER_MESSAGE')
     MAPS_MESSAGE = get_setting('MAPS_MESSAGE')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
@@ -335,7 +350,9 @@ def update_setting(key, value):
 reload_settings()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', default='YOUR-DEFAULT-SECRET-KEY')
+hash_object = SHA256.new(data=(secret_key or '').encode('utf-8'))
+hashed_secret_key = hash_object.digest()
+app.secret_key = os.getenv('secret_key', default='YOUR-DEFAULT-SECRET-KEY')
 
 @app.route('/reset_logs', methods=['POST'])
 def reset_logs():
@@ -406,38 +423,30 @@ def settings():
     required_env_vars=REQUIRED_ENV_VARS
     )
 
-# 設定プロンプト
-character_setting = SYSTEM_PROMPT
-# チャットプロンプトテンプレート
-prompt = ChatPromptTemplate.from_messages([
-    SystemMessagePromptTemplate.from_template(character_setting),
-    MessagesPlaceholder(variable_name="history"),
-    HumanMessagePromptTemplate.from_template("{input}")
-])
-# チャットモデル
-llm = ChatOpenAI(
-    model_name=GPT_MODEL,
-    temperature=1,
-    streaming=True
-)
+def systemRole():
+    return { "role": "system", "content": SYSTEM_PROMPT }
 
-class CustomConversationSummaryBufferMemory(ConversationSummaryBufferMemory):
-    def get_state(self):
-        return self.__dict__
+def get_encrypted_message(message, hashed_secret_key):
+    cipher = AES.new(hashed_secret_key, AES.MODE_ECB)
+    message = message.encode('utf-8')
+    padding = 16 - len(message) % 16
+    message += bytes([padding]) * padding
+    enc_message = base64.b64encode(cipher.encrypt(message))
+    return enc_message.decode()
 
-    def set_state(self, state):
-        self.__dict__.update(state)
-
-class ResetMemoryException(Exception):
-    pass
-
-# メモリ
-#memory = ConversationBufferWindowMemory(k=3, return_messages=True)
-# memory = ConversationSummaryBufferMemory(llm=llm, max_token_limit=2000, return_messages=True)
-memory = CustomConversationSummaryBufferMemory(llm=llm, max_token_limit=MAX_TOKEN_NUM, return_messages=True)
-
-# 会話チェーン
-conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm, verbose=False)
+def get_decrypted_message(enc_message, hashed_secret_key):
+    try:
+        cipher = AES.new(hashed_secret_key, AES.MODE_ECB)
+        enc_message = base64.b64decode(enc_message.encode('utf-8'))
+        message = cipher.decrypt(enc_message)
+        padding = message[-1]
+        if padding > 16:
+            raise ValueError("Invalid padding value")
+        message = message[:-padding]
+        return message.decode().rstrip("\0")
+    except Exception as e:
+        print(f"Error decrypting message: {e}")
+        return None
     
 @app.route("/", methods=["POST"])
 def callback():
@@ -471,12 +480,12 @@ def handle_message(event):
         
         @firestore.transactional
         def update_in_transaction(transaction, doc_ref):
-            user_message = ""
+            user_message = []
             exec_functions = False
             quick_reply_items = []
             head_message = ""
-            
-            memory_state = []
+            encoding: Encoding = tiktoken.encoding_for_model(GPT_MODEL)
+            messages = []
             updated_date_string = nowDate
             daily_usage = 0
             start_free_day = datetime.now(jst)
@@ -486,6 +495,7 @@ def handle_message(event):
             voice_speed = 'normal'
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
+            links = ""
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -499,21 +509,23 @@ def handle_message(event):
                     user_message = STICKER_MESSAGE + "\n" + ', '.join(keywords)
             elif message_type =='image':
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
-                head_message = str(vision_results)
-                user_message = OCR_MESSAGE
+                str_vision_results = str(vision_results)
+                str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
+                result = langchain_agent(str_vision_results)
+                OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
+                head_message = head_message + OCR_MESSAGE + "\n" + result
+                user_message = OCR_USER_MESSAGE
             elif message_type == 'location':
-                exec_functions = True 
                 latitude =  event.message.latitude
                 longitude = event.message.longitude
-                result = maps_search(latitude, longitude, "")
-                head_message = result['message']
-                links = result['links']
-                user_message = MAPS_MESSAGE
+                result = get_addresses(latitude, longitude)
+                user_message = MAPS_MESSAGE + "\n" + result
                 
             doc = doc_ref.get(transaction=transaction)
+            
             if doc.exists:
                 user = doc.to_dict()
-                memory_state = pickle.loads(bytes(doc.to_dict()['memory_state']))
+                user['messages'] = [{**msg, 'content': get_decrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
                 updated_date_string = user['updated_date_string']
                 daily_usage = user['daily_usage']
                 start_free_day = user['start_free_day']
@@ -528,7 +540,7 @@ def handle_message(event):
                     
             else:
                 user = {
-                    'memory_state': memory_state,
+                    'messages': messages,
                     'updated_date_string': updated_date_string,
                     'daily_usage': daily_usage,
                     'start_free_day': start_free_day,
@@ -539,141 +551,137 @@ def handle_message(event):
                     'translate_language' : translate_language
                 }
                 transaction.set(doc_ref, user)
-
-            if memory_state is not None:
-                memory.set_state(memory_state)
             
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
-                memory_state = pickle.dumps([])
-                user['memory_state'] = memory_state
+                user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
-                raise ResetMemoryException
+                return 'OK'
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
                 user_message = CHANGE_TO_TEXT_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
                 user_message = CHANGE_TO_AUDIO_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_chinese = "MANDARIN"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
                 user_message = OR_CHINESE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_chinese = "CANTONESE"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
                 user_message = OR_CHINESE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "AMERICAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
                 user_message = OR_ENGLISH_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
                 user_message = OR_ENGLISH_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
                 user_message = OR_ENGLISH_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "INDIAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
                 user_message = OR_ENGLISH_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_speed = "slow"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_speed = "normal"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_speed = "fast"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_OFF_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "OFF"
                 user['translate_language'] = translate_language
                 TRANSLATE_OFF_MESSAGE = get_setting('TRANSLATE_OFF_MESSAGE').format(display_name=display_name)
                 user_message = TRANSLATE_OFF_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "CHAINESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TRANSLATE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "ENGLISH"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TRANSLATE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "INDONESIAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TRANSLATE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "JAPANESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TRANSLATE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "KOREAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TRANSLATE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
             elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "THAI"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
                 user_message = TRANSLATE_MESSAGE
-                transaction.set(doc_ref, user, merge=True)
-            
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
                 result = langchain_agent(user_message)
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
@@ -709,7 +717,7 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
-            
+
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
                 head_message = head_message + TRANSLATE_ORDER
@@ -720,7 +728,7 @@ def handle_message(event):
             if 'start_free_day' in user:
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
-                    
+
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
                     (reply_token, MAX_DAILY_MESSAGE, 'text')
@@ -728,22 +736,50 @@ def handle_message(event):
             elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
                 (reply_token, MAX_DAILY_MESSAGE, 'text')
                 return 'OK'
-            
+
             if source_type == "group" or source_type == "room":
                 if any(word in user_message for word in BOT_NAME) or exec_functions == True:
                     pass
                 else:
-                    memory.save_context(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
-                    memory_state = pickle.dumps(memory.get_state())
-                    transaction.update(doc_ref, {'memory_state': memory_state})
+                    user['messages'].append({'role': 'user', 'content': display_name + ":" + user_message})
+                    transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
-            
-            response = conversation.predict(input=nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message)
-            
-            response = response_filter(response, bot_name, display_name)
-            
-            daily_usage += 1
-            
+
+            temp_messages = nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
+            total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
+            while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
+                user['messages'].pop(0)
+                total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
+
+            temp_messages_final = user['messages'].copy()
+            temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
+
+            messages = user['messages']
+            try:
+                response = requests.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    headers={'Authorization': f'Bearer {openai_api_key}'},
+                    json={'model': GPT_MODEL, 'messages': [systemRole()] + temp_messages_final},
+                    timeout=50
+                )
+            except requests.exceptions.Timeout:
+                print("OpenAI API timed out")
+                line_reply(reply_token, ERROR_MESSAGE, 'text')
+                return 'OK'
+            user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
+
+            response_json = response.json()
+
+            if response.status_code != 200 or 'error' in response_json:
+                print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
+                line_reply(reply_token, ERROR_MESSAGE, 'text')
+                return 'OK' 
+            bot_reply = response_json['choices'][0]['message']['content'].strip()
+            bot_reply = response_filter(bot_reply, bot_name, display_name)
+            user['messages'].append({'role': 'assistant', 'content': bot_reply})
+            user['daily_usage'] += 1
+            bot_reply = bot_reply + links
+                        
             success = []
             public_url = []
             local_path = []
@@ -751,22 +787,22 @@ def handle_message(event):
             send_message_type = 'text'
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                    public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, gender)
+                    public_url, local_path, duration = put_audio(user_id, message_id, messages, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
                     if  LINE_REPLY == "Both":
                         success = line_push(user_id, public_url, 'audio', None, duration)
                         send_message_type = 'text'
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
-                        response = public_url
+                        messages = public_url
                         send_message_type = 'audio'
-                    
-            line_reply(reply_token, response, send_message_type, quick_reply_items, duration)
+                        
+            line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
                 delete_local_file(local_path) 
             
-            # Save memory state to Firestore
-            memory_state = pickle.dumps(memory.get_state())
-            transaction.update(doc_ref, {'memory_state': memory_state, 'daily_usage': daily_usage})
+            # Save messages to Firestore
+            transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+            transaction.update(doc_ref, {'daily_usage': daily_usage})
 
 
         return update_in_transaction(db.transaction(), doc_ref)
