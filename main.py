@@ -808,8 +808,9 @@ def handle_message(event):
             if audio_or_text == "Audio":
                 print("act2")
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                    print("act3")
+                    print(f"{user_id}, {message_id}, {response}, {BACKET_NAME}, {FILE_AGE}, {or_chinese}, {or_english}, {voice_speed}, {AUDIO_GENDER}")
                     public_url, local_path, duration = put_audio(user_id, message_id, response, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
+                    print(f"{public_url}, {local_path}, {duration}")
                     if  LINE_REPLY == "Both":
                         print("act4")
                         success = line_push(user_id, public_url, 'audio', None, duration)
