@@ -492,7 +492,7 @@ def handle_message(event):
             audio_or_text = 'Text'
             or_chinese = 'MANDARIN'
             or_english = 'AMERICAN'
-            voice_speed = 'normal'
+            audio_speed = 'normal'
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
             links = ""
@@ -532,7 +532,7 @@ def handle_message(event):
                 audio_or_text = user['audio_or_text']
                 or_chinese = user['or_chinese']
                 or_english = user['or_english']
-                voice_speed = user['voice_speed']
+                audio_speed = user['audio_speed']
                 translate_language = user['translate_language']
                 updated_date = user['updated_date_string'].astimezone(jst)
                 if nowDate.date() != updated_date.date():
@@ -547,11 +547,10 @@ def handle_message(event):
                     'audio_or_text' : audio_or_text,
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
-                    'voice_speed' : voice_speed,
+                    'audio_speed' : audio_speed,
                     'translate_language' : translate_language
                 }
                 transaction.set(doc_ref, user)
-            
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 user['messages'] = []
@@ -561,126 +560,146 @@ def handle_message(event):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
-                user_message = CHANGE_TO_TEXT_MESSAGE
+                line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
-                user_message = CHANGE_TO_AUDIO_MESSAGE
+                line_reply(reply_token, CHANGE_TO_AUDIO_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_chinese = "MANDARIN"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
-                user_message = OR_CHINESE_MESSAGE
+                line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_chinese = "CANTONESE"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
                 user_message = OR_CHINESE_MESSAGE
+                line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "AMERICAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                user_message = OR_ENGLISH_MESSAGE
+                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                user_message = OR_ENGLISH_MESSAGE
+                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                user_message = OR_ENGLISH_MESSAGE
+                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_english = "INDIAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                user_message = OR_ENGLISH_MESSAGE
+                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_speed = "slow"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                user_message = AUDIO_SPEED_MESSAGE
+                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_speed = "normal"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
+                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 audio_speed = "fast"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                user_message = AUDIO_SPEED_MESSAGE
+                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif TRANSLATE_OFF_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "OFF"
                 user['translate_language'] = translate_language
                 TRANSLATE_OFF_MESSAGE = get_setting('TRANSLATE_OFF_MESSAGE').format(display_name=display_name)
-                user_message = TRANSLATE_OFF_MESSAGE
+                line_reply(reply_token, TRANSLATE_OFF_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "CHAINESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TRANSLATE_MESSAGE
+                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "ENGLISH"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TRANSLATE_MESSAGE
+                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "INDONESIAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TRANSLATE_MESSAGE
+                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "JAPANESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TRANSLATE_MESSAGE
+                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "KOREAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TRANSLATE_MESSAGE
+                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
                 exec_functions = True
                 translate_language = "THAI"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                user_message = TRANSLATE_MESSAGE
+                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
 
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
                 result = langchain_agent(user_message)
@@ -707,7 +726,7 @@ def handle_message(event):
                 quick_reply_items.append(['message', AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_SLOW_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_FAST_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY])
-                head_message = head_message + VOICE_SPEED_GUIDE_MESSAGE
+                head_message = head_message + AUDIO_SPEED_GUIDE_MESSAGE
             if any(word in user_message for word in TRANSLATE_KEYWORDS) and not exec_functions:
                 quick_reply_items.append(['message', TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_OFF_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY])
@@ -787,14 +806,13 @@ def handle_message(event):
             send_message_type = 'text'
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
-                    public_url, local_path, duration = put_audio(user_id, message_id, messages, BACKET_NAME, FILE_AGE, or_chinese, or_english, voice_speed, AUDIO_GENDER)
+                    public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     if  LINE_REPLY == "Both":
                         success = line_push(user_id, public_url, 'audio', None, duration)
                         send_message_type = 'text'
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
-                        messages = public_url
-                        send_message_type = 'audio'
-                        
+                        bot_reply = public_url
+                        send_message_type = 'audio'          
             line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
