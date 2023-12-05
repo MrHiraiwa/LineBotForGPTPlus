@@ -551,7 +551,6 @@ def handle_message(event):
                     'translate_language' : translate_language
                 }
                 transaction.set(doc_ref, user)
-            print(f"{user_message}")
             if user_message.strip() == FORGET_QUICK_REPLY:
                 line_reply(reply_token, FORGET_MESSAGE, 'text')
                 user['messages'] = []
@@ -561,15 +560,16 @@ def handle_message(event):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
-                user_message = CHANGE_TO_TEXT_MESSAGE
+                line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
-                print(f"{CHANGE_TO_AUDIO_QUICK_REPLY}")
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
-                user_message = CHANGE_TO_AUDIO_MESSAGE
+                line_reply(reply_token, CHANGE_TO_AUDIO_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
             elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
                 exec_functions = True
                 or_chinese = "MANDARIN"
