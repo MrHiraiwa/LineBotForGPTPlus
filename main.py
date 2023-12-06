@@ -855,7 +855,7 @@ def handle_message(event):
 
             # daily_usage をインクリメント
             user['daily_usage'] += 1
-            user['updatedDateString'] = nowDate
+            user['updated_date_string'] = nowDate
 
             # Firestore ドキュメントを更新
             transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
