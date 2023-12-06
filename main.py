@@ -42,6 +42,7 @@ from voice import put_audio
 from vision import vision_api
 from maps import get_addresses
 from langchainagent import langchain_agent
+from payment import create_checkout_session
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -114,7 +115,13 @@ REQUIRED_ENV_VARS = [
     "TRANSLATE_JAPANESE_QUICK_REPLY",
     "TRANSLATE_KOREAN_QUICK_REPLY",
     "TRANSLATE_THAIAN_QUICK_REPLY",
-    "TRANSLATE_ORDER"
+    "TRANSLATE_ORDER",
+    "PAYMENT_KEYWORDS",
+    "PAYMENT_PRICE_ID",
+    "PAYMENT_GUIDE_MESSAGE",
+    "PAYMENT_FAIL_MESSAGE",
+    "PAYMENT_QUICK_REPLY",
+    "PAYMENT_RESULT_URL"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -138,7 +145,7 @@ DEFAULT_ENV_VARS = {
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
-    'SEARCH_KEYWORDS': '今日,本日,まとめ,検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
+    'SEARCH_KEYWORDS': 'ませんか,ますか,今日,本日,まとめ,検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
     'SEARCH_MESSAGE': '{display_name}の問いに対して以下の検索結果の情報が有益な場合は、情報を{display_name}に報告してください。情報にURLが含まれる場合はURLを提示してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
@@ -180,7 +187,13 @@ DEFAULT_ENV_VARS = {
     'TRANSLATE_JAPANESE_QUICK_REPLY': '🇯🇵日本語',
     'TRANSLATE_KOREAN_QUICK_REPLY': '🇰🇷韓国語',
     'TRANSLATE_THAIAN_QUICK_REPLY': '🇹🇭タイランド語',
-    'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。'
+    'TRANSLATE_ORDER': '{display_name}の発言を{translate_language}に翻訳してください。',
+    'PAYMENT_KEYWORDS': '💸支払い',
+    'PAYMENT_PRICE_ID': '環境変数にStripのSTRIPE_SECRET_KEYとSTRIPE_WEBHOOK_SECRETを設定しないと発動しません。',
+    'PAYMENT_GUIDE_MESSAGE': 'ユーザーに「画面下の「支払い」の項目をタップすると私の利用料の支払い画面が表示される」と案内して感謝の言葉を述べてください。以下の文章はユーザーから送られたものです。',
+    'PAYMENT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
+    'PAYMENT_QUICK_REPLY': '💸支払い',
+    'PAYMENT_RESULT_URL': 'http://example'
 }
 
 try:
@@ -205,6 +218,7 @@ def reload_settings():
     global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
     global TRANSLATE_KEYWORDS, TRANSLATE_GUIDE_MESSAGE, TRANSLATE_MESSAGE, TRANSLATE_OFF_MESSAGE, TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
+    global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -304,6 +318,17 @@ def reload_settings():
     TRANSLATE_KOREAN_QUICK_REPLY = get_setting('TRANSLATE_KOREAN_QUICK_REPLY')
     TRANSLATE_THAIAN_QUICK_REPLY = get_setting('TRANSLATE_THAIAN_QUICK_REPLY')
     TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER')
+    FREE_LIMIT_DAY = int(get_setting('FREE_LIMIT_DAY') or 0)
+    PAYMENT_KEYWORDS = get_setting('PAYMENT_KEYWORDS')
+    if PAYMENT_KEYWORDS:
+        PAYMENT_KEYWORDS = PAYMENT_KEYWORDS.split(',')
+    else:
+        PAYMENT_KEYWORDS = []
+    PAYMENT_PRICE_ID = get_setting('PAYMENT_PRICE_ID')
+    PAYMENT_GUIDE_MESSAGE = get_setting('PAYMENT_GUIDE_MESSAGE')
+    PAYMENT_FAIL_MESSAGE = get_setting('PAYMENT_FAIL_MESSAGE')
+    PAYMENT_QUICK_REPLY = get_setting('PAYMENT_QUICK_REPLY')
+    PAYMENT_RESULT_URL = get_setting('PAYMENT_RESULT_URL')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -535,13 +560,17 @@ def handle_message(event):
                 audio_speed = user['audio_speed']
                 translate_language = user['translate_language']
                 updated_date = user['updated_date_string'].astimezone(jst)
+                
+                testtest = nowDate.date()
+                print(f"{daily_usage},{testtest},{updated_date}")
+                
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
                     
             else:
                 user = {
                     'messages': messages,
-                    'updated_date_string': updated_date_string,
+                    'updated_date_string': nowDate,
                     'daily_usage': daily_usage,
                     'start_free_day': start_free_day,
                     'audio_or_text' : audio_or_text,
@@ -736,6 +765,14 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
+            if any(word in user_message for word in PAYMENT_KEYWORDS) and not exec_functions:
+                if source_type == "user":
+                    checkout_url = create_checkout_session(user_id, PAYMENT_PRICE_ID, PAYMENT_RESULT_URL + '/success', PAYMENT_RESULT_URL + '/cansel')
+                    quick_reply_items.append(['uri', PAYMENT_QUICK_REPLY, checkout_url])
+                    head_message = head_message + PAYMENT_GUIDE_MESSAGE
+                else:
+                    line_reply(reply_token, PAYMENT_FAIL_MESSAGE, 'text')
+                    return 'OK'
 
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
@@ -747,13 +784,13 @@ def handle_message(event):
             if 'start_free_day' in user:
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
-
+            print(f"{daily_usage},{MAX_DAILY_USAGE},{MAX_DAILY_MESSAGE}")
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
-                    (reply_token, MAX_DAILY_MESSAGE, 'text')
+                    line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
                     return 'OK'
             elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
-                (reply_token, MAX_DAILY_MESSAGE, 'text')
+                line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
                 return 'OK'
 
             if source_type == "group" or source_type == "room":
@@ -796,7 +833,6 @@ def handle_message(event):
             bot_reply = response_json['choices'][0]['message']['content'].strip()
             bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
-            user['daily_usage'] += 1
             bot_reply = bot_reply + links
                         
             success = []
@@ -818,9 +854,15 @@ def handle_message(event):
             if success:
                 delete_local_file(local_path) 
             
-            # Save messages to Firestore
-            transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
-            transaction.update(doc_ref, {'daily_usage': daily_usage})
+            # messages を暗号化
+            encrypted_messages = [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
+
+            # daily_usage をインクリメント
+            user['daily_usage'] += 1
+            user['updatedDateString'] = nowDate
+
+            # Firestore ドキュメントを更新
+            transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
 
 
         return update_in_transaction(db.transaction(), doc_ref)
@@ -923,6 +965,73 @@ def line_push(user_id, response, send_message_type, quick_reply_items=None, audi
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
     return profile
+
+@app.route('/webhook', methods=['POST'])
+def stripe_webhook():
+    db = firestore.Client()
+
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return Response(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return Response(status=400)
+
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+
+        # Get the user_id from the metadata
+        user_id = session['metadata']['line_user_id']
+
+        # Get the Firestore document reference
+        doc_ref = db.collection('users').document(user_id)
+
+        # Define the number of hours to subtract
+        hours_to_subtract = 9
+
+        # Create the datetime object
+        start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
+        
+        doc_ref.update({
+            'start_free_day': start_free_day
+        })
+    # Handle the invoice.payment_succeeded event
+    elif event['type'] == 'invoice.payment_succeeded':
+        invoice = event['data']['object']
+
+        # Get the user_id from the metadata
+        user_id = invoice['metadata']['line_user_id']
+
+        # Get the Firestore document reference
+        doc_ref = db.collection('users').document(user_id)
+
+        # You might want to adjust this depending on your timezone
+        start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
+
+        doc_ref.update({
+             'start_free_day': start_free_day
+        })
+
+    return Response(status=200)
+
+
+@app.route('/success', methods=['GET'])
+def success():
+    return render_template('success.html')
+
+@app.route('/cancel', methods=['GET'])
+def cancel():
+    return render_template('cancel.html')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
