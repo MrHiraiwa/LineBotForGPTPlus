@@ -561,9 +561,6 @@ def handle_message(event):
                 translate_language = user['translate_language']
                 updated_date = user['updated_date_string'].astimezone(jst)
                 
-                testtest = nowDate.date()
-                print(f"{daily_usage},{testtest},{updated_date}")
-                
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
                     
@@ -784,7 +781,6 @@ def handle_message(event):
             if 'start_free_day' in user:
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
-            print(f"{daily_usage},{MAX_DAILY_USAGE},{MAX_DAILY_MESSAGE}")
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
                     line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
