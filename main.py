@@ -570,7 +570,7 @@ def handle_message(event):
             else:
                 user = {
                     'messages': messages,
-                    'updated_date_string': updated_date_string,
+                    'updated_date_string': nowDate,
                     'daily_usage': daily_usage,
                     'start_free_day': start_free_day,
                     'audio_or_text' : audio_or_text,
@@ -859,6 +859,7 @@ def handle_message(event):
 
             # daily_usage をインクリメント
             user['daily_usage'] += 1
+            user['updatedDateString'] = nowDate
 
             # Firestore ドキュメントを更新
             transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
