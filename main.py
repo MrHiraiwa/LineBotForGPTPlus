@@ -1002,17 +1002,13 @@ def stripe_webhook():
         doc_ref.update({
              'start_free_day': start_free_day
         })
-    elif event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        line_user_id = session.get('metadata', {}).get('line_user_id')
 
-        if line_user_id:
-            # Stripeの顧客オブジェクトを更新
-            customer_id = session.get('customer')
-            stripe.Customer.modify(
-                customer_id,
-                metadata={'line_user_id': line_user_id}
-            )
+        # Stripeの顧客オブジェクトを更新
+        customer_id = session.get('customer')
+        stripe.Customer.modify(
+            customer_id,
+            metadata={'line_user_id': line_user_id}
+        )
 
     return Response(status=200)
 
