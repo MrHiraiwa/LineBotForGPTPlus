@@ -988,15 +988,15 @@ def stripe_webhook():
     # Handle the checkout.session.completed event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
+        payment_intent_id = session.get('payment_intent')
         line_user_id = session.get('metadata', {}).get('line_user_id')
 
-        if line_user_id:
-            # Stripeの顧客オブジェクトを更新
-            customer_id = session.get('customer')
-            stripe.Customer.modify(
-                customer_id,
+        if line_user_id and payment_intent_id:
+            # Payment Intentのメタデータを更新
+            stripe.PaymentIntent.modify(
+                payment_intent_id,
                 metadata={'line_user_id': line_user_id}
-            ) 
+            )
     # Handle the invoice.payment_succeeded event
     elif event['type'] == 'invoice.payment_succeeded':
         invoice = event['data']['object']
