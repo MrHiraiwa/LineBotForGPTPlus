@@ -989,13 +989,13 @@ def stripe_webhook():
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         print(f"{session}")
-        payment_intent_id = session.get('invoice')
+        payment_invoice_id = session.get('invoice')
         line_user_id = session.get('metadata', {}).get('line_user_id')
 
-        if line_user_id and payment_intent_id:
-            # Payment Intentのメタデータを更新
-            stripe.PaymentIntent.modify(
-                payment_intent_id,
+        if line_user_id and payment_invoice_id:
+            # Payment Invoiceのメタデータを更新
+            stripe.Invoice.modify(
+                payment_invoice_id,
                 metadata={'line_user_id': line_user_id}
             )
     # Handle the invoice.payment_succeeded event
