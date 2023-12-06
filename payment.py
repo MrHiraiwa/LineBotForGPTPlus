@@ -1,6 +1,5 @@
 import os
 import stripe
-import request
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
