@@ -1007,6 +1007,7 @@ def stripe_webhook():
     # Handle the invoice.payment_succeeded event
     elif event['type'] == 'invoice.payment_succeeded':
         invoice = event['data']['object']
+        print(f"{invoice}")
 
         # Get the user_id from the metadata
         user_id = invoice['metadata']['line_user_id']
