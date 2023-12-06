@@ -218,6 +218,7 @@ def reload_settings():
     global OR_CHINESE_KEYWORDS, OR_CHINESE_GUIDE_MESSAGE, OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY
     global TRANSLATE_KEYWORDS, TRANSLATE_GUIDE_MESSAGE, TRANSLATE_MESSAGE, TRANSLATE_OFF_MESSAGE, TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
+    global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -762,7 +763,7 @@ def handle_message(event):
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
             if any(word in user_message for word in PAYMENT_KEYWORDS) and not exec_functions:
                 if source_type == "user":
-                    checkout_url = create_checkout_session(userId, PAYMENT_PRICE_ID, PAYMENT_RESULT_URL + '/success', PAYMENT_RESULT_URL + '/cansel')
+                    checkout_url = create_checkout_session(user_id, PAYMENT_PRICE_ID, PAYMENT_RESULT_URL + '/success', PAYMENT_RESULT_URL + '/cansel')
                     quick_reply_items.append(['uri', PAYMENT_QUICK_REPLY, checkout_url])
                     head_message = head_message + PAYMENT_GUIDE_MESSAGE
                 else:
@@ -981,10 +982,10 @@ def stripe_webhook():
         session = event['data']['object']
 
         # Get the user_id from the metadata
-        userId = session['metadata']['line_user_id']
+        user_id = session['metadata']['line_user_id']
 
         # Get the Firestore document reference
-        doc_ref = db.collection('users').document(userId)
+        doc_ref = db.collection('users').document(user_id)
 
         # Define the number of hours to subtract
         hours_to_subtract = 9
@@ -1000,10 +1001,10 @@ def stripe_webhook():
         invoice = event['data']['object']
 
         # Get the user_id from the metadata
-        userId = invoice['metadata']['line_user_id']
+        user_id = invoice['metadata']['line_user_id']
 
         # Get the Firestore document reference
-        doc_ref = db.collection('users').document(userId)
+        doc_ref = db.collection('users').document(user_id)
 
         # You might want to adjust this depending on your timezone
         start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
