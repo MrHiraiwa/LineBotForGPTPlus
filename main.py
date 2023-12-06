@@ -1021,24 +1021,6 @@ def stripe_webhook():
         doc_ref.update({
              'start_free_day': start_free_day
         })
-    elif event['type'] == 'invoice.paid':
-        invoice = event['data']['object']
-        print(f"{invoice}")
-
-        # Get the user_id from the metadata
-        user_id = invoice['metadata']['line_user_id']
-
-        # Get the Firestore document reference
-        doc_ref = db.collection('users').document(user_id)
-
-        # You might want to adjust this depending on your timezone
-        start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
-
-        doc_ref.update({
-             'start_free_day': start_free_day
-        })
-
-    
 
     return Response(status=200)
 
