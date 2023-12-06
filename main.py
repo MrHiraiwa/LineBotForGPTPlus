@@ -829,7 +829,6 @@ def handle_message(event):
             bot_reply = response_json['choices'][0]['message']['content'].strip()
             bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
-            user['daily_usage'] += 1
             bot_reply = bot_reply + links
                         
             success = []
@@ -851,9 +850,14 @@ def handle_message(event):
             if success:
                 delete_local_file(local_path) 
             
-            # Save messages to Firestore
-            transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
-            transaction.update(doc_ref, {'daily_usage': daily_usage})
+        # messages を暗号化
+        encrypted_messages = [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
+
+        # daily_usage をインクリメント
+        user['daily_usage'] += 1
+
+        # Firestore ドキュメントを更新
+        transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
 
 
         return update_in_transaction(db.transaction(), doc_ref)
