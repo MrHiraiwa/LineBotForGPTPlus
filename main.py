@@ -560,6 +560,10 @@ def handle_message(event):
                 audio_speed = user['audio_speed']
                 translate_language = user['translate_language']
                 updated_date = user['updated_date_string'].astimezone(jst)
+                
+                testtest = nowDate.date()
+                print(f"{daily_usage},{testtest}")
+                
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
                     
