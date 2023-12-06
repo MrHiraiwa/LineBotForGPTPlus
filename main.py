@@ -1004,7 +1004,7 @@ def stripe_webhook():
         })
 
         # Stripeの顧客オブジェクトを更新
-        customer_id = session.get('customer')
+        customer_id = invoice.get('customer')
         stripe.Customer.modify(
             customer_id,
             metadata={'line_user_id': line_user_id}
