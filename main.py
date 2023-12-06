@@ -780,13 +780,13 @@ def handle_message(event):
             if 'start_free_day' in user:
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
-
+            print(f"{daily_usage},{MAX_DAILY_USAGE},{MAX_DAILY_MESSAGE}")
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
-                    (reply_token, MAX_DAILY_MESSAGE, 'text')
+                    line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
                     return 'OK'
             elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
-                (reply_token, MAX_DAILY_MESSAGE, 'text')
+                line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
                 return 'OK'
 
             if source_type == "group" or source_type == "room":
