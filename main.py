@@ -562,7 +562,7 @@ def handle_message(event):
                 updated_date = user['updated_date_string'].astimezone(jst)
                 
                 testtest = nowDate.date()
-                print(f"{daily_usage},{testtest}")
+                print(f"{daily_usage},{testtest},{updated_date}")
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
