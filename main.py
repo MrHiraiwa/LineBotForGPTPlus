@@ -1021,7 +1021,7 @@ def stripe_webhook():
         doc_ref.update({
              'start_free_day': start_free_day
         })
-        elif event['type'] == 'invoice.paid':
+    elif event['type'] == 'invoice.paid':
         invoice = event['data']['object']
         print(f"{invoice}")
 
