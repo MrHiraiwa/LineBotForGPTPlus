@@ -2,9 +2,10 @@ import os
 import pytz
 import requests
 from datetime import datetime, time, timedelta
-from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort
+from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort,  Response
 from google.cloud import firestore
 from googleapiclient.discovery import build
+import stripe
 from linebot import (
     LineBotApi, WebhookHandler
 )
@@ -378,6 +379,8 @@ app = Flask(__name__)
 hash_object = SHA256.new(data=(secret_key or '').encode('utf-8'))
 hashed_secret_key = hash_object.digest()
 app.secret_key = os.getenv('secret_key', default='YOUR-DEFAULT-SECRET-KEY')
+# Stripe webhook secret, used to verify the event
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 @app.route('/reset_logs', methods=['POST'])
 def reset_logs():
