@@ -988,6 +988,7 @@ def stripe_webhook():
     # Handle the checkout.session.completed event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
+        print("session")
         print(f"{session}")
         payment_invoice_id = session.get('invoice')
         line_user_id = session.get('metadata', {}).get('line_user_id')
@@ -1001,6 +1002,7 @@ def stripe_webhook():
     # Handle the invoice.payment_succeeded event
     elif event['type'] == 'invoice.payment_succeeded':
         invoice = event['data']['object']
+        print("invoice")
         print(f"{invoice}")
 
         # Get the user_id from the metadata
