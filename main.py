@@ -988,22 +988,15 @@ def stripe_webhook():
     # Handle the checkout.session.completed event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
+        line_user_id = session.get('metadata', {}).get('line_user_id')
 
-        # Get the user_id from the metadata
-        user_id = session['metadata']['line_user_id']
-
-        # Get the Firestore document reference
-        doc_ref = db.collection('users').document(user_id)
-
-        # Define the number of hours to subtract
-        hours_to_subtract = 9
-
-        # Create the datetime object
-        start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
-        
-        doc_ref.update({
-            'start_free_day': start_free_day
-        })
+        if line_user_id:
+            # Stripeの顧客オブジェクトを更新
+            customer_id = session.get('customer')
+            stripe.Customer.modify(
+                customer_id,
+                metadata={'line_user_id': line_user_id}
+            ) 
     # Handle the invoice.payment_succeeded event
     elif event['type'] == 'invoice.payment_succeeded':
         invoice = event['data']['object']
