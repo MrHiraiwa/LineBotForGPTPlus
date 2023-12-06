@@ -850,14 +850,14 @@ def handle_message(event):
             if success:
                 delete_local_file(local_path) 
             
-        # messages を暗号化
-        encrypted_messages = [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
+            # messages を暗号化
+            encrypted_messages = [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
 
-        # daily_usage をインクリメント
-        user['daily_usage'] += 1
+            # daily_usage をインクリメント
+            user['daily_usage'] += 1
 
-        # Firestore ドキュメントを更新
-        transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
+            # Firestore ドキュメントを更新
+            transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
 
 
         return update_in_transaction(db.transaction(), doc_ref)
