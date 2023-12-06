@@ -985,28 +985,14 @@ def stripe_webhook():
         # Invalid signature
         return Response(status=400)
 
-    # Handle the checkout.session.completed event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        print("session")
-        print(f"{session}")
-        payment_invoice_id = session.get('invoice')
-        line_user_id = session.get('metadata', {}).get('line_user_id')
-
-        if line_user_id and payment_invoice_id:
-            # Payment Invoiceのメタデータを更新
-            stripe.Invoice.modify(
-                payment_invoice_id,
-                metadata={'line_user_id': line_user_id}
-            )
     # Handle the invoice.payment_succeeded event
-    elif event['type'] == 'invoice.payment_succeeded':
+    if event['type'] == 'invoice.payment_succeeded':
         invoice = event['data']['object']
         print("invoice")
         print(f"{invoice}")
 
-        # Get the user_id from the metadata
-        user_id = invoice['metadata']['line_user_id']
+        # Get thecustomer id
+        customer_id = invoice['customer']
 
         # Get the Firestore document reference
         doc_ref = db.collection('users').document(user_id)
