@@ -996,6 +996,12 @@ def stripe_webhook():
             invoice_id,
             metadata={'line_user_id': line_user_id}
         )
+
+        ustomer_id = session.get('customer')
+        stripe.Customer.modify(
+            customer_id,
+            metadata={'line_user_id': line_user_id}
+        )
     
     elif event['type'] == 'invoice.payment_succeeded':
         time.sleep(5)
