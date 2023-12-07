@@ -998,7 +998,7 @@ def stripe_webhook():
             metadata={'line_user_id': line_user_id}
         )
 
-        ustomer_id = session.get('customer')
+        customer_id = session.get('customer')
         stripe.Customer.modify(
             customer_id,
             metadata={'line_user_id': line_user_id}
