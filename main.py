@@ -998,12 +998,6 @@ def stripe_webhook():
             invoice_id,
             metadata={'line_user_id': line_user_id}
         )
-
-        customer_id = session.get('customer')
-        stripe.Customer.modify(
-            customer_id,
-            metadata={'line_user_id': line_user_id}
-        )
     
     elif event['type'] == 'invoice.payment_succeeded':
         time_module.sleep(5)
@@ -1024,6 +1018,12 @@ def stripe_webhook():
         # Get the user_id from the metadata
         user_id = invoice['metadata']['line_user_id']
 
+        customer_id = invoice.get('customer')
+        stripe.Customer.modify(
+            customer_id,
+            metadata={'line_user_id': user_id}
+        )
+        
         # Get the Firestore document reference
         doc_ref = db.collection('users').document(user_id)
 
