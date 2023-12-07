@@ -2,6 +2,7 @@ import os
 import pytz
 import requests
 from datetime import datetime, time, timedelta
+import time as time_module
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort,  Response
 from google.cloud import firestore
 from googleapiclient.discovery import build
@@ -1005,7 +1006,7 @@ def stripe_webhook():
         )
     
     elif event['type'] == 'invoice.payment_succeeded':
-        time.sleep(5)
+        time_module.sleep(5)
 
         try:
             event = stripe.Webhook.construct_event(
