@@ -1016,7 +1016,7 @@ def stripe_webhook():
         invoice = event['data']['object']
 
         # Get the user_id from the metadata
-        user_id = invoice['metadata'].get('line_user_id')
+        line_user_id = invoice['metadata'].get('line_user_id')
 
         #customer_id = invoice.get('customer')
         #stripe.Customer.modify(
@@ -1025,7 +1025,7 @@ def stripe_webhook():
         #)
         
         # Get the Firestore document reference
-        doc_ref = db.collection('users').document(user_id)
+        doc_ref = db.collection('users').document(line_user_id)
 
         # You might want to adjust this depending on your timezone
         start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
