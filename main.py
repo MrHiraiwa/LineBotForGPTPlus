@@ -992,7 +992,7 @@ def stripe_webhook():
         user_id = session['metadata']['line_user_id']
 
         invoice_id = invoice.get('invoice')
-        "stripe.Invoice.modify"(
+        stripe.Invoice.modify(
             invoice_id,
             metadata={'line_user_id': line_user_id}
         )
