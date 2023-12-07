@@ -974,21 +974,44 @@ def stripe_webhook():
 
     event = None
 
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        # Invalid payload
-        return Response(status=400)
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        return Response(status=400)
+    if event['type'] == 'checkout.session.completed':
 
-    if event['type'] == 'checkout.session.async_payment_succeeded':
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, STRIPE_WEBHOOK_SECRET
+            )
+        except ValueError as e:
+            # Invalid payload
+            return Response(status=400)
+        except stripe.error.SignatureVerificationError as e:
+            # Invalid signature
+            return Response(status=400)
+        session = event['data']['object']
+
+        # Get the user_id from the metadata
+        user_id = session['metadata']['line_user_id']
+
+        invoice_id = invoice.get('invoice')
+        "stripe.Invoice.modify"(
+            invoice_id,
+            metadata={'line_user_id': line_user_id}
+        )
+    
+    elif event['type'] == 'invoice.payment_succeeded':
+        time.sleep(5)
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, STRIPE_WEBHOOK_SECRET
+            )
+        except ValueError as e:
+            # Invalid payload
+            return Response(status=400)
+        except stripe.error.SignatureVerificationError as e:
+            # Invalid signature
+            return Response(status=400)
+        
         invoice = event['data']['object']
-        print("invoice")
-        print(f"{invoice}")
 
         # Get the user_id from the metadata
         user_id = invoice['metadata']['line_user_id']
@@ -1002,13 +1025,6 @@ def stripe_webhook():
         doc_ref.update({
              'start_free_day': start_free_day
         })
-
-        # Stripeの顧客オブジェクトを更新
-        customer_id = invoice.get('customer')
-        stripe.Customer.modify(
-            customer_id,
-            metadata={'line_user_id': line_user_id}
-        )
 
     return Response(status=200)
 
