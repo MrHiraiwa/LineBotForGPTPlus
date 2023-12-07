@@ -1014,7 +1014,7 @@ def stripe_webhook():
             return Response(status=400)
         
         invoice = event['data']['object']
-
+        print(f"{invoice}")
         # Get the user_id from the metadata
         line_user_id = invoice['metadata'].get('line_user_id')
 
