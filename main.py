@@ -974,24 +974,25 @@ def stripe_webhook():
 
     event = None
 
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return Response(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return Response(status=400)
+    
     if event['type'] == 'checkout.session.completed':
 
-        try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, STRIPE_WEBHOOK_SECRET
-            )
-        except ValueError as e:
-            # Invalid payload
-            return Response(status=400)
-        except stripe.error.SignatureVerificationError as e:
-            # Invalid signature
-            return Response(status=400)
         session = event['data']['object']
 
         # Get the user_id from the metadata
         user_id = session['metadata']['line_user_id']
 
-        invoice_id = invoice.get('invoice')
+        invoice_id = session.get('invoice')
         stripe.Invoice.modify(
             invoice_id,
             metadata={'line_user_id': line_user_id}
