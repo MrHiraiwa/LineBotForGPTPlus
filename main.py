@@ -918,8 +918,8 @@ def response_filter(response,bot_name,display_name):
     response = re.sub(dot_pattern, "", response).strip()
     dot_pattern = r"^ "
     response = re.sub(dot_pattern, "", response).strip()
-    return response     
-    
+    return response 
+
 def line_reply(reply_token, bot_reply_list):
     messages = []
 
@@ -930,7 +930,12 @@ def line_reply(reply_token, bot_reply_list):
         if reply_type == 'text':
             # クイックリプライのアイテムがある場合、それを処理する
             if len(reply) > 2 and reply[2]:
-                quick_reply_items = [QuickReplyButton(action=MessageAction(label=item[1], text=item[2])) for item in reply[2]]
+                quick_reply_items = []
+                for item in reply[2]:
+                    if item[0] == 'message':
+                        quick_reply_items.append(QuickReplyButton(action=MessageAction(label=item[1], text=item[2])))
+                    elif item[0] == 'uri':
+                        quick_reply_items.append(QuickReplyButton(action=URIAction(label=item[1], uri=item[2])))
                 messages.append(TextSendMessage(text=content, quick_reply=QuickReply(items=quick_reply_items)))
             else:
                 messages.append(TextSendMessage(text=content))
@@ -940,7 +945,7 @@ def line_reply(reply_token, bot_reply_list):
             messages.append(AudioSendMessage(original_content_url=audio_url, duration=duration))
 
     line_bot_api.reply_message(reply_token, messages)
-    
+
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
     return profile
