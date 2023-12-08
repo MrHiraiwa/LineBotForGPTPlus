@@ -1009,9 +1009,14 @@ def stripe_webhook():
         invoice = stripe.Invoice.retrieve(
             invoice_id
         )
-        print(f"{invoice}")
 
         line_user_id = invoice['metadata']['line_user_id']
+        
+        customer_id = invoice.get('customer')
+        stripe.Invoice.modify(
+            customer_id,
+            metadata={'line_user_id': line_user_id}
+        )
         
         # Get the Firestore document reference
         doc_ref = db.collection('users').document(line_user_id)
