@@ -844,11 +844,12 @@ def handle_message(event):
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     if  LINE_REPLY == "Both":
-                        success = line_push(user_id, public_url, 'audio', None, duration)
+                        success = line_reply(reply_token, public_url, 'audio', None, duration)
                         send_message_type = 'text'
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         bot_reply = public_url
-                        send_message_type = 'audio'          
+                        send_message_type = 'audio' 
+                        success = 'dummy'
             line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
