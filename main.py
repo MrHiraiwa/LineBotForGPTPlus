@@ -865,15 +865,15 @@ def handle_message(event):
             local_path = []
             duration = []
             bot_reply_list = []
-            send_message_type = 'text'
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False:
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     success = dummy
                     bot_reply_list.append(['audio', public_url, duration])
+                    print(f"{public_url}")
                     
             bot_reply_list.append(['text', bot_reply, quick_reply_items])
-                        
+            print(f"{bot_reply_list}")           
             line_reply(reply_token, bot_reply_list)
         
             if success:
