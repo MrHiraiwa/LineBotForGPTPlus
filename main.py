@@ -1002,28 +1002,14 @@ def stripe_webhook():
     
     elif event['type'] == 'invoice.payment_succeeded':
         time_module.sleep(5)
-
-        try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, STRIPE_WEBHOOK_SECRET
-            )
-        except ValueError as e:
-            # Invalid payload
-            return Response(status=400)
-        except stripe.error.SignatureVerificationError as e:
-            # Invalid signature
-            return Response(status=400)
         
         invoice = event['data']['object']
-        print(f"{invoice}")
-        # Get the user_id from the metadata
-        line_user_id = invoice['metadata'].get('line_user_id')
+        invoice_id = invoice.get('id')
 
-        #customer_id = invoice.get('customer')
-        #stripe.Customer.modify(
-        #    customer_id,
-        #    metadata={'line_user_id': user_id}
-        #)
+        line_user_id = stripe.Invoice.retrieve(
+            invoice_id,
+            metadata={'line_user_id': line_user_id}
+        )
         
         # Get the Firestore document reference
         doc_ref = db.collection('users').document(line_user_id)
