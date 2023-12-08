@@ -895,8 +895,25 @@ def response_filter(response,bot_name,display_name):
     return response     
     
 def line_reply(reply_token, bot_reply_list):
-    #under construction
-    return
+    messages = []
+
+    for reply in bot_reply_list:
+        reply_type = reply[0]
+        content = reply[1]
+
+        if reply_type == 'text':
+            # クイックリプライのアイテムがある場合、それを処理する
+            if len(reply) > 2 and reply[2]:
+                quick_reply_items = [QuickReplyButton(action=MessageAction(label=item[1], text=item[2])) for item in reply[2]]
+                messages.append(TextSendMessage(text=content, quick_reply=QuickReply(items=quick_reply_items)))
+            else:
+                messages.append(TextSendMessage(text=content))
+        elif reply_type == 'audio':
+            audio_url = reply[1]
+            duration = reply[2]
+            messages.append(AudioSendMessage(original_content_url=audio_url, duration=duration))
+
+    line_bot_api.reply_message(reply_token, messages)
     
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
