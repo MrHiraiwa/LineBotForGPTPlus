@@ -2,6 +2,7 @@ import os
 import pytz
 import requests
 from datetime import datetime, time, timedelta
+import time as time_module
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, abort,  Response
 from google.cloud import firestore
 from googleapiclient.discovery import build
@@ -843,11 +844,12 @@ def handle_message(event):
                 if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     if  LINE_REPLY == "Both":
-                        success = line_push(user_id, public_url, 'audio', None, duration)
+                        success = line_reply(reply_token, public_url, 'audio', None, duration)
                         send_message_type = 'text'
                     elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
                         bot_reply = public_url
-                        send_message_type = 'audio'          
+                        send_message_type = 'audio' 
+                        success = 'dummy'
             line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
         
             if success:
@@ -984,35 +986,40 @@ def stripe_webhook():
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
         return Response(status=400)
-
-    # Handle the checkout.session.completed event
+    
     if event['type'] == 'checkout.session.completed':
+
         session = event['data']['object']
 
         # Get the user_id from the metadata
-        user_id = session['metadata']['line_user_id']
+        line_user_id = session['metadata']['line_user_id']
 
-        # Get the Firestore document reference
-        doc_ref = db.collection('users').document(user_id)
-
-        # Define the number of hours to subtract
-        hours_to_subtract = 9
-
-        # Create the datetime object
-        start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
-        
-        doc_ref.update({
-            'start_free_day': start_free_day
-        })
-    # Handle the invoice.payment_succeeded event
+        invoice_id = session.get('invoice')
+        stripe.Invoice.modify(
+            invoice_id,
+            metadata={'line_user_id': line_user_id}
+        )
+    
     elif event['type'] == 'invoice.payment_succeeded':
+        time_module.sleep(5)
+        
         invoice = event['data']['object']
+        invoice_id = invoice.get('id')
 
-        # Get the user_id from the metadata
-        user_id = invoice['metadata']['line_user_id']
+        invoice = stripe.Invoice.retrieve(
+            invoice_id
+        )
 
+        line_user_id = invoice['metadata']['line_user_id']
+        
+        customer_id = invoice.get('customer')
+        stripe.Customer.modify(
+            customer_id,
+            metadata={'line_user_id': line_user_id}
+        )
+        
         # Get the Firestore document reference
-        doc_ref = db.collection('users').document(user_id)
+        doc_ref = db.collection('users').document(line_user_id)
 
         # You might want to adjust this depending on your timezone
         start_free_day = datetime.combine(nowDate.date(), time()) - timedelta(hours=9)
