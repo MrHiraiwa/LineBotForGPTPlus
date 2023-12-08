@@ -839,15 +839,17 @@ def handle_message(event):
             public_url = []
             local_path = []
             duration = []
+            bot_reply_list = []
             send_message_type = 'text'
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False:
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     success = dummy
+                    bot_reply_list.append(['audio', public_url, duration])
                     
-                    line_reply(reply_token, public_url, 'audio', None, duration)
+            bot_reply_list.append(['text', bot_reply, quick_reply_items])
                         
-            line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
+            line_reply(reply_token, bot_reply_list)
         
             if success:
                 delete_local_file(local_path) 
@@ -892,73 +894,9 @@ def response_filter(response,bot_name,display_name):
     response = re.sub(dot_pattern, "", response).strip()
     return response     
     
-def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
-    if send_message_type == 'text':
-        if quick_reply_items:
-            # Create QuickReplyButton list from quick_reply_items
-            quick_reply_button_list = []
-            for item in quick_reply_items:
-                action_type, label, action_data = item
-                if action_type == 'message':
-                    action = MessageAction(label=label, text=action_data)
-                elif action_type == 'location':
-                    action = LocationAction(label=label)
-                elif action_type == 'uri':
-                    action = URIAction(label=label, uri=action_data)
-                else:
-                    print(f"Unknown action type: {action_type}")
-                    continue
-                quick_reply_button_list.append(QuickReplyButton(action=action))
-
-            # Create QuickReply
-            quick_reply = QuickReply(items=quick_reply_button_list)
-
-            # Add QuickReply to TextSendMessage
-            message = TextSendMessage(text=response, quick_reply=quick_reply)
-        else:
-            message = TextSendMessage(text=response)
-    elif send_message_type == 'audio':
-        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
-    else:
-        print(f"Unknown REPLY type: {send_message_type}")
-        return
-
-    line_bot_api.reply_message(
-        reply_token,
-        message
-    )
-
-def line_push(user_id, response, send_message_type, quick_reply_items=None, audio_duration=None):
-    if send_message_type == 'text':
-        if quick_reply_items:
-            # Create QuickReplyButton list from quick_reply_items
-            quick_reply_button_list = []
-            for item in quick_reply_items:
-                action_type, label, action_data = item
-                if action_type == 'message':
-                    action = MessageAction(label=label, text=action_data)
-                elif action_type == 'location':
-                    action = LocationAction(label=label)
-                elif action_type == 'uri':
-                    action = URIAction(label=label, uri=action_data)
-                else:
-                    print(f"Unknown action type: {action_type}")
-                    continue
-                quick_reply_button_list.append(QuickReplyButton(action=action))
-
-            # Create QuickReply
-            quick_reply = QuickReply(items=quick_reply_button_list)
-
-            # Add QuickReply to TextSendMessage
-            message = TextSendMessage(text=response, quick_reply=quick_reply)
-        else:
-            message = TextSendMessage(text=response)
-    elif send_message_type == 'audio':
-        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
-    else:
-        print(f"Unknown REPLY type: {send_message_type}")
-        return
-    line_bot_api.push_message(user_id, message)
+def line_reply(reply_token, bot_reply_list):
+    #under construction
+    return
     
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
