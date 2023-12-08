@@ -1013,7 +1013,7 @@ def stripe_webhook():
         line_user_id = invoice['metadata']['line_user_id']
         
         customer_id = invoice.get('customer')
-        stripe.Invoice.modify(
+        stripe.Customer.modify(
             customer_id,
             metadata={'line_user_id': line_user_id}
         )
