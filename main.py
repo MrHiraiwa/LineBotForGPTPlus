@@ -582,7 +582,8 @@ def handle_message(event):
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
-                line_reply(reply_token, FORGET_MESSAGE, 'text')
+                bot_reply_list.append(['text', FORGET_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
@@ -590,14 +591,16 @@ def handle_message(event):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
-                line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
+                bot_reply_list.append(['text', CHANGE_TO_TEXT_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
-                line_reply(reply_token, CHANGE_TO_AUDIO_MESSAGE, 'text')
+                bot_reply_list.append(['text', CHANGE_TO_AUDIO_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -605,7 +608,8 @@ def handle_message(event):
                 or_chinese = "MANDARIN"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
-                line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_CHINESE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -614,7 +618,8 @@ def handle_message(event):
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
                 user_message = OR_CHINESE_MESSAGE
-                line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_CHINESE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio"):
@@ -622,7 +627,8 @@ def handle_message(event):
                 or_english = "AMERICAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -630,7 +636,8 @@ def handle_message(event):
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -638,7 +645,8 @@ def handle_message(event):
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -646,7 +654,8 @@ def handle_message(event):
                 or_english = "INDIAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -654,7 +663,8 @@ def handle_message(event):
                 audio_speed = "slow"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -663,7 +673,8 @@ def handle_message(event):
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
-                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
@@ -671,7 +682,8 @@ def handle_message(event):
                 audio_speed = "fast"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_OFF_QUICK_REPLY in user_message:
@@ -679,7 +691,8 @@ def handle_message(event):
                 translate_language = "OFF"
                 user['translate_language'] = translate_language
                 TRANSLATE_OFF_MESSAGE = get_setting('TRANSLATE_OFF_MESSAGE').format(display_name=display_name)
-                line_reply(reply_token, TRANSLATE_OFF_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_OFF_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
@@ -687,7 +700,8 @@ def handle_message(event):
                 translate_language = "CHAINESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
@@ -695,7 +709,8 @@ def handle_message(event):
                 translate_language = "ENGLISH"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
@@ -703,7 +718,8 @@ def handle_message(event):
                 translate_language = "INDONESIAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
@@ -711,7 +727,8 @@ def handle_message(event):
                 translate_language = "JAPANESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
@@ -719,7 +736,8 @@ def handle_message(event):
                 translate_language = "KOREAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
@@ -727,7 +745,8 @@ def handle_message(event):
                 translate_language = "THAI"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
 
