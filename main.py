@@ -525,6 +525,7 @@ def handle_message(event):
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
             links = ""
+            bot_reply_list = []
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -582,96 +583,108 @@ def handle_message(event):
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
-                line_reply(reply_token, FORGET_MESSAGE, 'text')
+                bot_reply_list.append(['text', FORGET_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
-            elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
-                line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
+                bot_reply_list.append(['text', CHANGE_TO_TEXT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
-                line_reply(reply_token, CHANGE_TO_AUDIO_MESSAGE, 'text')
+                bot_reply_list.append(['text', CHANGE_TO_AUDIO_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_chinese = "MANDARIN"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
-                line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_CHINESE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_chinese = "CANTONESE"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
                 user_message = OR_CHINESE_MESSAGE
-                line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_CHINESE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "AMERICAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "INDIAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 audio_speed = "slow"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 audio_speed = "normal"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
-                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 audio_speed = "fast"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_OFF_QUICK_REPLY in user_message:
@@ -679,7 +692,8 @@ def handle_message(event):
                 translate_language = "OFF"
                 user['translate_language'] = translate_language
                 TRANSLATE_OFF_MESSAGE = get_setting('TRANSLATE_OFF_MESSAGE').format(display_name=display_name)
-                line_reply(reply_token, TRANSLATE_OFF_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_OFF_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_CHAINESE_QUICK_REPLY in user_message:
@@ -687,7 +701,8 @@ def handle_message(event):
                 translate_language = "CHAINESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_ENGLISH_QUICK_REPLY in user_message:
@@ -695,7 +710,8 @@ def handle_message(event):
                 translate_language = "ENGLISH"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_INDONESIAN_QUICK_REPLY in user_message:
@@ -703,7 +719,8 @@ def handle_message(event):
                 translate_language = "INDONESIAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_JAPANESE_QUICK_REPLY in user_message:
@@ -711,7 +728,8 @@ def handle_message(event):
                 translate_language = "JAPANESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_KOREAN_QUICK_REPLY in user_message:
@@ -719,7 +737,8 @@ def handle_message(event):
                 translate_language = "KOREAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif TRANSLATE_THAIAN_QUICK_REPLY in user_message:
@@ -727,7 +746,8 @@ def handle_message(event):
                 translate_language = "THAI"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                line_reply(reply_token, TRANSLATE_MESSAGE, 'text')
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
 
@@ -738,21 +758,21 @@ def handle_message(event):
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
-            if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
                 quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
                 quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_QUICK_REPLY])
                 head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
-            if any(word in user_message for word in OR_CHINESE_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            if any(word in user_message for word in OR_CHINESE_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
                 quick_reply_items.append(['message', OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_MANDARIN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_CHINESE_CANTONESE_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY])
                 head_message = head_message + OR_CHINESE_GUIDE_MESSAGE
-            if any(word in user_message for word in OR_ENGLISH_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            if any(word in user_message for word in OR_ENGLISH_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
                 quick_reply_items.append(['message', OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_AMERICAN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_INDIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY])
                 head_message = head_message + OR_ENGLISH_GUIDE_MESSAGE
-            if any(word in user_message for word in AUDIO_SPEED_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            if any(word in user_message for word in AUDIO_SPEED_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
                 quick_reply_items.append(['message', AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_SLOW_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_FAST_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY])
@@ -772,7 +792,8 @@ def handle_message(event):
                     quick_reply_items.append(['uri', PAYMENT_QUICK_REPLY, checkout_url])
                     head_message = head_message + PAYMENT_GUIDE_MESSAGE
                 else:
-                    line_reply(reply_token, PAYMENT_FAIL_MESSAGE, 'text')
+                    bot_reply_list.append(['text', PAYMENT_FAIL_MESSAGE])
+                    line_reply(reply_token, bot_reply_list)
                     return 'OK'
 
             if translate_language != 'OFF':
@@ -787,10 +808,12 @@ def handle_message(event):
                     dailyUsage = None
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
-                    line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
+                    bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
+                    line_reply(reply_token, bot_reply_list)
                     return 'OK'
             elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
-                line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
+                bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 return 'OK'
 
             if source_type == "group" or source_type == "room":
@@ -820,7 +843,8 @@ def handle_message(event):
                 )
             except requests.exceptions.Timeout:
                 print("OpenAI API timed out")
-                line_reply(reply_token, ERROR_MESSAGE, 'text')
+                bot_reply_list.append(['text', ERROR_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 return 'OK'
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
 
@@ -828,7 +852,8 @@ def handle_message(event):
 
             if response.status_code != 200 or 'error' in response_json:
                 print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
-                line_reply(reply_token, ERROR_MESSAGE, 'text')
+                bot_reply_list.append(['text', ERROR_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
                 return 'OK' 
             bot_reply = response_json['choices'][0]['message']['content'].strip()
             bot_reply = response_filter(bot_reply, bot_name, display_name)
@@ -839,18 +864,17 @@ def handle_message(event):
             public_url = []
             local_path = []
             duration = []
-            send_message_type = 'text'
+            bot_reply_list = []
             if audio_or_text == "Audio":
-                if  LINE_REPLY == "Both" or (LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False):
+                if  LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False:
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
-                    if  LINE_REPLY == "Both":
-                        success = line_reply(reply_token, public_url, 'audio', None, duration)
-                        send_message_type = 'text'
-                    elif (LINE_REPLY == "Audio" and len(quick_reply_items) == 0) or (LINE_REPLY == "Audio" and exec_functions == False):
-                        bot_reply = public_url
-                        send_message_type = 'audio' 
-                        success = 'dummy'
-            line_reply(reply_token, bot_reply, send_message_type, quick_reply_items, duration)
+                    success = "dummy"
+                    bot_reply_list.append(['audio', public_url, duration])
+                    print(f"{public_url}")
+                    
+            bot_reply_list.append(['text', bot_reply, quick_reply_items])
+            print(f"{bot_reply_list}")           
+            line_reply(reply_token, bot_reply_list)
         
             if success:
                 delete_local_file(local_path) 
@@ -873,7 +897,8 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, ERROR_MESSAGE + f": {e}", 'text')
+        bot_reply_list.append(['text', ERROR_MESSAGE + f": {e}"])
+        line_reply(reply_token, bot_reply_list)
         raise
     finally:
         return 'OK'
@@ -895,73 +920,26 @@ def response_filter(response,bot_name,display_name):
     response = re.sub(dot_pattern, "", response).strip()
     return response     
     
-def line_reply(reply_token, response, send_message_type, quick_reply_items=None, audio_duration=None):
-    if send_message_type == 'text':
-        if quick_reply_items:
-            # Create QuickReplyButton list from quick_reply_items
-            quick_reply_button_list = []
-            for item in quick_reply_items:
-                action_type, label, action_data = item
-                if action_type == 'message':
-                    action = MessageAction(label=label, text=action_data)
-                elif action_type == 'location':
-                    action = LocationAction(label=label)
-                elif action_type == 'uri':
-                    action = URIAction(label=label, uri=action_data)
-                else:
-                    print(f"Unknown action type: {action_type}")
-                    continue
-                quick_reply_button_list.append(QuickReplyButton(action=action))
+def line_reply(reply_token, bot_reply_list):
+    messages = []
 
-            # Create QuickReply
-            quick_reply = QuickReply(items=quick_reply_button_list)
+    for reply in bot_reply_list:
+        reply_type = reply[0]
+        content = reply[1]
 
-            # Add QuickReply to TextSendMessage
-            message = TextSendMessage(text=response, quick_reply=quick_reply)
-        else:
-            message = TextSendMessage(text=response)
-    elif send_message_type == 'audio':
-        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
-    else:
-        print(f"Unknown REPLY type: {send_message_type}")
-        return
+        if reply_type == 'text':
+            # クイックリプライのアイテムがある場合、それを処理する
+            if len(reply) > 2 and reply[2]:
+                quick_reply_items = [QuickReplyButton(action=MessageAction(label=item[1], text=item[2])) for item in reply[2]]
+                messages.append(TextSendMessage(text=content, quick_reply=QuickReply(items=quick_reply_items)))
+            else:
+                messages.append(TextSendMessage(text=content))
+        elif reply_type == 'audio':
+            audio_url = reply[1]
+            duration = reply[2]
+            messages.append(AudioSendMessage(original_content_url=audio_url, duration=duration))
 
-    line_bot_api.reply_message(
-        reply_token,
-        message
-    )
-
-def line_push(user_id, response, send_message_type, quick_reply_items=None, audio_duration=None):
-    if send_message_type == 'text':
-        if quick_reply_items:
-            # Create QuickReplyButton list from quick_reply_items
-            quick_reply_button_list = []
-            for item in quick_reply_items:
-                action_type, label, action_data = item
-                if action_type == 'message':
-                    action = MessageAction(label=label, text=action_data)
-                elif action_type == 'location':
-                    action = LocationAction(label=label)
-                elif action_type == 'uri':
-                    action = URIAction(label=label, uri=action_data)
-                else:
-                    print(f"Unknown action type: {action_type}")
-                    continue
-                quick_reply_button_list.append(QuickReplyButton(action=action))
-
-            # Create QuickReply
-            quick_reply = QuickReply(items=quick_reply_button_list)
-
-            # Add QuickReply to TextSendMessage
-            message = TextSendMessage(text=response, quick_reply=quick_reply)
-        else:
-            message = TextSendMessage(text=response)
-    elif send_message_type == 'audio':
-        message = AudioSendMessage(original_content_url=response, duration=audio_duration)
-    else:
-        print(f"Unknown REPLY type: {send_message_type}")
-        return
-    line_bot_api.push_message(user_id, message)
+    line_bot_api.reply_message(reply_token, messages)
     
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
