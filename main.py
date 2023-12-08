@@ -586,21 +586,21 @@ def handle_message(event):
                 user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
-            elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
                 line_reply(reply_token, CHANGE_TO_TEXT_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
                 line_reply(reply_token, CHANGE_TO_AUDIO_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_CHINESE_MANDARIN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_chinese = "MANDARIN"
                 user['or_chinese'] = or_chinese
@@ -608,7 +608,7 @@ def handle_message(event):
                 line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_CHINESE_CANTONESE_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_chinese = "CANTONESE"
                 user['or_chinese'] = or_chinese
@@ -617,7 +617,7 @@ def handle_message(event):
                 line_reply(reply_token, OR_CHINESE_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_AMERICAN_QUICK_REPLY in user_message and  (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "AMERICAN"
                 user['or_english'] = or_english
@@ -625,7 +625,7 @@ def handle_message(event):
                 line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_BRIDISH_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
@@ -633,7 +633,7 @@ def handle_message(event):
                 line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_AUSTRALIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
@@ -641,7 +641,7 @@ def handle_message(event):
                 line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif OR_ENGLISH_INDIAN_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 or_english = "INDIAN"
                 user['or_english'] = or_english
@@ -649,7 +649,7 @@ def handle_message(event):
                 line_reply(reply_token, OR_ENGLISH_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif AUDIO_SPEED_SLOW_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 audio_speed = "slow"
                 user['audio_speed'] = audio_speed
@@ -657,7 +657,7 @@ def handle_message(event):
                 line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif AUDIO_SPEED_NORMAL_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 audio_speed = "normal"
                 user['audio_speed'] = audio_speed
@@ -666,7 +666,7 @@ def handle_message(event):
                 line_reply(reply_token, AUDIO_SPEED_MESSAGE, 'text')
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "Both"):
+            elif AUDIO_SPEED_FAST_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
                 exec_functions = True
                 audio_speed = "fast"
                 user['audio_speed'] = audio_speed
