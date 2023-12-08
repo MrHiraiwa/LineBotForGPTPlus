@@ -583,7 +583,7 @@ def handle_message(event):
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
-                bot_reply_list.append(['text', FORGET_MESSAGE)
+                bot_reply_list.append(['text', FORGET_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
@@ -592,7 +592,7 @@ def handle_message(event):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
-                bot_reply_list.append(['text', CHANGE_TO_TEXT_MESSAGE)
+                bot_reply_list.append(['text', CHANGE_TO_TEXT_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -600,7 +600,7 @@ def handle_message(event):
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
-                bot_reply_list.append(['text', CHANGE_TO_AUDIO_MESSAGE)
+                bot_reply_list.append(['text', CHANGE_TO_AUDIO_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -609,7 +609,7 @@ def handle_message(event):
                 or_chinese = "MANDARIN"
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
-                bot_reply_list.append(['text', OR_CHINESE_MESSAGE)
+                bot_reply_list.append(['text', OR_CHINESE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -619,7 +619,7 @@ def handle_message(event):
                 user['or_chinese'] = or_chinese
                 OR_CHINESE_MESSAGE = get_setting('OR_CHINESE_MESSAGE').format(or_chinese=or_chinese)
                 user_message = OR_CHINESE_MESSAGE
-                bot_reply_list.append(['text', OR_CHINESE_MESSAGE)
+                bot_reply_list.append(['text', OR_CHINESE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -628,7 +628,7 @@ def handle_message(event):
                 or_english = "AMERICAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -637,7 +637,7 @@ def handle_message(event):
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -646,7 +646,7 @@ def handle_message(event):
                 or_english = "BRIDISH"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -655,7 +655,7 @@ def handle_message(event):
                 or_english = "INDIAN"
                 user['or_english'] = or_english
                 OR_ENGLISH_MESSAGE = get_setting('OR_ENGLISH_MESSAGE').format(or_english=or_english)
-                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE)
+                bot_reply_list.append(['text', OR_ENGLISH_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -664,7 +664,7 @@ def handle_message(event):
                 audio_speed = "slow"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE)
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -674,7 +674,7 @@ def handle_message(event):
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
                 user_message = AUDIO_SPEED_MESSAGE
-                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE)
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -683,7 +683,7 @@ def handle_message(event):
                 audio_speed = "fast"
                 user['audio_speed'] = audio_speed
                 AUDIO_SPEED_MESSAGE = get_setting('AUDIO_SPEED_MESSAGE').format(audio_speed=audio_speed)
-                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE)
+                bot_reply_list.append(['text', AUDIO_SPEED_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -692,7 +692,7 @@ def handle_message(event):
                 translate_language = "OFF"
                 user['translate_language'] = translate_language
                 TRANSLATE_OFF_MESSAGE = get_setting('TRANSLATE_OFF_MESSAGE').format(display_name=display_name)
-                bot_reply_list.append(['text', TRANSLATE_OFF_MESSAGE)
+                bot_reply_list.append(['text', TRANSLATE_OFF_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -701,7 +701,7 @@ def handle_message(event):
                 translate_language = "CHAINESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -710,7 +710,7 @@ def handle_message(event):
                 translate_language = "ENGLISH"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -719,7 +719,7 @@ def handle_message(event):
                 translate_language = "INDONESIAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -728,7 +728,7 @@ def handle_message(event):
                 translate_language = "JAPANESE"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -737,7 +737,7 @@ def handle_message(event):
                 translate_language = "KOREAN"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -746,7 +746,7 @@ def handle_message(event):
                 translate_language = "THAI"
                 user['translate_language'] = translate_language
                 TRANSLATE_MESSAGE = get_setting('TRANSLATE_MESSAGE').format(translate_language=translate_language)
-                bot_reply_list.append(['text', TRANSLATE_MESSAGE)
+                bot_reply_list.append(['text', TRANSLATE_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
@@ -792,7 +792,7 @@ def handle_message(event):
                     quick_reply_items.append(['uri', PAYMENT_QUICK_REPLY, checkout_url])
                     head_message = head_message + PAYMENT_GUIDE_MESSAGE
                 else:
-                    bot_reply_list.append(['text', PAYMENT_FAIL_MESSAGE)
+                    bot_reply_list.append(['text', PAYMENT_FAIL_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
 
@@ -808,11 +808,11 @@ def handle_message(event):
                     dailyUsage = None
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
-                    bot_reply_list.append(['text', MAX_DAILY_MESSAGE)
+                    bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
             elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
-                bot_reply_list.append(['text', MAX_DAILY_MESSAGE)
+                bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
 
@@ -843,7 +843,7 @@ def handle_message(event):
                 )
             except requests.exceptions.Timeout:
                 print("OpenAI API timed out")
-                bot_reply_list.append(['text', ERROR_MESSAGE)
+                bot_reply_list.append(['text', ERROR_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
@@ -852,7 +852,7 @@ def handle_message(event):
 
             if response.status_code != 200 or 'error' in response_json:
                 print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
-                bot_reply_list.append(['text', ERROR_MESSAGE)
+                bot_reply_list.append(['text', ERROR_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK' 
             bot_reply = response_json['choices'][0]['message']['content'].strip()
@@ -897,7 +897,7 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        bot_reply_list.append(['text', ERROR_MESSAGE + f": {e}")
+        bot_reply_list.append(['text', ERROR_MESSAGE + f": {e}"])
         line_reply(reply_token, bot_reply_list)
         raise
     finally:
