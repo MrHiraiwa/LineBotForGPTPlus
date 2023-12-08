@@ -525,6 +525,7 @@ def handle_message(event):
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
             links = ""
+            bot_reply_list = []
             
             if message_type == 'text':
                 user_message = event.message.text
