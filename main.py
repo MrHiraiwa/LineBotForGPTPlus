@@ -791,7 +791,8 @@ def handle_message(event):
                     quick_reply_items.append(['uri', PAYMENT_QUICK_REPLY, checkout_url])
                     head_message = head_message + PAYMENT_GUIDE_MESSAGE
                 else:
-                    line_reply(reply_token, PAYMENT_FAIL_MESSAGE, 'text')
+                    bot_reply_list.append(['text', PAYMENT_FAIL_MESSAGE)
+                    line_reply(reply_token, bot_reply_list)
                     return 'OK'
 
             if translate_language != 'OFF':
@@ -806,10 +807,12 @@ def handle_message(event):
                     dailyUsage = None
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
-                    line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
+                    bot_reply_list.append(['text', MAX_DAILY_MESSAGE)
+                    line_reply(reply_token, bot_reply_list)
                     return 'OK'
             elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
-                line_reply(reply_token, MAX_DAILY_MESSAGE, 'text')
+                bot_reply_list.append(['text', MAX_DAILY_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 return 'OK'
 
             if source_type == "group" or source_type == "room":
@@ -839,7 +842,8 @@ def handle_message(event):
                 )
             except requests.exceptions.Timeout:
                 print("OpenAI API timed out")
-                line_reply(reply_token, ERROR_MESSAGE, 'text')
+                bot_reply_list.append(['text', ERROR_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 return 'OK'
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
 
@@ -847,7 +851,8 @@ def handle_message(event):
 
             if response.status_code != 200 or 'error' in response_json:
                 print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
-                line_reply(reply_token, ERROR_MESSAGE, 'text')
+                bot_reply_list.append(['text', ERROR_MESSAGE)
+                line_reply(reply_token, bot_reply_list)
                 return 'OK' 
             bot_reply = response_json['choices'][0]['message']['content'].strip()
             bot_reply = response_filter(bot_reply, bot_name, display_name)
@@ -891,7 +896,8 @@ def handle_message(event):
         return 'Not a valid JSON', 200 
     except Exception as e:
         print(f"Error in lineBot: {e}")
-        line_reply(reply_token, ERROR_MESSAGE + f": {e}", 'text')
+        bot_reply_list.append(['text', ERROR_MESSAGE + f": {e}")
+        line_reply(reply_token, bot_reply_list)
         raise
     finally:
         return 'OK'
