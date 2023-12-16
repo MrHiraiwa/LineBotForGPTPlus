@@ -2,7 +2,7 @@
 
 このリポジトリは、LINE上で動作するPythonベースのチャットボットです。このボットはChatGPT APIを使用して、ユーザからのメッセージに対してレスポンスを生成します。
 このボットプログラムの機能や設置方法についての詳細は以下のページを確認してください。
-https://note.com/modern_echium586
+[https://note.com/modern_echium586](https://note.com/modern_echium586/n/n3c3fdf2149e5)
 
 ## 機能
 以下の機能を持っています。：
