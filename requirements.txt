@@ -17,4 +17,5 @@ requests
 beautifulsoup4
 wikipedia
 googlemaps
+Pillow
 stripe
