@@ -152,7 +152,7 @@ def generate_image(prompt):
     # プレビュー用のPNG画像をアップロード
     public_url_preview = upload_blob(bucket_name, preview_image, preview_blob_path)
 
-    return 'generated the image. The image you generated has already been displayed to the user. No further transmission is necessary.'
+    return 'generated the image. The image you generated has already been displayed to the user. No need to send URL.'
 
 tools = [
     Tool(
