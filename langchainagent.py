@@ -4,7 +4,7 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain_community.utilities.google_search import GoogleSearchAPIWrapper
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
-import openai
+from openai import OpenAI
 from datetime import datetime, time, timedelta
 import pytz
 import requests
@@ -125,6 +125,17 @@ def generate_image(prompt):
     
     blob_path = f'{user_id}/{message_id}.png'
     preview_blob_path = f'{user_id}/{message_id}_s.png'
+    client = OpenAI()
+
+    response = client.images.generate(
+      model="dall-e-3",
+      prompt="a white siamese cat",
+      size="1024x1024",
+      quality="standard",
+      n=1,
+    )
+
+image_url = response.data[0].url
     response = openai.Image.create(
     prompt=prompt,
     n=1,
