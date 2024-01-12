@@ -9,6 +9,7 @@ google-search-results
 langid
 openai==0.28
 langchain
+langchain-community
 line-bot-sdk
 tiktoken
 pydub
