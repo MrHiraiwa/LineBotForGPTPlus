@@ -892,8 +892,9 @@ def handle_message(event):
 
             line_reply(reply_token, bot_reply_list)
 
-            print(f"public_img_url: {public_img_url},{public_img_url_s}")
+            print(f"1: {public_img_url},{public_img_url_s}")
             if public_img_url:
+                print(f"2: {public_img_url},{public_img_url_s}")
                 bot_reply_list.append(['image', public_img_url,public_img_url_s])
                 line_reply(reply_token, bot_reply_list)
         
@@ -967,6 +968,7 @@ def line_reply(reply_token, bot_reply_list):
         elif reply_type == 'image':
             public_img_url = reply[1]
             public_img_url_s = reply[2]
+            print(f"3: {public_img_url},{public_img_url_s}")
             messages.append(ImageSendMessage(original_content_url=public_img_url, preview_image_url=public_img_url_s))
 
     line_bot_api.reply_message(reply_token, messages)
