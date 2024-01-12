@@ -1,7 +1,7 @@
-from langchain.agents import initialize_agent, Tool
-from langchain.agents import AgentType
+from langchain_community.agents import initialize_agent, Tool
+from langchain_community.agents import AgentType
 from langchain_community.chat_models import ChatOpenAI
-from langchain.utilities.google_search import GoogleSearchAPIWrapper
+from langchain_community.utilities.google_search import GoogleSearchAPIWrapper
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 import openai
@@ -51,7 +51,7 @@ def scraping(links):
         except requests.RequestException:
             html = "<html></html>"
             
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, features="html.parser")
 
         # Remove all 'a' tags
         for a in soup.findAll('a'):
