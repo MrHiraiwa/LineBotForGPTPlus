@@ -187,12 +187,14 @@ tools = [
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
 def langchain_agent(question, USER_ID, MESSAGE_ID, BUCKET_NAME=None, FILE_AGE=None):
-    public_url_original = []
-    public_url_preview = []
     global user_id
     global message_id
     global bucket_name
     global file_age
+    global public_url_original
+    global public_url_preview
+    public_url_original = []
+    public_url_preview = []
     user_id = USER_ID
     message_id = MESSAGE_ID
     bucket_name = BUCKET_NAME
