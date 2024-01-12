@@ -889,14 +889,11 @@ def handle_message(event):
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
-
-            line_reply(reply_token, bot_reply_list)
-
-            print(f"1: {public_img_url},{public_img_url_s}")
             if public_img_url:
                 print(f"2: {public_img_url},{public_img_url_s}")
                 bot_reply_list.append(['image', public_img_url,public_img_url_s])
-                line_reply(reply_token, bot_reply_list)
+            
+            line_reply(reply_token, bot_reply_list)
         
             if success:
                 delete_local_file(local_path) 
