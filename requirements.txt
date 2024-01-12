@@ -7,8 +7,9 @@ google-cloud-texttospeech
 google-cloud-storage
 google-search-results
 langid
-openai==0.28.1
+openai
 langchain
+langchain-community
 line-bot-sdk
 tiktoken
 pydub
@@ -17,4 +18,5 @@ requests
 beautifulsoup4
 wikipedia
 googlemaps
+Pillow
 stripe

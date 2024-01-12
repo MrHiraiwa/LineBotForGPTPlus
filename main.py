@@ -16,21 +16,9 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, AudioMessage, TextSendMessage, AudioSendMessage,
     QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction,
-    LocationMessage, ImageMessage, StickerMessage,
+    LocationMessage, ImageMessage, StickerMessage, ImageSendMessage,
 )
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    MessagesPlaceholder,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import (
-    ConversationBufferWindowMemory,
-    ConversationTokenBufferMemory,
-    ConversationSummaryBufferMemory,
-)
-from langchain.chains import ConversationChain
+
 import tiktoken
 import pickle
 import re
@@ -77,6 +65,8 @@ REQUIRED_ENV_VARS = [
     "FORGET_QUICK_REPLY",
     "SEARCH_KEYWORDS",
     "SEARCH_MESSAGE",
+    "IMAGE_KEYWORDS",
+    "IMAGE_MESSAGE",
     "ERROR_MESSAGE",
     "LINE_REPLY",
     "TEXT_OR_AUDIO_KEYWORDS",
@@ -149,6 +139,8 @@ DEFAULT_ENV_VARS = {
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'SEARCH_KEYWORDS': 'ませんか,ますか,今日,本日,まとめ,検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
     'SEARCH_MESSAGE': '{display_name}の問いに対して以下の検索結果の情報が有益な場合は、情報を{display_name}に報告してください。情報にURLが含まれる場合はURLを提示してください。',
+    'IMAGE_KEYWORDS': '画像,写真,絵,イメージ,image,photo',
+    'IMAGE_MESSAGE': '貴方が絵を描いた時の気持ちを{display_name}に返信してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
@@ -211,6 +203,7 @@ def reload_settings():
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global SEARCH_KEYWORDS, SEARCH_MESSAGE
+    global IMAGE_KEYWORDS, IMAGE_MESSAGE
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
     global LINE_REPLY, BACKET_NAME, FILE_AGE
@@ -259,6 +252,12 @@ def reload_settings():
     else:
         SEARCH_KEYWORDS = []
     SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE')
+    IMAGE_KEYWORDS = get_setting('IMAGE_KEYWORDS')
+    if IMAGE_KEYWORDS:
+        IMAGE_KEYWORDS = IMAGE_KEYWORDS.split(',')
+    else:
+        IMAGE_KEYWORDS = []
+    IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
     TEXT_OR_AUDIO_KEYWORDS = get_setting('TEXT_OR_AUDIO_KEYWORDS')
@@ -526,6 +525,9 @@ def handle_message(event):
             bot_name = BOT_NAME[0]
             links = ""
             bot_reply_list = []
+            public_url = []
+            public_img_url = []
+            public_img_url_s = []
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -541,7 +543,7 @@ def handle_message(event):
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 str_vision_results = str(vision_results)
                 str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
-                result = langchain_agent(str_vision_results)
+                result, public_img_url, public_img_url_s = langchain_agent(str_vision_results, user_id, message_id)
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
                 head_message = head_message + OCR_MESSAGE + "\n" + result
                 user_message = OCR_USER_MESSAGE
@@ -751,10 +753,14 @@ def handle_message(event):
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
 
-            if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
-                result = langchain_agent(user_message)
+            if (any(word in user_message for word in SEARCH_KEYWORDS) or any(word in user_message for word in IMAGE_KEYWORDS)) and exec_functions == False:
+                result, public_img_url, public_img_url_s = langchain_agent(user_message, user_id, message_id, BACKET_NAME, FILE_AGE)
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
-                head_message = head_message + SEARCH_MESSAGE + "\n" + result
+                head_message = head_message + SEARCH_MESSAGE + "\n"
+                if  public_img_url:
+                    IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE').format(display_name=display_name)
+                    head_message = head_message + IMAGE_MESSAGE + "\n"
+                head_message = head_message + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
@@ -861,7 +867,6 @@ def handle_message(event):
             bot_reply = bot_reply + links
                         
             success = []
-            public_url = []
             local_path = []
             duration = []
             bot_reply_list = []
@@ -872,9 +877,10 @@ def handle_message(event):
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
-
+            if public_img_url:
+                bot_reply_list.append(['image', public_img_url,public_img_url_s])
+            
             line_reply(reply_token, bot_reply_list)
-
         
             if success:
                 delete_local_file(local_path) 
@@ -943,8 +949,13 @@ def line_reply(reply_token, bot_reply_list):
             audio_url = reply[1]
             duration = reply[2]
             messages.append(AudioSendMessage(original_content_url=audio_url, duration=duration))
+        elif reply_type == 'image':
+            public_img_url = reply[1]
+            public_img_url_s = reply[2]
+            messages.append(ImageSendMessage(original_content_url=public_img_url, preview_image_url=public_img_url_s))
 
     line_bot_api.reply_message(reply_token, messages)
+    return
 
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
