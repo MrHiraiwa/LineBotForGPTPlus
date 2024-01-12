@@ -104,7 +104,7 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
 def generate_image(prompt):
     global public_url  # グローバル変数を使用することを宣言
-    blob_path = f'{user_id}/{message_id}.jpg'
+    blob_path = f'{user_id}/{message_id}.png'
     response = openai.Image.create(
         prompt=prompt,
         n=1,
