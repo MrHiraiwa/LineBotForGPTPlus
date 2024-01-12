@@ -768,7 +768,7 @@ def handle_message(event):
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
                 head_message = head_message + SEARCH_MESSAGE + "\n" + result
             if any(word in user_message for word in IMAGE_KEYWORDS) and exec_functions == False:
-                result, public_url = langchain_agent(user_message, user_id, message_id)
+                result, public_url = langchain_agent(user_message, user_id, message_id, BACKET_NAME, FILE_AGE)
                 IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE').format(display_name=display_name)
                 head_message = head_message + IMAGE_MESSAGE + "\n" + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
