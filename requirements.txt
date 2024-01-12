@@ -8,6 +8,7 @@ google-cloud-storage
 google-search-results
 langid
 openai==0.28
+langchain/openai
 langchain-community
 line-bot-sdk
 tiktoken
