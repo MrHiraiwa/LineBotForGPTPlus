@@ -16,7 +16,7 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, AudioMessage, TextSendMessage, AudioSendMessage,
     QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction,
-    LocationMessage, ImageMessage, StickerMessage,
+    LocationMessage, ImageMessage, StickerMessage, ImageSendMessage,
 )
 from langchain.prompts.chat import (
     ChatPromptTemplate,
