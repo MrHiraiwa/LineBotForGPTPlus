@@ -10,6 +10,8 @@ import pytz
 import requests
 from bs4 import BeautifulSoup
 from google.cloud import storage
+from PIL import Image
+import io
 
 public_url = []
 user_id = []
@@ -85,23 +87,27 @@ def bucket_exists(bucket_name):
 
     return bucket.exists()
 
-def upload_blob(bucket_name, image_url, destination_blob_name):
-    """Uploads a file to the bucket."""
+def download_and_convert_image(image_url):
+    """ PNG画像をダウンロードし、JPGに変換する """
+    response = requests.get(image_url)
+    image = Image.open(io.BytesIO(response.content))
+    jpg_image = io.BytesIO()
+    image.save(jpg_image, format='JPEG')
+    jpg_image.seek(0)  # ストリームの先頭に戻る
+    return jpg_image
+
+def upload_blob(bucket_name, source_stream, destination_blob_name):
+    """Uploads a file to the bucket from a byte stream."""
     try:
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(destination_blob_name)
 
-        # 画像の内容を取得
-        response = requests.get(image_url, stream=True)
-        response.raise_for_status()
-
         # ストリームから直接バケットにアップロード
-        blob.upload_from_string(response.content, content_type=response.headers['Content-Type'])
+        blob.upload_from_file(source_stream, content_type='image/jpeg')
     
         # 公開 URL を構築
         public_url = f"https://storage.googleapis.com/{bucket_name}/{destination_blob_name}"
-        #print(f"Successfully uploaded file to {public_url}")
 
         return public_url
     except Exception as e:
@@ -109,16 +115,15 @@ def upload_blob(bucket_name, image_url, destination_blob_name):
         raise
 
 def generate_image(prompt):
-    global public_url  # グローバル変数を使用することを宣言
-    blob_path = f'{user_id}/{message_id}.png'
+    global public_url
+    blob_path = f'{user_id}/{message_id}.jpg'
     response = openai.Image.create(
         prompt=prompt,
         n=1,
         size="1024x1024",
         response_format="url"
     )
-    
-    image_result = response['data'][0]['url']  # グローバル変数に値を代入
+    image_result = response['data'][0]['url']
     
     if bucket_exists(bucket_name):
         set_bucket_lifecycle(bucket_name, file_age)
@@ -126,10 +131,10 @@ def generate_image(prompt):
         print(f"Bucket {bucket_name} does not exist.")
         return 'OK'
 
-    public_url = upload_blob(bucket_name, image_result, blob_path)
+    jpg_image = download_and_convert_image(image_result)
+    public_url = upload_blob(bucket_name, jpg_image, blob_path)
     
     return 'generated the image.'
-
 
 
 tools = [
