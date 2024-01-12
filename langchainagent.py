@@ -178,7 +178,7 @@ tools = [
     Tool(
         name = "Painting",
         func= generate_image,
-        description="It is a useful tool that can reply image URL based on the Sentence by specifying the Sentence."
+        description="It is a useful tool that can generate image based on the Sentence by specifying the Sentence."
     ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
