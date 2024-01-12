@@ -526,6 +526,7 @@ def handle_message(event):
             bot_name = BOT_NAME[0]
             links = ""
             bot_reply_list = []
+            image_result = []
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -541,7 +542,7 @@ def handle_message(event):
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 str_vision_results = str(vision_results)
                 str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
-                result = langchain_agent(str_vision_results)
+                result, image_result = langchain_agent(str_vision_results)
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
                 head_message = head_message + OCR_MESSAGE + "\n" + result
                 user_message = OCR_USER_MESSAGE
@@ -752,7 +753,7 @@ def handle_message(event):
                 return 'OK'
 
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
-                result = langchain_agent(user_message)
+                result, image_result = langchain_agent(user_message)
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
                 head_message = head_message + SEARCH_MESSAGE + "\n" + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
@@ -875,6 +876,11 @@ def handle_message(event):
 
             line_reply(reply_token, bot_reply_list)
 
+            if image_result:
+                public_url, local_path = requests.get(image_result)
+                #工事中　langchain_agent内で画像ファイルをLocalpathに置いて読み込む処理が必要
+                bot_reply_list.append(['image', public_url])
+                line_reply(reply_token, bot_reply_list)
         
             if success:
                 delete_local_file(local_path) 
