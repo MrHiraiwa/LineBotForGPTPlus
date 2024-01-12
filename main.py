@@ -970,8 +970,10 @@ def line_reply(reply_token, bot_reply_list):
             public_img_url_s = reply[2]
             print(f"3: {public_img_url},{public_img_url_s}")
             messages.append(ImageSendMessage(original_content_url=public_img_url, preview_image_url=public_img_url_s))
+            print(f"４: {messages}")
 
     line_bot_api.reply_message(reply_token, messages)
+    return
 
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
