@@ -539,6 +539,7 @@ def handle_message(event):
             bot_reply_list = []
             public_url = []
             public_img_url = []
+            public_img_url_s = []
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -554,7 +555,7 @@ def handle_message(event):
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 str_vision_results = str(vision_results)
                 str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
-                result, public_img_url = langchain_agent(str_vision_results, user_id, message_id)
+                result, public_img_url, public_img_url_s = langchain_agent(str_vision_results, user_id, message_id)
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
                 head_message = head_message + OCR_MESSAGE + "\n" + result
                 user_message = OCR_USER_MESSAGE
@@ -765,11 +766,11 @@ def handle_message(event):
                 return 'OK'
 
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
-                result, public_img_url = langchain_agent(user_message, user_id, message_id)
+                result, public_img_url, public_img_url_s = langchain_agent(user_message, user_id, message_id)
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
                 head_message = head_message + SEARCH_MESSAGE + "\n" + result
             if any(word in user_message for word in IMAGE_KEYWORDS) and exec_functions == False:
-                result, public_img_url = langchain_agent(user_message, user_id, message_id, BACKET_NAME, FILE_AGE)
+                result, public_img_url, public_img_url_s = langchain_agent(user_message, user_id, message_id, BACKET_NAME, FILE_AGE)
                 IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE').format(display_name=display_name)
                 head_message = head_message + IMAGE_MESSAGE + "\n" + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
@@ -891,9 +892,9 @@ def handle_message(event):
 
             line_reply(reply_token, bot_reply_list)
 
-            print(f"public_img_url: {public_img_url}")
+            print(f"public_img_url: {public_img_url},{public_img_url_s}")
             if public_img_url:
-                bot_reply_list.append(['image', public_img_url])
+                bot_reply_list.append(['image', public_img_url,public_img_url_s])
                 line_reply(reply_token, bot_reply_list)
         
             if success:
@@ -965,7 +966,8 @@ def line_reply(reply_token, bot_reply_list):
             messages.append(AudioSendMessage(original_content_url=audio_url, duration=duration))
         elif reply_type == 'image':
             public_img_url = reply[1]
-            messages.append(ImageSendMessage(original_content_url=public_img_url, preview_image_url=public_img_url))
+            public_img_url_s = reply[2]
+            messages.append(ImageSendMessage(original_content_url=public_img_url, preview_image_url=public_img_url_s))
 
     line_bot_api.reply_message(reply_token, messages)
 
