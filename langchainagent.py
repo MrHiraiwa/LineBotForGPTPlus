@@ -14,6 +14,9 @@ from PIL import Image
 import io
 
 public_url = []
+public_url_original = []
+public_url_preview = []
+    
 user_id = []
 message_id = []
 bucket_name = []
@@ -87,55 +90,69 @@ def bucket_exists(bucket_name):
 
     return bucket.exists()
 
-def download_and_convert_image(image_url):
-    """ PNG画像をダウンロードし、JPGに変換する """
+def download_image(image_url):
+    """ PNG画像をダウンロードする """
     response = requests.get(image_url)
-    image = Image.open(io.BytesIO(response.content))
-    jpg_image = io.BytesIO()
-    image.save(jpg_image, format='JPEG')
-    jpg_image.seek(0)  # ストリームの先頭に戻る
-    return jpg_image
+    return io.BytesIO(response.content)
 
-def upload_blob(bucket_name, source_stream, destination_blob_name):
+def create_preview_image(original_image_stream):
+    """ 画像のサイズを縮小してプレビュー用画像を生成する """
+    image = Image.open(original_image_stream)
+    image.thumbnail((1024, 1024))  # 画像の最大サイズを1024x1024に制限
+    preview_image = io.BytesIO()
+    image.save(preview_image, format='PNG')
+    preview_image.seek(0)
+    return preview_image
+
+def upload_blob(bucket_name, source_stream, destination_blob_name, content_type='image/png'):
     """Uploads a file to the bucket from a byte stream."""
     try:
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(destination_blob_name)
 
-        # ストリームから直接バケットにアップロード
-        blob.upload_from_file(source_stream, content_type='image/jpeg')
+        blob.upload_from_file(source_stream, content_type=content_type)
     
-        # 公開 URL を構築
         public_url = f"https://storage.googleapis.com/{bucket_name}/{destination_blob_name}"
-
         return public_url
     except Exception as e:
         print(f"Failed to upload file: {e}")
         raise
 
 def generate_image(prompt):
-    global public_url
-    blob_path = f'{user_id}/{message_id}.jpg'
+    global public_url_original
+    global public_url_preview
+    
+    blob_path = f'{user_id}/{message_id}.png'
+    preview_blob_path = f'{user_id}/{message_id}_s.png'
     response = openai.Image.create(
-        prompt=prompt,
-        n=1,
-        size="1024x1024",
-        response_format="url"
+    prompt=prompt,
+    n=1,
+    size="1024x1024",
+    response_format="url"
     )
     image_result = response['data'][0]['url']
-    
+
     if bucket_exists(bucket_name):
         set_bucket_lifecycle(bucket_name, file_age)
     else:
         print(f"Bucket {bucket_name} does not exist.")
         return 'OK'
 
-    jpg_image = download_and_convert_image(image_result)
-    public_url = upload_blob(bucket_name, jpg_image, blob_path)
-    
-    return 'generated the image.'
+    # PNG画像をダウンロード
+    png_image = download_image(image_result)
 
+    # プレビュー画像を生成
+    preview_image = create_preview_image(png_image)
+    png_image.seek(0)  # ストリームをリセット
+
+    # 元のPNG画像をアップロード
+    public_url_original = upload_blob(bucket_name, png_image, blob_path)
+
+    # プレビュー用のPNG画像をアップロード
+    public_url_preview = upload_blob(bucket_name, preview_image, preview_blob_path)
+
+    return 'generated the image.'
 
 tools = [
     Tool(
@@ -178,7 +195,7 @@ def langchain_agent(question, USER_ID, MESSAGE_ID, BUCKET_NAME=None, FILE_AGE=No
     
     try:
         result = mrkl.run(question)
-        return result, public_url
+        return result, public_url_original, public_url_preview
     except Exception as e:
         print(f"An error occurred: {e}")
         # 何らかのデフォルト値やエラーメッセージを返す
