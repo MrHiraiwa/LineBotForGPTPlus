@@ -155,7 +155,7 @@ tools = [
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
-def langchain_agent(question, USER_ID, MESSAGE_ID, BUCKET_NAME=None, FILE_AGE=None):
+def langchain_agent(question, USER_ID, MESSAGE_ID, BUCKET_NAME, FILE_AGE):
     global user_id
     global message_id
     global bucket_name
