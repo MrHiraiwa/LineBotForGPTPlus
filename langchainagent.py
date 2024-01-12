@@ -9,8 +9,13 @@ from datetime import datetime, time, timedelta
 import pytz
 import requests
 from bs4 import BeautifulSoup
+from google.cloud import storage
 
-image_result = []
+public_url = []
+user_id = []
+message_id = []
+bucket_name = []
+file_age = []
 
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
@@ -80,23 +85,42 @@ def bucket_exists(bucket_name):
 
     return bucket.exists()
 
+def upload_blob(bucket_name, source_file_name, destination_blob_name):
+    """Uploads a file to the bucket."""
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
+
+        blob.upload_from_filename(source_file_name)
+    
+        # Construct public url
+        public_url = f"https://storage.googleapis.com/{bucket_name}/{destination_blob_name}"
+        #print(f"Successfully uploaded file to {public_url}")
+        return public_url
+    except Exception as e:
+        print(f"Failed to upload file: {e}")
+        raise
+
 def generate_image(prompt):
-    global image_result  # グローバル変数を使用することを宣言
+    global public_url  # グローバル変数を使用することを宣言
+    blob_path = f'{user_id}/{message_id}.jpg'
     response = openai.Image.create(
         prompt=prompt,
         n=1,
         size="1024x1024",
         response_format="url"
     )
+    
     image_result = response['data'][0]['url']  # グローバル変数に値を代入
-    time.sleep(10)
-
-    if bucket_exists(BACKET_NAME):
-        set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
+    
+    if bucket_exists(bucket_name):
+        set_bucket_lifecycle(bucket_name, file_age)
     else:
-        print(f"Bucket {BACKET_NAME} does not exist.")
+        print(f"Bucket {bucket_name} does not exist.")
         return 'OK'
 
+    public_url = upload_blob(bucket_name, image_result, blob_path)
     
     return 'generated the image.'
 
@@ -131,10 +155,19 @@ tools = [
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
-def langchain_agent(question):
+def langchain_agent(question, USER_ID, MESSAGE_ID, BUCKET_NAME=None, FILE_AGE=None):
+    global user_id
+    global message_id
+    global bucket_name
+    global file_age
+    user_id = USER_ID
+    message_id = MESSAGE_ID
+    bucket_name = BUCKET_NAME
+    file_age = FILE_AGE
+    
     try:
         result = mrkl.run(question)
-        return result, image_result
+        return result, public_url
     except Exception as e:
         print(f"An error occurred: {e}")
         # 何らかのデフォルト値やエラーメッセージを返す
