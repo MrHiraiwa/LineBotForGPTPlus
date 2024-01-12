@@ -151,8 +151,8 @@ DEFAULT_ENV_VARS = {
     'FORGET_QUICK_REPLY': '😱記憶を消去',
     'SEARCH_KEYWORDS': 'ませんか,ますか,今日,本日,まとめ,検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
     'SEARCH_MESSAGE': '{display_name}の問いに対して以下の検索結果の情報が有益な場合は、情報を{display_name}に報告してください。情報にURLが含まれる場合はURLを提示してください。',
-    'IMAGE_KEYWORDS': '画像,写真,イメージ,image,photo',
-    'IMAGE_MESSAGE': '{display_name}の要望が画像生成である場合は、画像生成した旨を{display_name}に報告してください。生成した画像はユーザーに提示済みです。',
+    'IMAGE_KEYWORDS': '画像,写真,絵,イメージ,image,photo',
+    'IMAGE_MESSAGE': '画像を生成し{display_name}へ提示しました。URLやファイルパス等は含めずに以下に画像生成した旨を{display_name}に報告してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
@@ -765,14 +765,14 @@ def handle_message(event):
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
 
-            if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
-                result, public_img_url, public_img_url_s = langchain_agent(user_message, user_id, message_id)
-                SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
-                head_message = head_message + SEARCH_MESSAGE + "\n" + result
-            if any(word in user_message for word in IMAGE_KEYWORDS) and exec_functions == False:
+            if (any(word in user_message for word in SEARCH_KEYWORDS) or any(word in user_message for word in IMAGE_KEYWORDS)) and exec_functions == False:
                 result, public_img_url, public_img_url_s = langchain_agent(user_message, user_id, message_id, BACKET_NAME, FILE_AGE)
-                IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE').format(display_name=display_name)
-                head_message = head_message + IMAGE_MESSAGE + "\n" + result
+                SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
+                head_message = head_message + SEARCH_MESSAGE + "\n"
+                if  public_img_url:
+                    IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE').format(display_name=display_name)
+                    head_message = head_message + IMAGE_MESSAGE + "\n"
+                head_message = head_message + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
@@ -890,7 +890,6 @@ def handle_message(event):
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
             if public_img_url:
-                print(f"2: {public_img_url},{public_img_url_s}")
                 bot_reply_list.append(['image', public_img_url,public_img_url_s])
             
             line_reply(reply_token, bot_reply_list)
@@ -965,9 +964,7 @@ def line_reply(reply_token, bot_reply_list):
         elif reply_type == 'image':
             public_img_url = reply[1]
             public_img_url_s = reply[2]
-            print(f"3: {public_img_url},{public_img_url_s}")
             messages.append(ImageSendMessage(original_content_url=public_img_url, preview_image_url=public_img_url_s))
-            print(f"４: {messages}")
 
     line_bot_api.reply_message(reply_token, messages)
     return
