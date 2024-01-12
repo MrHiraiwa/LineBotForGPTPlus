@@ -98,7 +98,7 @@ def download_image(image_url):
 def create_preview_image(original_image_stream):
     """ 画像のサイズを縮小してプレビュー用画像を生成する """
     image = Image.open(original_image_stream)
-    image.thumbnail((1024, 1024))  # 画像の最大サイズを1024x1024に制限
+    image.thumbnail((640, 640))  # 画像の最大サイズを1024x1024に制限
     preview_image = io.BytesIO()
     image.save(preview_image, format='PNG')
     preview_image.seek(0)
