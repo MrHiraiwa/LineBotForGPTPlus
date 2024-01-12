@@ -85,18 +85,24 @@ def bucket_exists(bucket_name):
 
     return bucket.exists()
 
-def upload_blob(bucket_name, source_file_name, destination_blob_name):
+def upload_blob(bucket_name, image_url, destination_blob_name):
     """Uploads a file to the bucket."""
     try:
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(destination_blob_name)
 
-        blob.upload_from_filename(source_file_name)
+        # 画像の内容を取得
+        response = requests.get(image_url, stream=True)
+        response.raise_for_status()
+
+        # ストリームから直接バケットにアップロード
+        blob.upload_from_string(response.content, content_type=response.headers['Content-Type'])
     
-        # Construct public url
+        # 公開 URL を構築
         public_url = f"https://storage.googleapis.com/{bucket_name}/{destination_blob_name}"
         #print(f"Successfully uploaded file to {public_url}")
+
         return public_url
     except Exception as e:
         print(f"Failed to upload file: {e}")
