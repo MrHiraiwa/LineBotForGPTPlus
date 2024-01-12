@@ -891,6 +891,7 @@ def handle_message(event):
 
             line_reply(reply_token, bot_reply_list)
 
+            print(f"public_img_url: {public_img_url}")
             if public_img_url:
                 bot_reply_list.append(['image', public_img_url])
                 line_reply(reply_token, bot_reply_list)
