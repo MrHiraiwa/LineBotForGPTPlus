@@ -123,11 +123,10 @@ def generate_image(prompt):
     global public_url_original
     global public_url_preview
     
-    error_message = []
     blob_path = f'{user_id}/{message_id}.png'
     preview_blob_path = f'{user_id}/{message_id}_s.png'
     client = OpenAI()
-    try {
+    try:
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt,
@@ -136,11 +135,8 @@ def generate_image(prompt):
             n=1,
         )
         image_result = response.data[0].url
-    } catch (error) {
-        error_message = error.message
-    }
-    if error_message:
-        return error_message
+    except Exception as e:
+        return e
 
     if bucket_exists(bucket_name):
         set_bucket_lifecycle(bucket_name, file_age)
