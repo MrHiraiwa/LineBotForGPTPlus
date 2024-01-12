@@ -126,23 +126,15 @@ def generate_image(prompt):
     blob_path = f'{user_id}/{message_id}.png'
     preview_blob_path = f'{user_id}/{message_id}_s.png'
     client = OpenAI()
-
+    
     response = client.images.generate(
-      model="dall-e-3",
-      prompt="a white siamese cat",
-      size="1024x1024",
-      quality="standard",
-      n=1,
+        model="dall-e-3",
+        prompt="a white siamese cat",
+        size="1024x1024",
+        quality="standard",
+        n=1,
     )
-
-image_url = response.data[0].url
-    response = openai.Image.create(
-    prompt=prompt,
-    n=1,
-    size="1024x1024",
-    response_format="url"
-    )
-    image_result = response['data'][0]['url']
+    image_result = response.data[0].url
 
     if bucket_exists(bucket_name):
         set_bucket_lifecycle(bucket_name, file_age)
