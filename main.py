@@ -542,7 +542,7 @@ def handle_message(event):
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 str_vision_results = str(vision_results)
                 str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
-                result, image_result = langchain_agent(str_vision_results)
+                result, public_url = langchain_agent(str_vision_results, user_id, message_id)
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
                 head_message = head_message + OCR_MESSAGE + "\n" + result
                 user_message = OCR_USER_MESSAGE
@@ -753,7 +753,7 @@ def handle_message(event):
                 return 'OK'
 
             if any(word in user_message for word in SEARCH_KEYWORDS) and exec_functions == False:
-                result, image_result = langchain_agent(user_message)
+                result, public_url = langchain_agent(user_message, user_id, message_id)
                 SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
                 head_message = head_message + SEARCH_MESSAGE + "\n" + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
@@ -876,8 +876,7 @@ def handle_message(event):
 
             line_reply(reply_token, bot_reply_list)
 
-            if image_result:
-                public_url, local_path = requests.get(image_result)
+            if public_url:
                 #工事中　langchain_agent内で画像ファイルをLocalpathに置いて読み込む処理が必要
                 bot_reply_list.append(['image', public_url])
                 line_reply(reply_token, bot_reply_list)
@@ -949,6 +948,9 @@ def line_reply(reply_token, bot_reply_list):
             audio_url = reply[1]
             duration = reply[2]
             messages.append(AudioSendMessage(original_content_url=audio_url, duration=duration))
+        elif reply_type == 'image':
+            public_url = reply[1]
+            messages.append(ImageSendMessage(original_content_url=public_url, preview_image_url=public_url))
 
     line_bot_api.reply_message(reply_token, messages)
 
