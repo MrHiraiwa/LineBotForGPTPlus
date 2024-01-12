@@ -10,6 +10,8 @@ import pytz
 import requests
 from bs4 import BeautifulSoup
 
+image_result = []
+
 llm = ChatOpenAI(model="gpt-3.5-turbo")
 
 google_search = GoogleSearchAPIWrapper()
@@ -56,6 +58,18 @@ def scraping(links):
 
     return contents
 
+def generate_image(prompt):
+    global image_result  # グローバル変数を使用することを宣言
+    response = openai.Image.create(
+        prompt=prompt,
+        n=1,
+        size="1024x1024",
+        response_format="url"
+    )
+    image_result = response['data'][0]['url']  # グローバル変数に値を代入
+    time.sleep(10)
+    return 'generated the image.'
+
 tools = [
     Tool(
         name = "Search",
@@ -77,13 +91,18 @@ tools = [
         func=wikipedia,
         description="useful for when you need to Read dictionary page by specifying the word. it is single-input tool."
     ),
+    Tool(
+        name = "Painting",
+        func= generate_image,
+        description="It is a useful tool that can reply image URL based on the Sentence by specifying the Sentence."
+    ),
 ]
 mrkl = initialize_agent(tools, llm, agent=AgentType.OPENAI_FUNCTIONS, verbose=True)
 
 def langchain_agent(question):
     try:
         result = mrkl.run(question)
-        return result
+        return result, image_result
     except Exception as e:
         print(f"An error occurred: {e}")
         # 何らかのデフォルト値やエラーメッセージを返す
