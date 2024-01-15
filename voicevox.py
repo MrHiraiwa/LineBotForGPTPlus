@@ -45,7 +45,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f
     
     # Save the audio file temporarily
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
-        temp.write(response.content)
+        temp.write(response.audio_content)
         temp.flush()
 
         # Convert the WAV file to M4A
