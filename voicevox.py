@@ -29,12 +29,11 @@ def convert_audio_to_m4a(input_path, output_path):
     command = ['ffmpeg', '-i', input_path, '-c:a', 'aac', output_path]
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
-def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, speaker_id):
+def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style_id):
     #voicevox main
     text = urllib.parse.quote(text)
     audio_query_endpoint = f"{voicevox_url}/audio_query"
     audio_synthesis_endpoint = f"{voicevox_url}/synthesis"
-    style_id = speaker_id
     query_params = {
         'text': text,
         'style_id': style_id
