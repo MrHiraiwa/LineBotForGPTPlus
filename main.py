@@ -116,7 +116,7 @@ REQUIRED_ENV_VARS = [
     "PAYMENT_QUICK_REPLY",
     "PAYMENT_RESULT_URL",
     "VOICEVOX_URL",
-    "VOICEVOX_SPEAKER_ID"
+    "VOICEVOX_STYLE_ID"
     
 ]
 
@@ -193,7 +193,7 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_QUICK_REPLY': '💸支払い',
     'PAYMENT_RESULT_URL': 'http://example',
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
-    'VOICEVOX_SPEAKER_ID': '3'
+    'VOICEVOX_STYLE_ID': '3'
 }
 
 try:
@@ -220,7 +220,7 @@ def reload_settings():
     global TRANSLATE_KEYWORDS, TRANSLATE_GUIDE_MESSAGE, TRANSLATE_MESSAGE, TRANSLATE_OFF_MESSAGE, TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
-    global VOICEVOX_URL, VOICEVOX_SPEAKER_ID
+    global VOICEVOX_URL, VOICEVOX_STYLE_ID
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -338,7 +338,7 @@ def reload_settings():
     PAYMENT_QUICK_REPLY = get_setting('PAYMENT_QUICK_REPLY')
     PAYMENT_RESULT_URL = get_setting('PAYMENT_RESULT_URL')
     VOICEVOX_URL = get_setting('VOICEVOX_URL')
-    VOICEVOX_SPEAKER_ID = get_setting('VOICEVOX_SPEAKER_ID')
+    VOICEVOX_STYLE_ID = get_setting('VOICEVOX_STYLE_ID')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -887,7 +887,7 @@ def handle_message(event):
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
                 elif  LINE_REPLY == "VV" and len(quick_reply_items) == 0 and exec_functions == False:
-                    public_url, local_path, duration = put_audio_voicevox(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, VOICEVOX_URL, VOICEVOX_SPEAKER_ID)
+                    public_url, local_path, duration = put_audio_voicevox(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, VOICEVOX_URL, VOICEVOX_STYLE_ID)
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
             if public_img_url:
