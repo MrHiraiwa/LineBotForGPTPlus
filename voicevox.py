@@ -39,7 +39,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f
     print(f"2c,{voicevox_api_url}")
     # テキストから音声合成のためのクエリを取得
     response = requests.post(voicevox_api_url)
-    print(f"3c,{response}")
+    print(f"3c,{response},{response.name},{response.audio_content}")
     if response.status_code != 200:
         raise Exception("Failed to get audio query from VOICEVOX")
     
