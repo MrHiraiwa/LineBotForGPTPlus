@@ -13,10 +13,11 @@
 - 地図検索: Geocoding APIとGoogle Custom Search APIを用いて地図検索が行なえます。
 - 画像認識: Cloud Visionを用いて画像認識が行なえます。
 - 画像生成: OpenAI DALL-E 3を用いて画像生成が行なえます。
-- 音声会話: text-to-SpeechとWhisperを用いて音声会話が行えます。
-- 英語と中国語の訛の切り替え:ユーザー操作で中国語音声の北京語と広東語の切り替えが行えます。英語も切り替えられます。
-- 音声速度:ユーザー操作で音声速度の変更が行えます。
-- 翻訳モード:入力した文字を翻訳します。
+- 音声認識: OpenAI Whisperを用いて音声認識が行えます。
+- 音声生成: Google text-to-SpeechまたはVOICEVOXを用いて音声会話が行えます。
+- 英語と中国語の訛の切り替え:Google text-to-Speech利用時のみユーザー操作で中国語音声の北京語と広東語の切り替えが行えます。英語も切り替えられます。
+- 音声速度:Google text-to-Speech利用時のみユーザー操作で音声速度の変更が行えます。
+- 翻訳モード:Google text-to-Speech利用時のみ入力した文字を翻訳します。
 - 支払い機能:Stripeと連携して利用料の支払いが行えます。
 
 ## セットアップ
@@ -29,6 +30,7 @@
 6. Cloud RunのURLに「/login」を付与して管理画面にログインし、パラメータを設定します
 7. LINE Developerにログインします：https://account.line.biz/login
 8. チャネルを作成し、webhookの宛先にCloud RunのサービスURLを指定します。
+9. VOICEVOXを利用する場合はサーバを別途用意してください。
 
 ## 環境変数
 - CHANNEL_ACCESS_TOKEN:LINEで発行したチャネルアクセストークンを設定してください。
