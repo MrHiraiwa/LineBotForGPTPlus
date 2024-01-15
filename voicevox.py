@@ -33,13 +33,10 @@ def convert_audio_to_m4a(input_path, output_path):
 def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f2-644c-49c9-8989-94e11f7129d0"):
 
     #voicevox main
-    voicevox_api_url = f"https://api.voicevox.hiroshiba.jp/audio_query?text={text}&speaker={speaker_id}"
-    headers = {
-        "Authorization": f"Bearer {VOICEVOX_API_KEY}"
-    }
+    voicevox_api_url = f"https://deprecatedapis.tts.quest/v2/voicevox/audio/?key={VOICEVOX_API_KEY}&speaker={speaker_id}&pitch=0&intonationScale=1&speed=1&text={text}
 
     # テキストから音声合成のためのクエリを取得
-    response = requests.post(voicevox_api_url, headers=headers)
+    response = requests.post(voicevox_api_url)
     if response.status_code != 200:
         raise Exception("Failed to get audio query from VOICEVOX")
     
