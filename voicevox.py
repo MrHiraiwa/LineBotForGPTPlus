@@ -39,14 +39,14 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, speak
     print(f"2c,{voicevox_api_url}")
     # テキストから音声合成のためのクエリを取得
     response = requests.post(voicevox_api_url)
-    print(f"3c,{response},{response.name}")
+    print(f"3c,{response}")
     if response.status_code != 200:
         raise Exception("Failed to get audio query from VOICEVOX")
     
     # Save the audio file temporarily
     print("4c")
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
-        print(f"5c,{response}")
+        print(f"5c,{response},{response.name}")
         temp.write(response.content)
         temp.flush()
         print("6c")
