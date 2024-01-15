@@ -49,16 +49,20 @@ def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f
         print("5c")
         temp.write(response.audio_content)
         temp.flush()
+        print("6c")
 
         # Convert the WAV file to M4A
         m4a_path = temp.name.replace(".wav", ".m4a")
         convert_audio_to_m4a(temp.name, m4a_path)
-
+        print("7c")
+        
         # Get the duration of the local file before uploading
         duration = get_duration(m4a_path)
+        print("8c")
 
         # Upload the m4a file
         public_url = upload_blob(bucket_name, m4a_path, destination_blob_name)
+        print(f"9c,{public_url},{m4a_path},{duration}")
         
         # Return the public url, local path of the file, and duration
         return public_url, m4a_path, duration
