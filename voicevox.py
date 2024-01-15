@@ -5,10 +5,8 @@ from google.cloud import storage
 import subprocess
 from pydub.utils import mediainfo
 import langid
-import urllib.parse
 
 LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
-VOICEVOX_API_KEY = os.getenv('VOICEVOX_API_KEY')
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
@@ -31,18 +29,31 @@ def convert_audio_to_m4a(input_path, output_path):
     command = ['ffmpeg', '-i', input_path, '-c:a', 'aac', output_path]
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
-def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, speaker_id="0f56c2f2-644c-49c9-8989-94e11f7129d0"):
+def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, speaker_id):
     #voicevox main
     text = urllib.parse.quote(text)
-    voicevox_api_url = f"{voicevox_url}key={VOICEVOX_API_KEY}&speaker={speaker_id}&pitch=0&intonationScale=1&speed=1&text={text}"
-    # テキストから音声合成のためのクエリを取得
-    response = requests.post(voicevox_api_url)
-    if response.status_code != 200:
-        raise Exception("Failed to get audio query from VOICEVOX")
+    audio_query_endpoint = f"{voicevox_url}/audio_query"
+    audio_synthesis_endpoint = f"{voicevox_url}/synthesis"
+    style_id = speaker_id
+    query_params = {
+        'text': text,
+        'style_id': style_id
+    }
+
+    query_response = requests.post(audio_query_endpoint, params=query_params)
     
-    # Save the audio file temporarily
+    if query_response.status_code == 200:
+        query_data = query_response.json()
+    else:
+        print('Error: Failed to get audio query.')
+        exit()
+        
+    synthesis_body = query_data
+
+    synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'style_id': style_id})
+    
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
-        temp.write(response.content)
+        temp.write(synthesis_response.content)
         temp.flush()
 
         # Convert the WAV file to M4A
