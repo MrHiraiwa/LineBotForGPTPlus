@@ -46,7 +46,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, speak
     # Save the audio file temporarily
     print("4c")
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
-        print(f"5c,{response},{response.name}")
+        print(f"5c, Status Code: {response.status_code}, Headers: {response.headers}")
         temp.write(response.content)
         temp.flush()
         print("6c")
