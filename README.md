@@ -12,6 +12,7 @@
 - Web検索+: Google Custom Search APIを用いてWeb検索が行えます。
 - 地図検索: Geocoding APIとGoogle Custom Search APIを用いて地図検索が行なえます。
 - 画像認識: Cloud Visionを用いて画像認識が行なえます。
+- 画像生成: OpenAI DALL-E 3を用いて画像生成が行なえます。
 - 音声会話: text-to-SpeechとWhisperを用いて音声会話が行えます。
 - 英語と中国語の訛の切り替え:ユーザー操作で中国語音声の北京語と広東語の切り替えが行えます。英語も切り替えられます。
 - 音声速度:ユーザー操作で音声速度の変更が行えます。
