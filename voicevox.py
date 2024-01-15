@@ -30,6 +30,7 @@ def convert_audio_to_m4a(input_path, output_path):
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
 def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style_id):
+    print(f"1,{text},{bucket_name},{destination_blob_name},{voicevox_url},{style_id}")
     #voicevox main
     audio_query_endpoint = f"{voicevox_url}/audio_query"
     audio_synthesis_endpoint = f"{voicevox_url}/synthesis"
@@ -37,9 +38,9 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
         'text': text,
         'style_id': style_id
     }
-
+    print(f"2,{audio_query_endpoint},{audio_synthesis_endpoint},{query_params}")
     query_response = requests.post(audio_query_endpoint, params=query_params)
-    
+    print(f"3,{query_response}")
     if query_response.status_code == 200:
         query_data = query_response.json()
     else:
@@ -49,7 +50,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     synthesis_body = query_data
 
     synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'style_id': style_id})
-    
+    print(f"4,{synthesis_body},{synthesis_response}")
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
         temp.write(synthesis_response.content)
         temp.flush()
