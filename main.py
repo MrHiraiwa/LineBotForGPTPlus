@@ -883,7 +883,9 @@ def handle_message(event):
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
                 elif  LINE_REPLY == "VV" and len(quick_reply_items) == 0 and exec_functions == False:
+                    print("1")
                     public_url, local_path, duration = put_audio_voicevox(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, VOICEVOX_SPEAKER_ID)
+                    print(f"2,{public_url},{local_path},{duration}")
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
             if public_img_url:
