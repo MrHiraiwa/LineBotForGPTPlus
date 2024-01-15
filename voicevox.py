@@ -31,11 +31,11 @@ def convert_audio_to_m4a(input_path, output_path):
     command = ['ffmpeg', '-i', input_path, '-c:a', 'aac', output_path]
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
-def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f2-644c-49c9-8989-94e11f7129d0"):
+def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, speaker_id="0f56c2f2-644c-49c9-8989-94e11f7129d0"):
     print(f"1c")
     #voicevox main
     text = urllib.parse.quote(text)
-    voicevox_api_url = f"https://deprecatedapis.tts.quest/v2/voicevox/audio/?key={VOICEVOX_API_KEY}&speaker={speaker_id}&pitch=0&intonationScale=1&speed=1&text={text}"
+    voicevox_api_url = f"{voicevox_url}key={VOICEVOX_API_KEY}&speaker={speaker_id}&pitch=0&intonationScale=1&speed=1&text={text}"
     print(f"2c,{voicevox_api_url}")
     # テキストから音声合成のためのクエリを取得
     response = requests.post(voicevox_api_url)
@@ -117,7 +117,7 @@ def bucket_exists(bucket_name):
 
 
 
-def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, speaker_id):
+def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, voicevox_url, speaker_id):
     if bucket_exists(BACKET_NAME):
         set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
     else:
@@ -125,7 +125,7 @@ def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, spea
         return 'OK'
     blob_path = f'{userId}/{message_id}.m4a'
     print(f"1a,{userId}, {message_id}, {response}, {BACKET_NAME}, {FILE_AGE}, {speaker_id}")
-    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, speaker_id)
+    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, voicevox_url, speaker_id)
     print("1b,{public_url},{local_path},{duration}")
     return public_url, local_path, duration
       
