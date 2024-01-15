@@ -38,7 +38,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
         'text': text,
         'style_id': style_id
     }
-    print(f"2,{audio_query_endpoint},{audio_synthesis_endpoint},{query_params}")
+    print(f"2,{query_endpoint},{query_params}")
     query_response = requests.post(query_endpoint, params=query_params)
     print(f"3,{query_response}")
     if query_response.status_code == 200:
