@@ -32,14 +32,14 @@ def convert_audio_to_m4a(input_path, output_path):
 def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style_id):
     print(f"1,{text},{bucket_name},{destination_blob_name},{voicevox_url},{style_id}")
     #voicevox main
-    audio_query_endpoint = f"{voicevox_url}/audio_query"
-    audio_synthesis_endpoint = f"{voicevox_url}/synthesis"
+    query_endpoint = f"{voicevox_url}/audio_query"
+    synthesis_endpoint = f"{voicevox_url}/synthesis"
     query_params = {
         'text': text,
         'style_id': style_id
     }
     print(f"2,{audio_query_endpoint},{audio_synthesis_endpoint},{query_params}")
-    query_response = requests.post(audio_query_endpoint, params=query_params)
+    query_response = requests.post(query_endpoint, params=query_params)
     print(f"3,{query_response}")
     if query_response.status_code == 200:
         query_data = query_response.json()
@@ -49,7 +49,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     print(f"4,{query_data}")
     synthesis_body = query_data
     print(f"5,{synthesis_body}")
-    synthesis_response = requests.post(audio_synthesis_endpoint, json=synthesis_body, params={'style_id': style_id})
+    synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'style_id': style_id})
     print(f"6,{synthesis_response}")
     if synthesis_response.status_code == 200:        
         with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
