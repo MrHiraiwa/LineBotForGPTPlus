@@ -882,8 +882,7 @@ def handle_message(event):
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
-            elif audio_or_text == "VV":
-                if  LINE_REPLY == "VV" and len(quick_reply_items) == 0 and exec_functions == False:
+                elif  LINE_REPLY == "VV" and len(quick_reply_items) == 0 and exec_functions == False:
                     public_url, local_path, duration = put_audio_voicevox(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, VOICEVOX_SPEAKER_ID)
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
