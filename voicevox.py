@@ -111,13 +111,13 @@ def bucket_exists(bucket_name):
 
 
 
-def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, voice_character='normal'):
+def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, speaker_id):
     if bucket_exists(BACKET_NAME):
         set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
     else:
         print(f"Bucket {BACKET_NAME} does not exist.")
         return 'OK'
     blob_path = f'{userId}/{message_id}.m4a'
-    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, voice_character, )
+    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, speaker_id)
     return public_url, local_path, duration
       
