@@ -773,7 +773,7 @@ def handle_message(event):
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
-            if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
+            if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
                 quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
                 quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_QUICK_REPLY])
                 head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
