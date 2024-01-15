@@ -31,7 +31,6 @@ def convert_audio_to_m4a(input_path, output_path):
 
 def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style_id):
     #voicevox main
-    text = urllib.parse.quote(text)
     audio_query_endpoint = f"{voicevox_url}/audio_query"
     audio_synthesis_endpoint = f"{voicevox_url}/synthesis"
     query_params = {
@@ -118,13 +117,13 @@ def bucket_exists(bucket_name):
 
 
 
-def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, voicevox_url, speaker_id):
+def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, voicevox_url, style_id):
     if bucket_exists(BACKET_NAME):
         set_bucket_lifecycle(BACKET_NAME, FILE_AGE)
     else:
         print(f"Bucket {BACKET_NAME} does not exist.")
         return 'OK'
     blob_path = f'{userId}/{message_id}.m4a'
-    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, voicevox_url, speaker_id)
+    public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, voicevox_url, style_id)
     return public_url, local_path, duration
       
