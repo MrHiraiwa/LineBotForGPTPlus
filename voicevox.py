@@ -31,17 +31,20 @@ def convert_audio_to_m4a(input_path, output_path):
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
 def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f2-644c-49c9-8989-94e11f7129d0"):
-
+    print(f"1c")
     #voicevox main
     voicevox_api_url = f"https://deprecatedapis.tts.quest/v2/voicevox/audio/?key={VOICEVOX_API_KEY}&speaker={speaker_id}&pitch=0&intonationScale=1&speed=1&text={text}"
-
+    print(f"2c,{voicevox_api_url}")
     # テキストから音声合成のためのクエリを取得
     response = requests.post(voicevox_api_url)
+    print(3c)
     if response.status_code != 200:
         raise Exception("Failed to get audio query from VOICEVOX")
     
     # Save the audio file temporarily
+    print(4c)
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
+        print(5c)
         temp.write(response.audio_content)
         temp.flush()
 
