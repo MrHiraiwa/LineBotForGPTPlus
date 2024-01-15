@@ -32,37 +32,28 @@ def convert_audio_to_m4a(input_path, output_path):
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
 def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, speaker_id="0f56c2f2-644c-49c9-8989-94e11f7129d0"):
-    print(f"1c")
     #voicevox main
     text = urllib.parse.quote(text)
     voicevox_api_url = f"{voicevox_url}key={VOICEVOX_API_KEY}&speaker={speaker_id}&pitch=0&intonationScale=1&speed=1&text={text}"
-    print(f"2c,{voicevox_api_url}")
     # テキストから音声合成のためのクエリを取得
     response = requests.post(voicevox_api_url)
-    print(f"3c,{response}")
     if response.status_code != 200:
         raise Exception("Failed to get audio query from VOICEVOX")
     
     # Save the audio file temporarily
-    print("4c")
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
-        print(f"5c, Status Code: {response.status_code}, Headers: {response.headers}")
         temp.write(response.content)
         temp.flush()
-        print("6c")
 
         # Convert the WAV file to M4A
         m4a_path = temp.name.replace(".wav", ".m4a")
         convert_audio_to_m4a(temp.name, m4a_path)
-        print("7c")
         
         # Get the duration of the local file before uploading
         duration = get_duration(m4a_path)
-        print("8c")
 
         # Upload the m4a file
         public_url = upload_blob(bucket_name, m4a_path, destination_blob_name)
-        print(f"9c,{public_url},{m4a_path},{duration}")
         
         # Return the public url, local path of the file, and duration
         return public_url, m4a_path, duration
@@ -124,8 +115,6 @@ def put_audio_voicevox(userId, message_id, response, BACKET_NAME, FILE_AGE, voic
         print(f"Bucket {BACKET_NAME} does not exist.")
         return 'OK'
     blob_path = f'{userId}/{message_id}.m4a'
-    print(f"1a,{userId}, {message_id}, {response}, {BACKET_NAME}, {FILE_AGE}, {speaker_id}")
     public_url, local_path, duration = text_to_speech(response, BACKET_NAME, blob_path, voicevox_url, speaker_id)
-    print("1b,{public_url},{local_path},{duration}")
     return public_url, local_path, duration
       
