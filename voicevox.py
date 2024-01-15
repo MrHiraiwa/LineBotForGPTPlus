@@ -46,11 +46,11 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     else:
         print('Error: Failed to get audio query.')
         exit()
-        
+    print(f"4,{query_data}")
     synthesis_body = query_data
-
+    print(f"5,{synthesis_body}")
     synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'style_id': style_id})
-    print(f"4,{synthesis_body},{synthesis_response}")
+    print(f"6,{synthesis_response}")
     with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
         temp.write(synthesis_response.content)
         temp.flush()
