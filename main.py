@@ -192,8 +192,8 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
     'PAYMENT_QUICK_REPLY': '💸支払い',
     'PAYMENT_RESULT_URL': 'http://example',
-    'VOICEVOX_URL': 'https://deprecatedapis.tts.quest/v2/voicevox/audio/?',
-    'VOICEVOX_SPEAKER_ID': '0f56c2f2-644c-49c9-8989-94e11f7129d0'
+    'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
+    'VOICEVOX_SPEAKER_ID': '3'
 }
 
 try:
