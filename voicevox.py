@@ -44,12 +44,12 @@ def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f
         raise Exception("Failed to get audio query from VOICEVOX")
     
     # Save the audio file temporarily
-    with NamedTemporaryFile(suffix=".mp3", delete=False) as temp:
+    with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
         temp.write(response.content)
         temp.flush()
 
-        # Convert the MP3 file to M4A
-        m4a_path = temp.name.replace(".mp3", ".m4a")
+        # Convert the WAV file to M4A
+        m4a_path = temp.name.replace(".wav", ".m4a")
         convert_audio_to_m4a(temp.name, m4a_path)
 
         # Get the duration of the local file before uploading
