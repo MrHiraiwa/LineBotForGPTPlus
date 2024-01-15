@@ -51,22 +51,26 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     print(f"5,{synthesis_body}")
     synthesis_response = requests.post(audio_synthesis_endpoint, json=synthesis_body, params={'style_id': style_id})
     print(f"6,{synthesis_response}")
-    with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
-        temp.write(synthesis_response.content)
-        temp.flush()
+    if synthesis_response.status_code == 200:        
+        with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
+            temp.write(synthesis_response.content)
+            temp.flush()
 
-        # Convert the WAV file to M4A
-        m4a_path = temp.name.replace(".wav", ".m4a")
-        convert_audio_to_m4a(temp.name, m4a_path)
+            # Convert the WAV file to M4A
+            m4a_path = temp.name.replace(".wav", ".m4a")
+            convert_audio_to_m4a(temp.name, m4a_path)
         
-        # Get the duration of the local file before uploading
-        duration = get_duration(m4a_path)
+            # Get the duration of the local file before uploading
+            duration = get_duration(m4a_path)
 
-        # Upload the m4a file
-        public_url = upload_blob(bucket_name, m4a_path, destination_blob_name)
+            # Upload the m4a file
+            public_url = upload_blob(bucket_name, m4a_path, destination_blob_name)
         
-        # Return the public url, local path of the file, and duration
-        return public_url, m4a_path, duration
+            # Return the public url, local path of the file, and duration
+            return public_url, m4a_path, duration
+    else:
+        print('Error: Failed to synthesize audio.')
+        return
     
 def delete_local_file(file_path):
     """Deletes a local file."""
