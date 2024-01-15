@@ -5,6 +5,7 @@ from google.cloud import storage
 import subprocess
 from pydub.utils import mediainfo
 import langid
+import urllib.parse
 
 LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
 VOICEVOX_API_KEY = os.getenv('VOICEVOX_API_KEY')
@@ -33,6 +34,7 @@ def convert_audio_to_m4a(input_path, output_path):
 def text_to_speech(text, bucket_name, destination_blob_name, speaker_id="0f56c2f2-644c-49c9-8989-94e11f7129d0"):
     print(f"1c")
     #voicevox main
+    text = urllib.parse.quote(text)
     voicevox_api_url = f"https://deprecatedapis.tts.quest/v2/voicevox/audio/?key={VOICEVOX_API_KEY}&speaker={speaker_id}&pitch=0&intonationScale=1&speed=1&text={text}"
     print(f"2c,{voicevox_api_url}")
     # テキストから音声合成のためのクエリを取得
