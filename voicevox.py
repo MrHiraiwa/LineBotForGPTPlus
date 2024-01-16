@@ -46,7 +46,6 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     headers = {
         'Authorization': f'Bearer {auth_token}'
     }
-    print(f"{headers}")
     
     #voicevox main
     query_endpoint = f"{voicevox_url}/audio_query"
@@ -57,7 +56,6 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     }
 
     query_response = requests.post(query_endpoint, params=query_params, headers=headers)
-    print(f"{query_response}")
 
     if query_response.status_code == 200:
         query_data = query_response.json()
