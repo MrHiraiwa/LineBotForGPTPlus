@@ -13,6 +13,11 @@ LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
 def get_google_cloud_token():
     credentials, project = google.auth.default()
     credentials.refresh(Request())
+
+    # サービスアカウントの詳細を表示
+    print(f"Service Account Email: {credentials.service_account_email}")
+    print(f"Project ID: {project}")
+
     return credentials.token
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
