@@ -29,6 +29,7 @@ from Crypto.Hash import SHA256
 
 from whisper import get_audio
 from voice import put_audio
+from voicevox import put_audio_voicevox
 from vision import vision_api
 from maps import get_addresses
 from langchainagent import langchain_agent
@@ -113,7 +114,10 @@ REQUIRED_ENV_VARS = [
     "PAYMENT_GUIDE_MESSAGE",
     "PAYMENT_FAIL_MESSAGE",
     "PAYMENT_QUICK_REPLY",
-    "PAYMENT_RESULT_URL"
+    "PAYMENT_RESULT_URL",
+    "VOICEVOX_URL",
+    "VOICEVOX_STYLE_ID"
+    
 ]
 
 DEFAULT_ENV_VARS = {
@@ -187,7 +191,9 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_GUIDE_MESSAGE': 'ユーザーに「画面下の「支払い」の項目をタップすると私の利用料の支払い画面が表示される」と案内して感謝の言葉を述べてください。以下の文章はユーザーから送られたものです。',
     'PAYMENT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
     'PAYMENT_QUICK_REPLY': '💸支払い',
-    'PAYMENT_RESULT_URL': 'http://example'
+    'PAYMENT_RESULT_URL': 'http://example',
+    'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
+    'VOICEVOX_STYLE_ID': '3'
 }
 
 try:
@@ -214,6 +220,7 @@ def reload_settings():
     global TRANSLATE_KEYWORDS, TRANSLATE_GUIDE_MESSAGE, TRANSLATE_MESSAGE, TRANSLATE_OFF_MESSAGE, TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_INDONESIAN_QUICK_REPLY
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
+    global VOICEVOX_URL, VOICEVOX_STYLE_ID
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -330,6 +337,8 @@ def reload_settings():
     PAYMENT_FAIL_MESSAGE = get_setting('PAYMENT_FAIL_MESSAGE')
     PAYMENT_QUICK_REPLY = get_setting('PAYMENT_QUICK_REPLY')
     PAYMENT_RESULT_URL = get_setting('PAYMENT_RESULT_URL')
+    VOICEVOX_URL = get_setting('VOICEVOX_URL')
+    VOICEVOX_STYLE_ID = get_setting('VOICEVOX_STYLE_ID')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -590,7 +599,7 @@ def handle_message(event):
                 user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
-            elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
+            elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
                 exec_functions == True
                 audio_or_text = "Text"
                 user['audio_or_text'] = audio_or_text
@@ -598,7 +607,7 @@ def handle_message(event):
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
-            elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio"):
+            elif CHANGE_TO_AUDIO_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
                 exec_functions == True
                 audio_or_text = "Audio"
                 user['audio_or_text'] = audio_or_text
@@ -764,7 +773,7 @@ def handle_message(event):
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
-            if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
+            if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
                 quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
                 quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_QUICK_REPLY])
                 head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
@@ -875,6 +884,10 @@ def handle_message(event):
             if audio_or_text == "Audio":
                 if  LINE_REPLY == "Audio" and len(quick_reply_items) == 0 and exec_functions == False:
                     public_url, local_path, duration = put_audio(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, or_chinese, or_english, audio_speed, AUDIO_GENDER)
+                    success = "dummy"
+                    bot_reply_list.append(['audio', public_url, duration])
+                elif  LINE_REPLY == "VV" and len(quick_reply_items) == 0 and exec_functions == False:
+                    public_url, local_path, duration = put_audio_voicevox(user_id, message_id, bot_reply, BACKET_NAME, FILE_AGE, VOICEVOX_URL, VOICEVOX_STYLE_ID)
                     success = "dummy"
                     bot_reply_list.append(['audio', public_url, duration])
             if public_img_url:
