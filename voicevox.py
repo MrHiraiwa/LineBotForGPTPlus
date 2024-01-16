@@ -15,8 +15,8 @@ def get_google_cloud_token():
     credentials.refresh(Request())
 
     # サービスアカウントの詳細を表示
-    print(f"Service Account Email: {credentials.service_account_email}")
-    print(f"Project ID: {project}")
+    #print(f"Service Account Email: {credentials.service_account_email}")
+    #print(f"Project ID: {project}")
 
     return credentials.token
 
@@ -46,7 +46,8 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     headers = {
         'Authorization': f'Bearer {auth_token}'
     }
-
+    print(f"{headers}")
+    
     #voicevox main
     query_endpoint = f"{voicevox_url}/audio_query"
     synthesis_endpoint = f"{voicevox_url}/synthesis"
@@ -56,6 +57,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     }
 
     query_response = requests.post(query_endpoint, params=query_params, headers=headers)
+    print(f"{query_response}")
 
     if query_response.status_code == 200:
         query_data = query_response.json()
