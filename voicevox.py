@@ -5,20 +5,16 @@ from google.cloud import storage
 import subprocess
 from pydub.utils import mediainfo
 import langid
-import google.auth
-from google.auth.transport.requests import Request
+import google.auth.transport.requests
+import google.oauth2.id_token
 
 LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
 
-def get_google_cloud_token():
-    credentials, project = google.auth.default()
-    credentials.refresh(Request())
+def get_google_cloud_token(audience):
+    auth_req = google.auth.transport.requests.Request()
+    id_token = google.oauth2.id_token.fetch_id_token(auth_req, audience)
 
-    # サービスアカウントの詳細を表示
-    #print(f"Service Account Email: {credentials.service_account_email}")
-    #print(f"Project ID: {project}")
-
-    return credentials.token
+    return id_token
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
@@ -42,7 +38,8 @@ def convert_audio_to_m4a(input_path, output_path):
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
 def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style_id):
-    auth_token = get_google_cloud_token()
+    audience = f"{voicevox_url}/"
+    auth_token = get_google_cloud_token(audience)
     headers = {
         'Authorization': f'Bearer {auth_token}'
     }
