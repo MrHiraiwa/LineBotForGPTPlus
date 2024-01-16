@@ -5,8 +5,15 @@ from google.cloud import storage
 import subprocess
 from pydub.utils import mediainfo
 import langid
+import google.auth
+from google.auth.transport.requests import Request
 
 LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
+
+def get_google_cloud_token():
+    credentials, project = google.auth.default()
+    credentials.refresh(Request())
+    return credentials.token
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
@@ -30,6 +37,10 @@ def convert_audio_to_m4a(input_path, output_path):
     result = subprocess.run(command, check=True, capture_output=True, text=True)
 
 def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style_id):
+    auth_token = get_google_cloud_token()
+    headers = {
+        'Authorization': f'Bearer {auth_token}'
+    }
 
     #voicevox main
     query_endpoint = f"{voicevox_url}/audio_query"
@@ -39,17 +50,17 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
         'style_id': style_id
     }
 
-    query_response = requests.post(query_endpoint, params=query_params)
+    query_response = requests.post(query_endpoint, params=query_params, headers=headers)
 
     if query_response.status_code == 200:
         query_data = query_response.json()
     else:
         print('Error: Failed to get audio query.')
-        exit()
+        return
 
     synthesis_body = query_data
 
-    synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'style_id': style_id})
+    synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'style_id': style_id}, headers=headers)
 
     if synthesis_response.status_code == 200:        
         with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
