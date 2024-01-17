@@ -38,6 +38,7 @@
 - OPENAI_API_KEY: OpenAIのAPIキーを入力してください。
 - GOOGLE_API_KEY:Google Cloud Pratformに発行したAPIキーを入力してください。
 - GOOGLE_CSE_ID:Google Cloud PratformのCustom Search設定時に発行した検索エンジンIDを設定してください。
+- SECRET_KEY: DBに保存するメッセージの暗号化と復号化に使用される秘密鍵です。適当な文字列を入れてください。
 - ADMIN_PASSWORD:WEBの管理画面のログインに使用する管理者パスワードです。このシステムはインターネットから誰でも触れるので、必ず複雑なパスワードを設定してください。
 
 ## 注意
