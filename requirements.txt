@@ -20,4 +20,3 @@ wikipedia
 googlemaps
 Pillow
 stripe
-openai
