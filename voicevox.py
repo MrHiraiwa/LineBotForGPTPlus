@@ -57,7 +57,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     if query_response.status_code == 200:
         query_data = query_response.json()
     else:
-        print('Error: Failed to get audio query.')
+        print(f'Error: Failed to get audio query. Status Code: {query_response.status_code}, Response: {query_response.text}')
         return
 
     synthesis_body = query_data
