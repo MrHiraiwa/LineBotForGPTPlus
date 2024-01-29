@@ -49,7 +49,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
     synthesis_endpoint = f"{voicevox_url}/synthesis"
     query_params = {
         'text': text,
-        'style_id': style_id
+        'speaker_id': style_id
     }
 
     query_response = requests.post(query_endpoint, params=query_params, headers=headers)
@@ -62,7 +62,7 @@ def text_to_speech(text, bucket_name, destination_blob_name, voicevox_url, style
 
     synthesis_body = query_data
 
-    synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'style_id': style_id}, headers=headers)
+    synthesis_response = requests.post(synthesis_endpoint, json=synthesis_body, params={'speaker_id': style_id}, headers=headers)
 
     if synthesis_response.status_code == 200:        
         with NamedTemporaryFile(suffix=".wav", delete=False) as temp:
