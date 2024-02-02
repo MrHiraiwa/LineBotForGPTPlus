@@ -179,10 +179,6 @@ def generate_image(paint_prompt, prompt, user_id, bucket_name, file_age):
     except Exception as e:
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
 
-def set_username(prompt):
-    username = prompt
-    return f"SYSTEM: 名前を覚えたことを返信してください。", username
-
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
@@ -207,17 +203,15 @@ def run_conversation_f(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
+def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, BUCKET_NAME=None, FILE_AGE=None, ERROR_MESSAGE, max_attempts=5):
     public_url_original = None
     user_id = USER_ID
     bucket_name = BUCKET_NAME
     file_age = FILE_AGE
     #paint_prompt = PAINT_PROMPT
-    username = ""
     attempt = 0
     i_messages_for_api = messages_for_api.copy()
 
-    set_username_called = False
     clock_called = False
     generate_image_called = False
     search_wikipedia_called = False
@@ -229,13 +223,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, BUCKET_NAME=None, FI
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:
-                if function_call.name == "set_UserName" and not set_username_called:
-                    set_username_called = True
-                    arguments = json.loads(function_call.arguments)
-                    bot_reply, username = set_username(arguments["username"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
-                    attempt += 1
-                elif function_call.name == "clock" and not clock_called:
+                if function_call.name == "clock" and not clock_called:
                     clock_called = True
                     bot_reply = clock()
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
@@ -270,10 +258,10 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, BUCKET_NAME=None, FI
                         bot_reply = response.choices[0].message.content
                     else:
                         bot_reply = "An error occurred while processing the question"
-                    return bot_reply, public_url_original, username                    
+                    return bot_reply, public_url_original                 
             else:
-                return response.choices[0].message.content, public_url_original, username
+                return response.choices[0].message.content, public_url_original
         else:
-            return "An error occurred while processing the question", public_url_original, username
+            return ERROR_MESSAGE + " Fail to connect OpenAI."
     
-    return bot_reply, public_url_original, username
+    return bot_reply, public_url_original
