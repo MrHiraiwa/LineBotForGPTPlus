@@ -215,7 +215,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, BUCKET_NAME=None, FI
     #paint_prompt = PAINT_PROMPT
     username = ""
     attempt = 0
-    i_messages_for_api = messages_for_api.copy()
+    i_messages_for_api = messages_for_api
 
     set_username_called = False
     clock_called = False
