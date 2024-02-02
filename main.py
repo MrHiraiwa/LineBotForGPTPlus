@@ -846,8 +846,8 @@ def handle_message(event):
                 user['messages'].pop(0)
                 total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
-            temp_messages_final.append(user['messages'])
-            temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
+            temp_messages_final.extend(user['messages'])
+            temp_messages_final.append({'role': 'user', 'content': temp_messages})
 
             messages = user['messages']
             try:
