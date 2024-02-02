@@ -34,6 +34,7 @@ from vision import vision_api
 from maps import get_addresses
 from langchainagent import langchain_agent
 from payment import create_checkout_session
+from functions import chatgpt_functions
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -844,33 +845,19 @@ def handle_message(event):
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 user['messages'].pop(0)
                 total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
-
-            temp_messages_final = user['messages'].copy()
+            temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+            temp_messages_final.append(user['messages'].copy())
             temp_messages_final.append({'role': 'user', 'content': temp_messages}) 
 
             messages = user['messages']
             try:
-                response = requests.post(
-                    'https://api.openai.com/v1/chat/completions',
-                    headers={'Authorization': f'Bearer {openai_api_key}'},
-                    json={'model': GPT_MODEL, 'messages': [systemRole()] + temp_messages_final},
-                    timeout=50
-                )
-            except requests.exceptions.Timeout:
-                print("OpenAI API timed out")
+                bot_reply, public_img_url, i_user_name = chatgpt_functions(GPT_MODEL, temp_messages, user_id, BACKET_NAME, FILE_AGE)
+            except Exception as e:
+                print(f"Error {str(e)}")
                 bot_reply_list.append(['text', ERROR_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
             user['messages'].append({'role': 'user', 'content': nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
-
-            response_json = response.json()
-
-            if response.status_code != 200 or 'error' in response_json:
-                print(f"OpenAI error: {response_json.get('error', 'No response from API')}")
-                bot_reply_list.append(['text', ERROR_MESSAGE])
-                line_reply(reply_token, bot_reply_list)
-                return 'OK' 
-            bot_reply = response_json['choices'][0]['message']['content'].strip()
             bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
             bot_reply = bot_reply + links
