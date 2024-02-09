@@ -157,12 +157,12 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 
-def generate_image(paint_prompt, prompt, user_id, message_id, bucket_name, file_age):
+def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
     blob_path = f'{user_id}/{message_id}.png'
     preview_blob_path = f'{user_id}/{message_id}_s.png'
     client = OpenAI()
-    prompt = paint_prompt + "\n" + prompt
+    prompt = paint_prompt + "\n" + i_prompt
     public_img_url = ""
     public_img_url_s = ""
     
@@ -193,7 +193,7 @@ def generate_image(paint_prompt, prompt, user_id, message_id, bucket_name, file_
         public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
 
         
-        return f"SYSTEM:{prompt}のキーワードに基づきシーンを変更しました。", public_img_url, public_img_url_s
+        return f"SYSTEM:{i_prompt}のキーワードで画像を生成しました。", public_img_url, public_img_url_s
     except Exception as e:
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
