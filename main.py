@@ -826,7 +826,7 @@ def handle_message(event):
 
             messages = user['messages']
             try:
-                bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE)
+                bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE)
             except Exception as e:
                 print(f"Error {str(e)}")
                 bot_reply_list.append(['text', ERROR_MESSAGE])
