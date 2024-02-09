@@ -136,6 +136,15 @@ def download_image(image_url):
     response = requests.get(image_url)
     return io.BytesIO(response.content)
 
+def create_preview_image(original_image_stream):
+    """ 画像のサイズを縮小してプレビュー用画像を生成する """
+    image = Image.open(original_image_stream)
+    image.thumbnail((640, 640))  # 画像の最大サイズを1024x1024に制限
+    preview_image = io.BytesIO()
+    image.save(preview_image, format='PNG')
+    preview_image.seek(0)
+    return preview_image
+
 def upload_blob(bucket_name, source_stream, destination_blob_name, content_type='image/png'):
     """Uploads a file to the bucket from a byte stream."""
     try:
@@ -154,6 +163,7 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
 def generate_image(paint_prompt, prompt, user_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
     blob_path = f'{user_id}/{filename}.png'
+    preview_blob_path = f'{user_id}/{message_id}_s.png'
     client = OpenAI()
     prompt = paint_prompt + "\n" + prompt
     try:
@@ -173,10 +183,16 @@ def generate_image(paint_prompt, prompt, user_id, bucket_name, file_age):
 
         # PNG画像をダウンロード
         png_image = download_image(image_result)
+        preview_image = create_preview_image(png_image)
+        
+        png_image.seek(0)  # ストリームをリセット
+        preview_image.seek(0)  # ストリームをリセット
 
-        # 元のPNG画像をアップロード
+        # 画像をアップロード
         public_img_url = upload_blob(bucket_name, png_image, blob_path)
-        public_img_url_s = None
+        public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
+
+        
         return f"SYSTEM:{prompt}のキーワードに基づきシーンを変更しました。", public_img_url, public_img_url_s
     except Exception as e:
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
