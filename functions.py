@@ -160,9 +160,9 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 
-def generate_image(paint_prompt, prompt, user_id, bucket_name, file_age):
+def generate_image(paint_prompt, prompt, user_id, message_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
-    blob_path = f'{user_id}/{filename}.png'
+    blob_path = f'{user_id}/{message_id}.png'
     preview_blob_path = f'{user_id}/{message_id}_s.png'
     client = OpenAI()
     prompt = paint_prompt + "\n" + prompt
@@ -221,7 +221,7 @@ def run_conversation_f(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
+def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -250,7 +250,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, PAINT
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, bucket_name, file_age)
+                    bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "search_wikipedia" and not search_wikipedia_called:
