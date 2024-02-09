@@ -124,7 +124,7 @@ window.onload = function() {
   {% for key in required_env_vars %}
     <div>
       <label for="{{ key }}">{{ key }}</label>
-      {% if key == "SYSTEM_PROMPT" or key == "PREVIOUS_DUMMY_USER_MESSAGE1" or key == "PREVIOUS_DUMMY_ASSISTANT_MESSAGE1" or key == "PREVIOUS_DUMMY_USER_MESSAGE2" or key == "PREVIOUS_DUMMY_ASSISTANT_MESSAGE2" %}
+      {% if key == "SYSTEM_PROMPT" or key == "PREVIOUS_DUMMY_USER_MESSAGE1" or key == "PREVIOUS_DUMMY_ASSISTANT_MESSAGE1" or key == "PREVIOUS_DUMMY_USER_MESSAGE2" or key == "PREVIOUS_DUMMY_ASSISTANT_MESSAGE2" or key == "PAINT_PROMPT"  %}
         <textarea id="{{ key }}" name="{{ key }}" oninput="adjustHeight(this)">{{ settings[key] or '' }}</textarea>
       {% else %}
         <input type="text" id="{{ key }}" name="{{ key }}" value="{{ settings[key] or '' }}">

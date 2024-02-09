@@ -10,14 +10,13 @@ import uuid
 import functions_config as cf
 import json
 import wikipedia
+from PIL import Image
 
 google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 gpt_client = OpenAI(api_key=openai_api_key)
-public_url = []
-public_url_original = []
     
 user_id = []
 bucket_name = []
@@ -135,6 +134,15 @@ def download_image(image_url):
     response = requests.get(image_url)
     return io.BytesIO(response.content)
 
+def create_preview_image(original_image_stream):
+    """ 画像のサイズを縮小してプレビュー用画像を生成する """
+    image = Image.open(original_image_stream)
+    image.thumbnail((640, 640))  # 画像の最大サイズを1024x1024に制限
+    preview_image = io.BytesIO()
+    image.save(preview_image, format='PNG')
+    preview_image.seek(0)
+    return preview_image
+
 def upload_blob(bucket_name, source_stream, destination_blob_name, content_type='image/png'):
     """Uploads a file to the bucket from a byte stream."""
     try:
@@ -150,11 +158,15 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 
-def generate_image(paint_prompt, prompt, user_id, bucket_name, file_age):
+def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
-    blob_path = f'{user_id}/{filename}.png'
+    blob_path = f'{user_id}/{message_id}.png'
+    preview_blob_path = f'{user_id}/{message_id}_s.png'
     client = OpenAI()
-    prompt = paint_prompt + "\n" + prompt
+    prompt = paint_prompt + "\n" + i_prompt
+    public_img_url = ""
+    public_img_url_s = ""
+    
     try:
         response = client.images.generate(
             model="dall-e-3",
@@ -168,16 +180,24 @@ def generate_image(paint_prompt, prompt, user_id, bucket_name, file_age):
             set_bucket_lifecycle(bucket_name, file_age)
         else:
             print(f"Bucket {bucket_name} does not exist.")
-            return "SYSTEM:バケットが存在しません。"
+            return "SYSTEM:バケットが存在しません。", public_img_url, public_img_url_s
 
         # PNG画像をダウンロード
         png_image = download_image(image_result)
+        preview_image = create_preview_image(png_image)
+        
+        png_image.seek(0)  # ストリームをリセット
+        preview_image.seek(0)  # ストリームをリセット
 
-        # 元のPNG画像をアップロード
-        public_url_original = upload_blob(bucket_name, png_image, blob_path)
-        return f"SYSTEM:{prompt}のキーワードに基づきシーンを変更しました。", public_url_original
+        # 画像をアップロード
+        public_img_url = upload_blob(bucket_name, png_image, blob_path)
+        public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
+
+        
+        return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。", public_img_url, public_img_url_s
     except Exception as e:
-        return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
+        print(f"generate_image error: {e}" )
+        return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
 def run_conversation(GPT_MODEL, messages):
     try:
@@ -203,12 +223,13 @@ def run_conversation_f(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
-    public_url_original = None
+def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
+    public_img_url = None
+    public_img_url_s = None
     user_id = USER_ID
     bucket_name = BUCKET_NAME
     file_age = FILE_AGE
-    #paint_prompt = PAINT_PROMPT
+    paint_prompt = PAINT_PROMPT
     attempt = 0
     i_messages_for_api = messages_for_api.copy()
 
@@ -231,7 +252,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, BUCKE
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, public_url_original = generate_image(paint_prompt, arguments["prompt"], user_id, bucket_name, file_age)
+                    bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "search_wikipedia" and not search_wikipedia_called:
@@ -258,10 +279,10 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, BUCKE
                         bot_reply = response.choices[0].message.content
                     else:
                         bot_reply = "An error occurred while processing the question"
-                    return bot_reply, public_url_original                 
+                    return bot_reply, public_img_url, public_img_url_s
             else:
-                return response.choices[0].message.content, public_url_original
+                return response.choices[0].message.content, public_img_url, public_img_url_s
         else:
             return ERROR_MESSAGE + " Fail to connect OpenAI."
     
-    return bot_reply, public_url_original
+    return bot_reply, public_img_url, public_img_url_s
