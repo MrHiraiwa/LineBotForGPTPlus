@@ -813,7 +813,7 @@ def handle_message(event):
                     transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
 
-            temp_messages = nowDateStr + " SYSTEM:" + head_message + "\n" + display_name + ":" + user_message
+            temp_messages = "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
             total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 user['messages'].pop(0)
@@ -830,7 +830,7 @@ def handle_message(event):
                 bot_reply_list.append(['text', ERROR_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
-            user['messages'].append({'role': 'user', 'content': nowDateStr + " SYSTEM:" + head_message + "\n" + display_name + ":" + user_message})
+            user['messages'].append({'role': 'user', 'content':  "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
             bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
             bot_reply = bot_reply + links
