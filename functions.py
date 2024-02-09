@@ -195,6 +195,7 @@ def generate_image(paint_prompt, prompt, user_id, message_id, bucket_name, file_
         
         return f"SYSTEM:{prompt}のキーワードに基づきシーンを変更しました。", public_img_url, public_img_url_s
     except Exception as e:
+        print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
 def run_conversation(GPT_MODEL, messages):
