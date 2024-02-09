@@ -16,9 +16,6 @@ google_cse_id = os.getenv("GOOGLE_CSE_ID")
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 gpt_client = OpenAI(api_key=openai_api_key)
-public_url = []
-public_img_url = []
-public_img_url_s = []
     
 user_id = []
 bucket_name = []
@@ -166,6 +163,9 @@ def generate_image(paint_prompt, prompt, user_id, message_id, bucket_name, file_
     preview_blob_path = f'{user_id}/{message_id}_s.png'
     client = OpenAI()
     prompt = paint_prompt + "\n" + prompt
+    public_img_url = ""
+    public_img_url_s = ""
+    
     try:
         response = client.images.generate(
             model="dall-e-3",
@@ -179,7 +179,7 @@ def generate_image(paint_prompt, prompt, user_id, message_id, bucket_name, file_
             set_bucket_lifecycle(bucket_name, file_age)
         else:
             print(f"Bucket {bucket_name} does not exist.")
-            return "SYSTEM:バケットが存在しません。"
+            return "SYSTEM:バケットが存在しません。", public_img_url, public_img_url_s
 
         # PNG画像をダウンロード
         png_image = download_image(image_result)
@@ -195,7 +195,7 @@ def generate_image(paint_prompt, prompt, user_id, message_id, bucket_name, file_
         
         return f"SYSTEM:{prompt}のキーワードに基づきシーンを変更しました。", public_img_url, public_img_url_s
     except Exception as e:
-        return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
+        return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
 def run_conversation(GPT_MODEL, messages):
     try:
