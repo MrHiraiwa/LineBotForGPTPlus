@@ -535,9 +535,8 @@ def handle_message(event):
                 vision_results = vision_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
                 str_vision_results = str(vision_results)
                 str_vision_results = OCR_BOTGUIDE_MESSAGE + "\n" + str_vision_results
-                result, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, str_vision_results, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE)
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
-                head_message = head_message + OCR_MESSAGE + "\n" + result
+                head_message = head_message + OCR_MESSAGE + "\n" + str_vision_results
                 user_message = OCR_USER_MESSAGE
             elif message_type == 'location':
                 latitude =  event.message.latitude
