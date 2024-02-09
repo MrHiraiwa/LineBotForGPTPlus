@@ -221,7 +221,7 @@ def run_conversation_f(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
+def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
