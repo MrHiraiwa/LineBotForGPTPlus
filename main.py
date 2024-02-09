@@ -40,6 +40,7 @@ openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
 admin_password = os.environ["ADMIN_PASSWORD"]
+DATABASE_NAME = os.getenv('DATABASE_NAME')
 secret_key = os.getenv('SECRET_KEY')
 jst = pytz.timezone('Asia/Tokyo')
 nowDate = datetime.now(jst) 
@@ -65,10 +66,6 @@ REQUIRED_ENV_VARS = [
     "FORGET_GUIDE_MESSAGE",
     "FORGET_MESSAGE",
     "FORGET_QUICK_REPLY",
-    "SEARCH_KEYWORDS",
-    "SEARCH_MESSAGE",
-    "IMAGE_KEYWORDS",
-    "IMAGE_MESSAGE",
     "ERROR_MESSAGE",
     "LINE_REPLY",
     "TEXT_OR_AUDIO_KEYWORDS",
@@ -142,10 +139,6 @@ DEFAULT_ENV_VARS = {
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
     'FORGET_MESSAGE': '記憶を消去しました。',
     'FORGET_QUICK_REPLY': '😱記憶を消去',
-    'SEARCH_KEYWORDS': 'ませんか,ますか,今日,本日,まとめ,検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓検索,調べ,教えて,知ってる,どう,どこ,誰,何,なに,どれ,どの,?,？,知っと,分かる,なぜ,理由,方法,手段,ように,いつ,何時,場所,状態,いくつ,なんぼ,いくら,種類,特徴,探す,見つ,確認,認識,理解,❔,❓,Who,What,Where,When,Why,How,Which,Whose,Can,Could,Will,Would,Do,Does,Is,Are,Did,Were,Have,Has,谁,什么,哪里,何时,为什么,怎么,哪个,能,可以,会,是,有,在,什麼,哪裡,為什麼,怎麼,哪個,能,可以,會,是,有,在,누구,뭐,어디,언제,왜,어떻게,어느,ㄹ까요,나요,습니까,Siapa,Apa,Di,Kapan,Mengapa,Bagaimana,Yang,Dapat,Akan,Adalah,Punyaใคร,อะไร,ที่ไหน,เมื่อไหร่,ทำไม,อย่างไร,ไหน,ได้,จะ,คือ,มี',
-    'SEARCH_MESSAGE': '{display_name}の問いに対して以下の検索結果の情報が有益な場合は、情報を{display_name}に報告してください。情報にURLが含まれる場合はURLを提示してください。',
-    'IMAGE_KEYWORDS': '画像,写真,絵,イメージ,image,photo',
-    'IMAGE_MESSAGE': '貴方が絵を描いた時の気持ちを{display_name}に返信してください。',
     'ERROR_MESSAGE': 'システムエラーが発生しています。',
     'LINE_REPLY': 'Text',
     'TEXT_OR_AUDIO_KEYWORDS': '音声設定',
@@ -198,7 +191,7 @@ DEFAULT_ENV_VARS = {
 }
 
 try:
-    db = firestore.Client()
+    db = firestore.Client(database=DATABASE_NAME)
 except Exception as e:
     print(f"Error creating Firestore client: {e}")
     raise
@@ -209,8 +202,6 @@ def reload_settings():
     global NG_MESSAGE, NG_KEYWORDS
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
-    global SEARCH_KEYWORDS, SEARCH_MESSAGE
-    global IMAGE_KEYWORDS, IMAGE_MESSAGE
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
     global LINE_REPLY, BACKET_NAME, FILE_AGE
@@ -222,6 +213,7 @@ def reload_settings():
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
+    global DATABASE_NAME
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -254,18 +246,6 @@ def reload_settings():
     FORGET_GUIDE_MESSAGE = get_setting('FORGET_GUIDE_MESSAGE')
     FORGET_MESSAGE = get_setting('FORGET_MESSAGE')
     FORGET_QUICK_REPLY = get_setting('FORGET_QUICK_REPLY')
-    SEARCH_KEYWORDS = get_setting('SEARCH_KEYWORDS')
-    if SEARCH_KEYWORDS:
-        SEARCH_KEYWORDS = SEARCH_KEYWORDS.split(',')
-    else:
-        SEARCH_KEYWORDS = []
-    SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE')
-    IMAGE_KEYWORDS = get_setting('IMAGE_KEYWORDS')
-    if IMAGE_KEYWORDS:
-        IMAGE_KEYWORDS = IMAGE_KEYWORDS.split(',')
-    else:
-        IMAGE_KEYWORDS = []
-    IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE')
     ERROR_MESSAGE = get_setting('ERROR_MESSAGE')
     LINE_REPLY = get_setting('LINE_REPLY')
     TEXT_OR_AUDIO_KEYWORDS = get_setting('TEXT_OR_AUDIO_KEYWORDS')
@@ -513,7 +493,7 @@ def handle_message(event):
         message_id = event.message.id
         source_type = event.source.type
             
-        db = firestore.Client()
+        db = firestore.Client(database=DATABASE_NAME)
         doc_ref = db.collection(u'users').document(user_id)
         
         @firestore.transactional
@@ -763,14 +743,6 @@ def handle_message(event):
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
 
-            if (any(word in user_message for word in SEARCH_KEYWORDS) or any(word in user_message for word in IMAGE_KEYWORDS)) and exec_functions == False:
-                result, public_img_url, public_img_url_s = langchain_agent(user_message, user_id, message_id, BACKET_NAME, FILE_AGE)
-                SEARCH_MESSAGE = get_setting('SEARCH_MESSAGE').format(display_name=display_name)
-                head_message = head_message + SEARCH_MESSAGE + "\n"
-                if  public_img_url:
-                    IMAGE_MESSAGE = get_setting('IMAGE_MESSAGE').format(display_name=display_name)
-                    head_message = head_message + IMAGE_MESSAGE + "\n"
-                head_message = head_message + result
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
@@ -963,7 +935,7 @@ def get_profile(user_id):
 
 @app.route('/webhook', methods=['POST'])
 def stripe_webhook():
-    db = firestore.Client()
+    db = firestore.Client(database=DATABASE_NAME)
 
     payload = request.get_data(as_text=True)
     sig_header = request.headers.get('Stripe-Signature')
