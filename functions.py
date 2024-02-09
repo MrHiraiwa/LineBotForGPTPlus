@@ -10,6 +10,7 @@ import uuid
 import functions_config as cf
 import json
 import wikipedia
+from PIL import Image
 
 google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
