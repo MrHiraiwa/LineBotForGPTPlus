@@ -17,7 +17,8 @@ google_cse_id = os.getenv("GOOGLE_CSE_ID")
 openai_api_key = os.getenv('OPENAI_API_KEY')
 gpt_client = OpenAI(api_key=openai_api_key)
 public_url = []
-public_url_original = []
+public_img_url = []
+public_img_url_s = []
     
 user_id = []
 bucket_name = []
@@ -174,8 +175,9 @@ def generate_image(paint_prompt, prompt, user_id, bucket_name, file_age):
         png_image = download_image(image_result)
 
         # 元のPNG画像をアップロード
-        public_url_original = upload_blob(bucket_name, png_image, blob_path)
-        return f"SYSTEM:{prompt}のキーワードに基づきシーンを変更しました。", public_url_original
+        public_img_url = upload_blob(bucket_name, png_image, blob_path)
+        public_img_url_s = None
+        return f"SYSTEM:{prompt}のキーワードに基づきシーンを変更しました。", public_img_url, public_img_url_s
     except Exception as e:
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
 
@@ -204,7 +206,8 @@ def run_conversation_f(GPT_MODEL, messages):
         return None  # エラー時には None を返す
 
 def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
-    public_url_original = None
+    public_img_url = None
+    public_img_url_s = None
     user_id = USER_ID
     bucket_name = BUCKET_NAME
     file_age = FILE_AGE
@@ -231,7 +234,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, BUCKE
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, public_url_original = generate_image(paint_prompt, arguments["prompt"], user_id, bucket_name, file_age)
+                    bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, bucket_name, file_age)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "search_wikipedia" and not search_wikipedia_called:
@@ -258,10 +261,10 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, BUCKE
                         bot_reply = response.choices[0].message.content
                     else:
                         bot_reply = "An error occurred while processing the question"
-                    return bot_reply, public_url_original                 
+                    return bot_reply, public_img_url, public_img_url_s
             else:
-                return response.choices[0].message.content, public_url_original
+                return response.choices[0].message.content, public_img_url, public_img_url_s
         else:
             return ERROR_MESSAGE + " Fail to connect OpenAI."
     
-    return bot_reply, public_url_original
+    return bot_reply, public_img_url, public_img_url_s
