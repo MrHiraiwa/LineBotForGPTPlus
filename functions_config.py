@@ -9,7 +9,7 @@ functions = [
         # 関数の名称
         "name": "generate_image",
         # 関数の機能説明
-        "description": "When a topic comes up about places or emotions, it generates your emotions and scenery from a single sentence.",
+        "description": "If you specify a long sentence, you can generate an image that matches the sentence.",
         # 関数のパラメータ
         "parameters": {
             "type": "object",
@@ -18,7 +18,7 @@ functions = [
                 "prompt": {
                     "type": "string",
                     # 引数の説明
-                    "description": "景色や感情"
+                    "description": "画像生成の文章"
                 }
             }
         }
