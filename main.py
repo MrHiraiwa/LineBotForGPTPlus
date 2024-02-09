@@ -48,6 +48,7 @@ nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
 REQUIRED_ENV_VARS = [
     "BOT_NAME",
     "SYSTEM_PROMPT",
+    "PAINT_PROMPT",
     "GPT_MODEL",
     "MAX_DAILY_USAGE",
     "GROUP_MAX_DAILY_USAGE",
@@ -121,6 +122,7 @@ REQUIRED_ENV_VARS = [
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
+    'PAINT_PROMPT': '',
     'GPT_MODEL': 'gpt-3.5-turbo',
     'MAX_TOKEN_NUM': '2000',
     'MAX_DAILY_USAGE': '1000',
@@ -197,7 +199,7 @@ except Exception as e:
     raise
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, GPT_MODEL
+    global BOT_NAME, SYSTEM_PROMPT, PAINT_PROMPT, GPT_MODEL
     global MAX_TOKEN_NUM, MAX_DAILY_USAGE, GROUP_MAX_DAILY_USAGE, FREE_LIMIT_DAY, MAX_DAILY_MESSAGE
     global NG_MESSAGE, NG_KEYWORDS
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
@@ -220,6 +222,7 @@ def reload_settings():
     else:
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
+    PAINT_PROMPT = get_setting('PAINT_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
     MAX_TOKEN_NUM = int(get_setting('MAX_TOKEN_NUM') or 2000)
     MAX_DAILY_USAGE = int(get_setting('MAX_DAILY_USAGE') or 0)
@@ -823,7 +826,7 @@ def handle_message(event):
 
             messages = user['messages']
             try:
-                bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, ERROR_MESSAGE, BACKET_NAME, FILE_AGE)
+                bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE)
             except Exception as e:
                 print(f"Error {str(e)}")
                 bot_reply_list.append(['text', ERROR_MESSAGE])
