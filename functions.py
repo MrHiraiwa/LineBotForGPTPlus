@@ -227,7 +227,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, ERROR_MESSAGE, PAINT
     user_id = USER_ID
     bucket_name = BUCKET_NAME
     file_age = FILE_AGE
-    #paint_prompt = PAINT_PROMPT
+    paint_prompt = PAINT_PROMPT
     attempt = 0
     i_messages_for_api = messages_for_api.copy()
 
