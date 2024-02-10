@@ -45,7 +45,8 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 
-def embedding_from_storage(bucket_name, source_blob_name):
+def embedding_from_storage(bucket_name):
+    source_blob_name = 'embedding_input.txt'
     destination_blob_name = 'embedding_data.json'
     
     # Cloud Storageからテキストデータをダウンロード
