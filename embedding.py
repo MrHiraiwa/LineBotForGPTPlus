@@ -1,5 +1,5 @@
 import os
-import openai
+from openai import OpenAI
 from google.cloud import storage
 import json
 
