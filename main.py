@@ -1011,7 +1011,7 @@ def cancel():
 def embedding():
     embedding_bucket_name = BACKET_NAME + "_embedding"
     # embedding_from_storage関数を呼び出し
-    public_url = embedding_from_storage(BACKET_NAME)
+    public_url = embedding_from_storage(embedding_bucket_name )
 
     # 公開URLをレスポンスとして返す
     return Response(public_url, status=200)
