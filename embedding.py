@@ -23,7 +23,7 @@ def download_text_from_storage(bucket_name, source_blob_name):
         raise
 
 def create_embedding(input_text):
-    response = openai.Embedding.create(
+    response = openai.embeddings.create(
         model='text-embedding-3-small',
         input=input_text
     )
