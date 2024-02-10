@@ -34,6 +34,7 @@ from vision import vision_api
 from maps import get_addresses
 from payment import create_checkout_session
 from functions import chatgpt_functions
+from embedding import embedding_from_storage
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -1005,6 +1006,14 @@ def success():
 @app.route('/cancel', methods=['GET'])
 def cancel():
     return render_template('cancel.html')
+
+@app.route('/embedding', methods=['GET'])
+def embedding():
+    # embedding_from_storage関数を呼び出し
+    public_url = embedding_from_storage(BACKET_NAME)
+
+    # 公開URLをレスポンスとして返す
+    return Response(public_url, status=200)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
