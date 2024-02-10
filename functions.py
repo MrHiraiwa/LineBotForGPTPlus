@@ -23,6 +23,11 @@ user_id = []
 bucket_name = []
 file_age = []
 
+def update_function_descriptions(functions, extra_description):
+    for func in functions:
+        if "parameters" in func:
+            for param_name, param_desc in func["parameters"].items():
+                func["description"] += extra_description
 
 def clock():
     jst = pytz.timezone('Asia/Tokyo')
@@ -236,7 +241,8 @@ def run_conversation(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(GPT_MODEL, messages):
+def run_conversation_f(GPT_MODEL, messages, extra_description):
+    update_function_descriptions(cf.functions, extra_description)
     try:
         response = gpt_client.chat.completions.create(
             model=GPT_MODEL,
@@ -249,13 +255,14 @@ def run_conversation_f(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5):
+def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME=None, FILE_AGE=None, max_attempts=5, EXTEA_DESCRIPTION):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
     bucket_name = BUCKET_NAME
     file_age = FILE_AGE
     paint_prompt = PAINT_PROMPT
+    extra_description = EXTEA_DESCRIPTION
     attempt = 0
     i_messages_for_api = messages_for_api.copy()
 
@@ -267,7 +274,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     get_googlesearch1_called = False
 
     while attempt < max_attempts:
-        response = run_conversation_f(GPT_MODEL, i_messages_for_api)
+        response = run_conversation_f(GPT_MODEL, i_messages_for_api, extra_description)
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:
