@@ -136,7 +136,7 @@ def scraping(link):
         if len(contents) > 1000:
             contents = contents[:1000] + "..."
 
-    return f"SYSTEM:以下は{link}の読み込み結果です。情報を提示するときは情報とともに参照元URLアドレスも案内してください。\n" + contents
+    return f"SYSTEM:以下はURL「{link}」の読み込み結果です。情報を提示するときは情報とともにURLも案内してください。\n" + contents
 
 def set_bucket_lifecycle(bucket_name, age):
     storage_client = storage.Client()
