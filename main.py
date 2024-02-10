@@ -1009,6 +1009,7 @@ def cancel():
 
 @app.route('/embedding', methods=['GET'])
 def embedding():
+    embedding_bucket_name = BACKET_NAME + "_embedding"
     # embedding_from_storage関数を呼び出し
     public_url = embedding_from_storage(BACKET_NAME)
 
