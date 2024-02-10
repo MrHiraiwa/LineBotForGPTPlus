@@ -28,12 +28,6 @@ def update_function_descriptions(functions, extra_description, function_name_to_
         if func["name"] == function_name_to_update:
             func["description"] += extra_description
 
-def update_function_descriptions(functions, extra_description):
-    for func in functions:
-        if "parameters" in func:
-            for param_name, param_desc in func["parameters"].items():
-                func["description"] += extra_description
-
 def clock():
     jst = pytz.timezone('Asia/Tokyo')
     nowDate = datetime.now(jst) 
