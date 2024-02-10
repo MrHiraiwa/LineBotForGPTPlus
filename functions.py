@@ -28,6 +28,11 @@ def update_function_descriptions(functions, extra_description, function_name_to_
         if func["name"] == function_name_to_update:
             func["description"] += extra_description
 
+def downdate_function_descriptions(functions, extra_description, function_name_to_update):
+    for func in functions:
+        if func["name"] == function_name_to_update:
+            func["description"] = ""
+
 def clock():
     jst = pytz.timezone('Asia/Tokyo')
     nowDate = datetime.now(jst) 
@@ -241,8 +246,9 @@ def run_conversation(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(GPT_MODEL, messages, extra_description):
+def run_conversation_f(GPT_MODEL, messages, extra_description, attempt):
     update_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
+    print(f"cf.functions: {cf.functions}")
     try:
         response = gpt_client.chat.completions.create(
             model=GPT_MODEL,
@@ -250,8 +256,10 @@ def run_conversation_f(GPT_MODEL, messages, extra_description):
             functions=cf.functions,
             function_call="auto",
         )
+        downdate_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
+        downdate_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
@@ -274,7 +282,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     get_googlesearch1_called = False
 
     while attempt < max_attempts:
-        response = run_conversation_f(GPT_MODEL, i_messages_for_api, extra_description)
+        response = run_conversation_f(GPT_MODEL, i_messages_for_api, extra_description, attempt)
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:
