@@ -24,7 +24,7 @@ def download_text_from_storage(bucket_name, source_blob_name):
 
 def create_embedding(input_text):
     response = openai.Embedding.create(
-        model='text-embedding-ada-002',
+        model='text-embedding-3-small',
         input=input_text
     )
     vec = response['data'][0]['embedding']
