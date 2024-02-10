@@ -1,7 +1,7 @@
 functions = [
     {
         # 関数の名称
-        "name": "get_googlesearch1",
+        "name": "get_customsearch1",
         # 関数の機能説明
         "description": "",
         # 関数のパラメータ

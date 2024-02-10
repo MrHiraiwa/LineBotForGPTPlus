@@ -65,7 +65,7 @@ def get_googlesearch(words, num=3, start_index=1, search_lang='lang_ja'):
 
     return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
-def get_googlesearch1(words, num=3, start_index=1, search_lang='lang_ja'):
+def get_customsearch1(words, num=3, start_index=1, search_lang='lang_ja'):
     base_url = "https://www.googleapis.com/customsearch/v1"
     params = {
         "key": google_api_key,
@@ -247,7 +247,7 @@ def run_conversation(GPT_MODEL, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(GPT_MODEL, messages, extra_description, attempt):
-    update_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
+    update_function_descriptions(cf.functions, extra_description, "get_customsearch1")
     print(f"cf.functions: {cf.functions}")
     try:
         response = gpt_client.chat.completions.create(
@@ -256,10 +256,10 @@ def run_conversation_f(GPT_MODEL, messages, extra_description, attempt):
             functions=cf.functions,
             function_call="auto",
         )
-        downdate_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
+        downdate_function_descriptions(cf.functions, extra_description, "get_customsearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
-        downdate_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
+        downdate_function_descriptions(cf.functions, extra_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
@@ -279,7 +279,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     search_wikipedia_called = False
     scraping_called = False
     get_googlesearch_called = False
-    get_googlesearch1_called = False
+    get_customsearch1_called = False
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, i_messages_for_api, extra_description, attempt)
@@ -315,10 +315,10 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                     bot_reply = get_googlesearch(arguments["words"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
-                elif function_call.name == "get_googlesearch1" and not get_googlesearch1_called:
-                    get_googlesearch1_called = True
+                elif function_call.name == "get_customsearch1" and not get_customsearch1_called:
+                    get_customsearch1_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply = get_googlesearch1(arguments["words"])
+                    bot_reply = get_customsearch1(arguments["words"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
