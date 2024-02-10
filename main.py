@@ -171,7 +171,7 @@ DEFAULT_ENV_VARS = {
     'OR_CHINESE_CANTONESE_QUICK_REPLY': '🌃広東語',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
     'FILE_AGE': '7',
-    'EXTEA_DESCRIPTION': '',
+    'EXTEA_DESCRIPTION': '利用できません。',
     'TRANSLATE_KEYWORDS': '翻訳モード',
     'TRANSLATE_GUIDE_MESSAGE': 'ユーザーに「画面下の「中国語」又は「英語」又は「インドネシア語」又は「日本語」又は「韓国語」又は「タイランド語」の項目をタップすると私はあなたの言葉を指定した言葉に翻訳する」と案内してください。以下の文章はユーザーから送られたものです。',
     'TRANSLATE_MESSAGE': '翻訳モードを{translate_language}にしました。',
