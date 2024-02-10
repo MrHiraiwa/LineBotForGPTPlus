@@ -23,6 +23,11 @@ user_id = []
 bucket_name = []
 file_age = []
 
+def update_function_descriptions(functions, extra_description, function_name_to_update):
+    for func in functions:
+        if func["name"] == function_name_to_update:
+            func["description"] += extra_description
+
 def update_function_descriptions(functions, extra_description):
     for func in functions:
         if "parameters" in func:
@@ -242,7 +247,7 @@ def run_conversation(GPT_MODEL, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(GPT_MODEL, messages, extra_description):
-    update_function_descriptions(cf.functions, extra_description)
+    update_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
     try:
         response = gpt_client.chat.completions.create(
             model=GPT_MODEL,
