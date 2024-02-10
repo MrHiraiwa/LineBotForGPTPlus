@@ -243,6 +243,7 @@ def run_conversation(GPT_MODEL, messages):
 
 def run_conversation_f(GPT_MODEL, messages, extra_description):
     update_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
+    print(f"cf.functions: {cf.functions}")
     try:
         response = gpt_client.chat.completions.create(
             model=GPT_MODEL,
