@@ -28,6 +28,11 @@ def update_function_descriptions(functions, extra_description, function_name_to_
         if func["name"] == function_name_to_update:
             func["description"] += extra_description
 
+def downdate_function_descriptions(functions, extra_description, function_name_to_update):
+    for func in functions:
+        if func["name"] == function_name_to_update:
+            func["description"] = ""
+
 def clock():
     jst = pytz.timezone('Asia/Tokyo')
     nowDate = datetime.now(jst) 
@@ -242,8 +247,7 @@ def run_conversation(GPT_MODEL, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(GPT_MODEL, messages, extra_description, attempt):
-    if attempt == 0:
-        update_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
+    update_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
     print(f"cf.functions: {cf.functions}")
     try:
         response = gpt_client.chat.completions.create(
@@ -252,8 +256,10 @@ def run_conversation_f(GPT_MODEL, messages, extra_description, attempt):
             functions=cf.functions,
             function_call="auto",
         )
+        downdate_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
+        downdate_function_descriptions(cf.functions, extra_description, "get_googlesearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
