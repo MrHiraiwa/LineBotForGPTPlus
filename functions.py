@@ -88,7 +88,6 @@ def get_customsearch1(words, num=3, start_index=1, search_lang='lang_ja'):
         link = item.get("link")
         snippet = item.get("snippet")
         formatted_results += f"タイトル: {title}\nリンク: {link}\n概要: {snippet}\n\n"
-        print(f"formatted_results : {formatted_results}")
 
     return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
@@ -248,7 +247,6 @@ def run_conversation(GPT_MODEL, messages):
 
 def run_conversation_f(GPT_MODEL, messages, extra_description, attempt):
     update_function_descriptions(cf.functions, extra_description, "get_customsearch1")
-    print(f"cf.functions: {cf.functions}")
     try:
         response = gpt_client.chat.completions.create(
             model=GPT_MODEL,
