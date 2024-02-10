@@ -96,6 +96,7 @@ REQUIRED_ENV_VARS = [
     "OR_CHINESE_CANTONESE_QUICK_REPLY",
     "BACKET_NAME",
     "FILE_AGE",
+    "EXTEA_DESCRIPTION",
     "TRANSLATE_KEYWORDS",
     "TRANSLATE_GUIDE_MESSAGE",
     "TRANSLATE_MESSAGE",
@@ -170,6 +171,7 @@ DEFAULT_ENV_VARS = {
     'OR_CHINESE_CANTONESE_QUICK_REPLY': '🌃広東語',
     'BACKET_NAME': 'あなたがCloud Strageに作成したバケット名を入れてください。',
     'FILE_AGE': '7',
+    'EXTEA_DESCRIPTION': '',
     'TRANSLATE_KEYWORDS': '翻訳モード',
     'TRANSLATE_GUIDE_MESSAGE': 'ユーザーに「画面下の「中国語」又は「英語」又は「インドネシア語」又は「日本語」又は「韓国語」又は「タイランド語」の項目をタップすると私はあなたの言葉を指定した言葉に翻訳する」と案内してください。以下の文章はユーザーから送られたものです。',
     'TRANSLATE_MESSAGE': '翻訳モードを{translate_language}にしました。',
@@ -206,7 +208,7 @@ def reload_settings():
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
-    global LINE_REPLY, BACKET_NAME, FILE_AGE
+    global LINE_REPLY, BACKET_NAME, FILE_AGE, EXTEA_DESCRIPTION
     global AUDIO_GENDER, AUDIO_SPEED_KEYWORDS, AUDIO_SPEED_GUIDE_MESSAGE, AUDIO_SPEED_MESSAGE, AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY
     global OR_ENGLISH_KEYWORDS, OR_ENGLISH_GUIDE_MESSAGE, OR_ENGLISH_MESSAGE
     global OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY
@@ -294,6 +296,7 @@ def reload_settings():
     OR_CHINESE_CANTONESE_QUICK_REPLY = get_setting('OR_CHINESE_CANTONESE_QUICK_REPLY')
     BACKET_NAME = get_setting('BACKET_NAME')
     FILE_AGE = get_setting('FILE_AGE')
+    EXTEA_DESCRIPTION = get_setting('EXTEA_DESCRIPTION')
     TRANSLATE_KEYWORDS = get_setting('TRANSLATE_KEYWORDS')
     if TRANSLATE_KEYWORDS:
         TRANSLATE_KEYWORDS = TRANSLATE_KEYWORDS.split(',')
@@ -825,7 +828,7 @@ def handle_message(event):
 
             messages = user['messages']
             try:
-                bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE)
+                bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, EXTEA_DESCRIPTION)
             except Exception as e:
                 print(f"Error {str(e)}")
                 bot_reply_list.append(['text', ERROR_MESSAGE])
