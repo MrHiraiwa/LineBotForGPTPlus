@@ -46,18 +46,22 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         raise
 
 def embedding_from_storage(bucket_name):
-    source_blob_name = 'embedding_input.txt'
-    destination_blob_name = 'embedding_data.json'
+    try:
+        source_blob_name = 'embedding_input.txt'
+        destination_blob_name = 'embedding_data.json'
     
-    # Cloud Storageからテキストデータをダウンロード
-    input_text = download_text_from_storage(bucket_name, source_blob_name)
+        # Cloud Storageからテキストデータをダウンロード
+        input_text = download_text_from_storage(bucket_name, source_blob_name)
 
-    # ベクトルデータを生成
-    embedding_vector = create_embedding(input_text)
+        # ベクトルデータを生成
+        embedding_vector = create_embedding(input_text)
 
-    # ベクトルデータをJSON形式に変換
-    embedding_json = json.dumps(embedding_vector)
+        # ベクトルデータをJSON形式に変換
+        embedding_json = json.dumps(embedding_vector)
 
-    # Cloud Storageにアップロードして、公開URLを取得
-    public_url = upload_blob(bucket_name, embedding_json, destination_blob_name)
-    return public_url
+        # Cloud Storageにアップロードして、公開URLを取得
+        public_url = upload_blob(bucket_name, embedding_json, destination_blob_name)
+        return public_url
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
