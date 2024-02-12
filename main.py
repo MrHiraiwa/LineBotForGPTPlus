@@ -524,6 +524,7 @@ def handle_message(event):
             public_url = []
             public_img_url = []
             public_img_url_s = []
+            enable_quick_reply = False
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -749,28 +750,34 @@ def handle_message(event):
                 return 'OK'
 
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
+                enable_quick_reply = True
                 quick_reply_items.append(['message', FORGET_QUICK_REPLY, FORGET_QUICK_REPLY])
                 head_message = head_message + FORGET_GUIDE_MESSAGE
             if any(word in user_message for word in TEXT_OR_AUDIO_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
+                enable_quick_reply = True
                 quick_reply_items.append(['message', CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_QUICK_REPLY])
                 quick_reply_items.append(['message', CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_QUICK_REPLY])
                 head_message = head_message + TEXT_OR_AUDIO_GUIDE_MESSAGE
             if any(word in user_message for word in OR_CHINESE_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
+                enable_quick_reply = True
                 quick_reply_items.append(['message', OR_CHINESE_MANDARIN_QUICK_REPLY, OR_CHINESE_MANDARIN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_CHINESE_CANTONESE_QUICK_REPLY, OR_CHINESE_CANTONESE_QUICK_REPLY])
                 head_message = head_message + OR_CHINESE_GUIDE_MESSAGE
             if any(word in user_message for word in OR_ENGLISH_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
+                enable_quick_reply = True
                 quick_reply_items.append(['message', OR_ENGLISH_AMERICAN_QUICK_REPLY, OR_ENGLISH_AMERICAN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_BRIDISH_QUICK_REPLY, OR_ENGLISH_BRIDISH_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_AUSTRALIAN_QUICK_REPLY, OR_ENGLISH_AUSTRALIAN_QUICK_REPLY])
                 quick_reply_items.append(['message', OR_ENGLISH_INDIAN_QUICK_REPLY, OR_ENGLISH_INDIAN_QUICK_REPLY])
                 head_message = head_message + OR_ENGLISH_GUIDE_MESSAGE
             if any(word in user_message for word in AUDIO_SPEED_KEYWORDS) and not exec_functions and (LINE_REPLY == "Audio"):
+                enable_quick_reply = True
                 quick_reply_items.append(['message', AUDIO_SPEED_SLOW_QUICK_REPLY, AUDIO_SPEED_SLOW_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_NORMAL_QUICK_REPLY, AUDIO_SPEED_NORMAL_QUICK_REPLY])
                 quick_reply_items.append(['message', AUDIO_SPEED_FAST_QUICK_REPLY, AUDIO_SPEED_FAST_QUICK_REPLY])
                 head_message = head_message + AUDIO_SPEED_GUIDE_MESSAGE
             if any(word in user_message for word in TRANSLATE_KEYWORDS) and not exec_functions:
+                enable_quick_reply = True
                 quick_reply_items.append(['message', TRANSLATE_OFF_QUICK_REPLY, TRANSLATE_OFF_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_CHAINESE_QUICK_REPLY, TRANSLATE_CHAINESE_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_ENGLISH_QUICK_REPLY, TRANSLATE_ENGLISH_QUICK_REPLY])
@@ -780,6 +787,7 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
             if any(word in user_message for word in PAYMENT_KEYWORDS) and not exec_functions:
+                enable_quick_reply = True
                 if source_type == "user":
                     checkout_url = create_checkout_session(user_id, PAYMENT_PRICE_ID, PAYMENT_RESULT_URL + '/success', PAYMENT_RESULT_URL + '/cansel')
                     quick_reply_items.append(['uri', PAYMENT_QUICK_REPLY, checkout_url])
@@ -829,6 +837,8 @@ def handle_message(event):
             messages = user['messages']
             try:
                 bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, EXTEA_DESCRIPTION)
+                if enable_quick_reply == True:
+                    public_img_url = []
             except Exception as e:
                 print(f"Error {str(e)}")
                 bot_reply_list.append(['text', ERROR_MESSAGE])
