@@ -229,7 +229,7 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
 
         
-        return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。", public_img_url, public_img_url_s
+        return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。(dummy.jpg)", public_img_url, public_img_url_s
     except Exception as e:
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
