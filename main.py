@@ -563,7 +563,7 @@ def handle_message(event):
                 user['messages'] = [{**msg, 'content': get_decrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
                 updated_date_string = user['updated_date_string']
                 daily_usage = user['daily_usage']
-                monthly_usage = user['monthly_usage']
+                monthly_usage = user.get('monthly_usage', 0)
                 start_free_day = user['start_free_day']
                 audio_or_text = user['audio_or_text']
                 or_chinese = user['or_chinese']
