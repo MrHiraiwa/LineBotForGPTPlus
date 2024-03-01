@@ -576,13 +576,11 @@ def handle_message(event):
                     daily_usage = 0
                 else:
                     daily_usage = daily_usage + 1
-                print(f"1 monthly_usage: {monthly_usage} ")
+
                 if nowDate.month != updated_date.month:
                     monthly_usage = 0
-                    print(f"2 monthly_usage: {monthly_usage} ")
                 else:
                     monthly_usage = monthly_usage + 1
-                    print(f"3 monthly_usage: {monthly_usage} ")
                     
             else:
                 user = {
@@ -896,7 +894,6 @@ def handle_message(event):
             
             # messages を暗号化
             encrypted_messages = [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
-            print(f"4 monthly_usage: {monthly_usage} ")
 
             # daily_usage をインクリメント
             user['daily_usage'] = daily_usage
