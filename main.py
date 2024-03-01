@@ -577,7 +577,7 @@ def handle_message(event):
                 else:
                     daily_usage = daily_usage + 1
                 print(f"1 monthly_usage: {monthly_usage} ")
-                if nowDate.month() != updated_date.month():
+                if nowDate.month != updated_date.month:
                     monthly_usage = 0
                     print(f"2 monthly_usage: {monthly_usage} ")
                 else:
