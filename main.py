@@ -567,7 +567,7 @@ def handle_message(event):
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
                 else:
-                    daily_usage = user_data['daily_usage'] + 1
+                    daily_usage = daily_usage + 1
                     
             else:
                 user = {
