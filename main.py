@@ -486,22 +486,17 @@ def update_monthly_usage(transaction, doc_ref):
 
         if snapshot.exists:
             last_updated = snapshot.get('last_updated')
-            print(f"last_updated: {last_updated}")
             last_updated_date = last_updated.astimezone(jst).date() if last_updated else None
-            print(f"last_updated_date: {last_updated_date}")
             monthly_usage = snapshot.get('monthly_usage') if snapshot.exists and 'monthly_usage' in snapshot.to_dict() else 0
-            print(f"monthly_usage: {monthly_usage}")
             if last_updated_date is None or last_updated_date.month != nowDate.month:
                 monthly_usage = 1  # 新しい月になったら1にリセット
             else:
                 monthly_usage += 1  # 同じ月ならインクリメント
-            print(f"monthly_usage: {monthly_usage}")
             # ドキュメントを更新
             transaction.update(doc_ref, {
                 'monthly_usage': monthly_usage,
                 'last_updated': nowDate
             })
-            print(f"nowDate: {nowDate}")
         else:
             # ドキュメントが存在しない場合、新しいドキュメントを作成
             monthly_usage = 1
