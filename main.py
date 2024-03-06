@@ -477,7 +477,40 @@ def get_decrypted_message(enc_message, hashed_secret_key):
     except Exception as e:
         print(f"Error decrypting message: {e}")
         return None
+
+@firestore.transactional
+def update_monthly_usage(transaction, doc_ref):
+    try:
+        snapshot = doc_ref.get(transaction=transaction)
+        monthly_usage = 0
+
+        if snapshot.exists:
+            last_updated = snapshot.get('last_updated')
+            last_updated_date = last_updated.astimezone(jst).date() if last_updated else None
+            monthly_usage = snapshot.get('monthly_usage') if snapshot.exists and 'monthly_usage' in snapshot.to_dict() else 0
+            if last_updated_date is None or last_updated_date.month != nowDate.month:
+                monthly_usage = 1  # 新しい月になったら1にリセット
+            else:
+                monthly_usage += 1  # 同じ月ならインクリメント
+            # ドキュメントを更新
+            transaction.update(doc_ref, {
+                'monthly_usage': monthly_usage,
+                'last_updated': nowDate
+            })
+        else:
+            # ドキュメントが存在しない場合、新しいドキュメントを作成
+            monthly_usage = 1
+            transaction.set(doc_ref, {
+                'monthly_usage': monthly_usage,
+                'last_updated': nowDate
+            })
     
+        return monthly_usage
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
+    
+
 @app.route("/", methods=["POST"])
 def callback():
     # get X-Line-Signature header value
@@ -506,6 +539,11 @@ def handle_message(event):
         source_type = event.source.type
             
         db = firestore.Client(database=DATABASE_NAME)
+        
+        doc_ref = db.collection('settings').document('counter')
+        transaction = db.transaction()
+        monthly_usage = update_monthly_usage(transaction, doc_ref)
+        
         doc_ref = db.collection(u'users').document(user_id)
         
         @firestore.transactional
@@ -518,7 +556,6 @@ def handle_message(event):
             messages = []
             updated_date_string = nowDate
             daily_usage = 0
-            monthly_usage = 0
             start_free_day = datetime.now(jst)
             audio_or_text = 'Text'
             or_chinese = 'MANDARIN'
@@ -563,7 +600,6 @@ def handle_message(event):
                 user['messages'] = [{**msg, 'content': get_decrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]
                 updated_date_string = user['updated_date_string']
                 daily_usage = user['daily_usage']
-                monthly_usage = user.get('monthly_usage', 0)
                 start_free_day = user['start_free_day']
                 audio_or_text = user['audio_or_text']
                 or_chinese = user['or_chinese']
@@ -576,18 +612,12 @@ def handle_message(event):
                     daily_usage = 0
                 else:
                     daily_usage = daily_usage + 1
-
-                if nowDate.month != updated_date.month:
-                    monthly_usage = 0
-                else:
-                    monthly_usage = monthly_usage + 1
                     
             else:
                 user = {
                     'messages': messages,
                     'updated_date_string': nowDate,
                     'daily_usage': daily_usage,
-                    'monthly_usage': monthly_usage,
                     'start_free_day': start_free_day,
                     'audio_or_text' : audio_or_text,
                     'or_chinese' : or_chinese,
@@ -897,7 +927,6 @@ def handle_message(event):
 
             # daily_usage をインクリメント
             user['daily_usage'] = daily_usage
-            user['monthly_usage'] = monthly_usage
             user['updated_date_string'] = nowDate
 
             # Firestore ドキュメントを更新
