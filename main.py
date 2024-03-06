@@ -489,7 +489,7 @@ def update_monthly_usage(transaction, doc_ref):
             print(f"last_updated: {last_updated}")
             last_updated_date = last_updated.astimezone(jst).date() if last_updated else None
             print(f"last_updated_date: {last_updated_date}")
-            monthly_usage = snapshot.get('monthly_usage', 0)
+            monthly_usage = snapshot.get('monthly_usage') if snapshot.exists and 'monthly_usage' in snapshot.to_dict() else 0
             print(f"monthly_usage: {monthly_usage}")
             if last_updated_date is None or last_updated_date.month != nowDate.month:
                 monthly_usage = 1  # 新しい月になったら1にリセット
