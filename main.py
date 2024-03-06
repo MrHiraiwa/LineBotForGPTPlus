@@ -481,36 +481,36 @@ def get_decrypted_message(enc_message, hashed_secret_key):
 @firestore.transactional
 def update_monthly_usage(transaction, doc_ref):
     snapshot = doc_ref.get(transaction=transaction)
-    monthly_usage = 0
+    i_monthly_usage = 0
 
     if snapshot.exists:
         last_updated = snapshot.get('last_updated')
         print(f"last_updated: {last_updated}")
         last_updated_date = last_updated.astimezone(jst).date() if last_updated else None
         print(f"last_updated_date: {last_updated_date}")
-        # monthly_usage = snapshot.get('monthly_usage', 0)
-        monthly_usage = snapshot['monthly_usage']
-        print(f"monthly_usage: {monthly_usage}")
+        # i_monthly_usage = snapshot.get('monthly_usage', 0)
+        i_monthly_usage = snapshot['monthly_usage']
+        print(f"i_monthly_usage: {i_monthly_usage}")
         if last_updated_date is None or last_updated_date.month != nowDate.month:
-            monthly_usage = 1  # 新しい月になったら1にリセット
+            i_monthly_usage = 1  # 新しい月になったら1にリセット
         else:
-            monthly_usage += 1  # 同じ月ならインクリメント
-        print(f"monthly_usage: {monthly_usage}")
+            i_monthly_usage += 1  # 同じ月ならインクリメント
+        print(f"i_monthly_usage: {i_monthly_usage}")
         # ドキュメントを更新
         transaction.update(doc_ref, {
-            'monthly_usage': monthly_usage,
+            'monthly_usage': i_monthly_usage,
             'last_updated': nowDate
         })
         print(f"nowDate: {nowDate}")
     else:
         # ドキュメントが存在しない場合、新しいドキュメントを作成
-        monthly_usage = 1
+        i_monthly_usage = 1
         transaction.set(doc_ref, {
-            'monthly_usage': monthly_usage,
+            'monthly_usage': i_monthly_usage,
             'last_updated': nowDate
         })
 
-    return monthly_usage
+    return i_monthly_usage
 
 @app.route("/", methods=["POST"])
 def callback():
