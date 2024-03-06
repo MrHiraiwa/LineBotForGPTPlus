@@ -513,8 +513,6 @@ def update_monthly_usage(transaction, doc_ref):
         return monthly_usage
     except Exception as e:
         print(f"Error: {e}")
-        bot_reply_list.append(['text', ERROR_MESSAGE + f": {e}"])
-        line_reply(reply_token, bot_reply_list)
         raise
     
 
