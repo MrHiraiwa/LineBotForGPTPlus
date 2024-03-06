@@ -481,6 +481,7 @@ def get_decrypted_message(enc_message, hashed_secret_key):
 @firestore.transactional
 def update_monthly_usage(transaction, doc_ref):
     snapshot = doc_ref.get(transaction=transaction)
+    monthly_usage = 0
 
     if snapshot.exists:
         last_updated = snapshot.get('last_updated')
