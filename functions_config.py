@@ -81,7 +81,7 @@ functions = [
         # 関数の名称
         "name": "get_googlesearch",
         # 関数の機能説明
-        "description": "useful for when you need to answer questions about current events.",
+        "description": "",
         # 関数のパラメータ
         "parameters": {
             "type": "object",
