@@ -245,7 +245,7 @@ def run_conversation(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(GPT_MODEL, messages, extra_description, attempt):
+def run_conversation_f(GPT_MODEL, messages, google_description, extra_description, attempt):
     update_function_descriptions(cf.functions, google_description, "get_googlesearch")
     update_function_descriptions(cf.functions, extra_description, "get_customsearch1")
 
