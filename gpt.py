@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from google.cloud import storage
 import io
 import uuid
-import functions_config as cf
+import gpt_config as cf
 import json
 import wikipedia
 from PIL import Image
