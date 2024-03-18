@@ -34,6 +34,7 @@ from vision import vision_api
 from maps import get_addresses
 from payment import create_checkout_session
 from gpt import chatgpt_functions
+from claude import claude_functions
 from localllm import localllm_functions
 from embedding import embedding_from_storage
 
@@ -122,6 +123,7 @@ REQUIRED_ENV_VARS = [
     "VOICEVOX_URL",
     "VOICEVOX_STYLE_ID",
     "CORE_AI_TYPE",
+    "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL"
 ]
 
@@ -201,6 +203,7 @@ DEFAULT_ENV_VARS = {
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
     'VOICEVOX_STYLE_ID': '3',
     'CORE_AI_TYPE': 'GPT',
+    'CLAUDE_MODEL': 'claude-3-haiku-20240307',
     'LOCALLLM_BASE_URL': 'http://127.0.0.1:5000/v1'
 }
 
@@ -229,6 +232,7 @@ def reload_settings():
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
     global DATABASE_NAME
     global CORE_AI_TYPE
+    global CLAUDE_MODEL
     global LOCALLLM_BASE_URL
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -342,6 +346,7 @@ def reload_settings():
     VOICEVOX_URL = get_setting('VOICEVOX_URL')
     VOICEVOX_STYLE_ID = get_setting('VOICEVOX_STYLE_ID')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
+    CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
     
 def get_setting(key):
@@ -902,7 +907,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
                 elif CORE_AI_TYPE == 'Claude':
-                    #工事中
+                    bot_reply, public_img_url, public_img_url_s = claude_functions(CLAUDE_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
                     if enable_quick_reply == True:
                         public_img_url = []
                 elif CORE_AI_TYPE == 'LocalLLM':
