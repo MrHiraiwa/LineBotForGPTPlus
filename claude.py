@@ -238,10 +238,11 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
-def run_conversation(CLAUDE_MODEL, messages):
+def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
         response = claude_client.messages.create(
             max_tokens=1024,
+            system=SYSTEM_PROMPT,
             messages=messages,
             model="claude-3-opus-20240229",
         )
@@ -250,13 +251,14 @@ def run_conversation(CLAUDE_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(CLAUDE_MODEL, messages, google_description, custom_description, attempt):
+def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages, google_description, custom_description, attempt):
     update_function_descriptions(cf.functions, google_description, "get_googlesearch")
     update_function_descriptions(cf.functions, custom_description, "get_customsearch1")
 
     try:
         response = claude_client.messages.create(
             max_tokens=1024,
+            system=SYSTEM_PROMPT,
             messages=messages,
             model="claude-3-opus-20240229",
         )
@@ -269,7 +271,7 @@ def run_conversation_f(CLAUDE_MODEL, messages, google_description, custom_descri
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def claude_functions(CLAUDE_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -289,7 +291,7 @@ def claude_functions(CLAUDE_MODEL, messages_for_api, USER_ID, message_id, ERROR_
     get_customsearch1_called = False
 
     while attempt < max_attempts:
-        response = run_conversation_f(CLAUDE_MODEL, i_messages_for_api, google_description, custom_description, attempt)
+        response = run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api, google_description, custom_description, attempt)
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:
@@ -329,7 +331,7 @@ def claude_functions(CLAUDE_MODEL, messages_for_api, USER_ID, message_id, ERROR_
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
-                    response = run_conversation(CLAUDE_MODEL, i_messages_for_api)
+                    response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
                     if response:
                         bot_reply = response.choices[0].message.content
                     else:
