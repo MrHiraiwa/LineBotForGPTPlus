@@ -1,5 +1,5 @@
 import os
-from openai import OpenAI
+from anthropic import Anthropic
 from datetime import datetime, time, timedelta
 import pytz
 import requests
@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from google.cloud import storage
 import io
 import uuid
-import gpt_config as cf
+import claude_config as cf
 import json
 import wikipedia
 from PIL import Image
@@ -16,9 +16,13 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
 google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
-openai_api_key = os.getenv('OPENAI_API_KEY')
-gpt_client = OpenAI(api_key=openai_api_key)
-    
+anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
+
+claude_client = Anthropic(
+    # This is the default and can be omitted
+    api_key=anthropic_api_key,
+)
+
 user_id = []
 bucket_name = []
 file_age = []
@@ -234,27 +238,27 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
-def run_conversation(GPT_MODEL, messages):
+def run_conversation(CLAUDE_MODEL, messages):
     try:
-        response = gpt_client.chat.completions.create(
-            model=GPT_MODEL,
+        response = claude_client.messages.create(
+            max_tokens=1024,
             messages=messages,
+            model="claude-3-opus-20240229",
         )
         return response  # レスポンス全体を返す
     except Exception as e:
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(GPT_MODEL, messages, google_description, custom_description, attempt):
+def run_conversation_f(CLAUDE_MODEL, messages, google_description, custom_description, attempt):
     update_function_descriptions(cf.functions, google_description, "get_googlesearch")
     update_function_descriptions(cf.functions, custom_description, "get_customsearch1")
 
     try:
-        response = gpt_client.chat.completions.create(
-            model=GPT_MODEL,
+        response = claude_client.messages.create(
+            max_tokens=1024,
             messages=messages,
-            functions=cf.functions,
-            function_call="auto",
+            model="claude-3-opus-20240229",
         )
         downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
         downdate_function_descriptions(cf.functions, custom_description, "get_customsearch1")
@@ -265,7 +269,7 @@ def run_conversation_f(GPT_MODEL, messages, google_description, custom_descripti
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+def claude_functions(CLAUDE_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -285,7 +289,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     get_customsearch1_called = False
 
     while attempt < max_attempts:
-        response = run_conversation_f(GPT_MODEL, i_messages_for_api, google_description, custom_description, attempt)
+        response = run_conversation_f(CLAUDE_MODEL, i_messages_for_api, google_description, custom_description, attempt)
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:
@@ -325,7 +329,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
-                    response = run_conversation(GPT_MODEL, i_messages_for_api)
+                    response = run_conversation(CLAUDE_MODEL, i_messages_for_api)
                     if response:
                         bot_reply = response.choices[0].message.content
                     else:
