@@ -8,9 +8,10 @@ def run_conversation(api_base, messages):
         response = requests.post(
             api_base,
             headers={'Authorization': f'Bearer {LOCALLLM_API_KEY}'},
-            json={'messages': [systemRole()] + temp_messages_final},
-            "mode": "chat","character": "Example"
-            timeout=50
+            json={'messages': messages,
+            'mode': 'chat',
+            'character': 'Example',
+            timeout=50}
         )
             except requests.exceptions.Timeout:
                 print("OpenAI API timed out")
