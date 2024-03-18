@@ -21,3 +21,4 @@ googlemaps
 Pillow
 stripe
 anthropic
+anthropic-bedrock
