@@ -896,21 +896,27 @@ def handle_message(event):
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 user['messages'].pop(0)
                 total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
-            temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
-            temp_messages_final.extend(user['messages'])
-            temp_messages_final.append({'role': 'user', 'content': temp_messages})
 
-            messages = user['messages']
             try:
                 if CORE_AI_TYPE == 'GPT':
+                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final.extend(user['messages'])
+                    temp_messages_final.append({'role': 'user', 'content': temp_messages})
                     bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
                     if enable_quick_reply == True:
                         public_img_url = []
+                        
                 elif CORE_AI_TYPE == 'Claude':
-                    bot_reply, public_img_url, public_img_url_s = claude_functions(CLAUDE_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+                    temp_messages_final.extend(user['messages'])
+                    temp_messages_final.append({'role': 'user', 'content': temp_messages})
+                    bot_reply, public_img_url, public_img_url_s = claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
                     if enable_quick_reply == True:
                         public_img_url = []
+                        
                 elif CORE_AI_TYPE == 'LocalLLM':
+                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final.extend(user['messages'])
+                    temp_messages_final.append({'role': 'user', 'content': temp_messages})                    
                     bot_reply, public_img_url, public_img_url_s = localllm_functions(LOCALLLM_BASE_URL, temp_messages_final)
                     if enable_quick_reply == True:
                         public_img_url = []
@@ -920,6 +926,7 @@ def handle_message(event):
                 bot_reply_list.append(['text', ERROR_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
+                
             user['messages'].append({'role': 'user', 'content':  "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
             bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
