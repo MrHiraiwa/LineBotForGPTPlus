@@ -1,18 +1,21 @@
-import openai
+import requests
 
-openai_api_key = os.getenv('LOCALLLM_API_KEY')
+LOCALLLM_API_KEY = os.getenv('LOCALLLM_API_KEY')
 openai.api_version = "2023-05-15"
 
 def run_conversation(api_base, messages):
-    openai.api_base = api_base
     try:
-        response = openai.chat.completions.create(
-            messages=messages,
+        response = requests.post(
+            api_base,
+            headers={'Authorization': f'Bearer {LOCALLLM_API_KEY}'},
+            json={'messages': [systemRole()] + temp_messages_final},
+            "mode": "chat","character": "Example"
+            timeout=50
         )
-        return response  # レスポンス全体を返す
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None  # エラー時には None を返す
+            except requests.exceptions.Timeout:
+                print("OpenAI API timed out")
+                callLineApi(ERROR_MESSAGE, replyToken, {'items': quick_reply})
+                return 'OK'
 
 def localllm_functions(LOCALLLM_BASE_URL, messages_for_api):
     public_img_url = None
