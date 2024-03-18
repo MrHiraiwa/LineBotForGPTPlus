@@ -12,6 +12,9 @@ import json
 import wikipedia
 from PIL import Image
 
+from anthropic-tools.base_tool import BaseTool
+from anthropic-tools.tool_user import ToolUser
+
 google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
 google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
