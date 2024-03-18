@@ -897,7 +897,14 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
                 elif CORE_AI_TYPE == 'Claude':
+                    #工事中
+                    if enable_quick_reply == True:
+                        public_img_url = []
                 elif CORE_AI_TYPE == 'LocalLLM':
+                    #工事中
+                    if enable_quick_reply == True:
+                        public_img_url = []
+                        
             except Exception as e:
                 print(f"Error {str(e)}")
                 bot_reply_list.append(['text', ERROR_MESSAGE])
