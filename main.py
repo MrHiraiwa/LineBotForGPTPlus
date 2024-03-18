@@ -580,6 +580,7 @@ def handle_message(event):
             translate_language = 'OFF'
             bot_name = BOT_NAME[0]
             links = ""
+            bot_reply = ""
             bot_reply_list = []
             public_url = []
             public_img_url = []
