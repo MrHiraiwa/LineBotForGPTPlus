@@ -278,5 +278,5 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, mes
 
     response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
     print(f"response: {response}")
-    bot_reply = response.content
+    bot_reply = response.content[0].text
     return bot_reply, public_img_url, public_img_url_s
