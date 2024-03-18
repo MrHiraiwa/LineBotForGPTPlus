@@ -10,8 +10,8 @@ def run_conversation(api_base, messages):
             headers={'Authorization': f'Bearer {LOCALLLM_API_KEY}'},
             json={'messages': messages,
             'mode': 'chat',
-            'character': 'Example',
-            timeout=50}
+            'character': 'Example'},
+            timeout=50
         )
             except requests.exceptions.Timeout:
                 print("OpenAI API timed out")
