@@ -911,6 +911,7 @@ def handle_message(event):
                     temp_messages_final = user['messages']
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
                     bot_reply, public_img_url, public_img_url_s = claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+                    print(f"bot_reply: {bot_reply}")
                     if enable_quick_reply == True:
                         public_img_url = []
                         
@@ -927,8 +928,9 @@ def handle_message(event):
                 bot_reply_list.append(['text', ERROR_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
-                
+            print(f"message1: {user['messages']}")   
             user['messages'].append({'role': 'user', 'content':  "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message})
+            print(f"message2: {user['messages']}")
             bot_reply = response_filter(bot_reply, bot_name, display_name)
             user['messages'].append({'role': 'assistant', 'content': bot_reply})
             bot_reply = bot_reply + links
