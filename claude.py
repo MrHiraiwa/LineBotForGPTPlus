@@ -356,4 +356,4 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, mes
 #        else:
 #            return ERROR_MESSAGE + " Fail to connect OpenAI."
     
-    return bot_reply, public_img_url, public_img_url_s#l, public_img_url_s
+    return bot_reply, public_img_url, public_img_url_s
