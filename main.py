@@ -34,6 +34,7 @@ from vision import vision_api
 from maps import get_addresses
 from payment import create_checkout_session
 from gpt import chatgpt_functions
+from localllm import localllm_functions
 from embedding import embedding_from_storage
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -120,7 +121,8 @@ REQUIRED_ENV_VARS = [
     "PAYMENT_RESULT_URL",
     "VOICEVOX_URL",
     "VOICEVOX_STYLE_ID",
-    "CORE_AI_TYPE"
+    "CORE_AI_TYPE",
+    "LOCALLLM_BASE_URL"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -198,7 +200,8 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_RESULT_URL': 'http://example',
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
     'VOICEVOX_STYLE_ID': '3',
-    'CORE_AI_TYPE': 'GPT'
+    'CORE_AI_TYPE': 'GPT',
+    'LOCALLLM_BASE_URL': 'http://127.0.0.1:5000/v1'
 }
 
 try:
@@ -226,6 +229,7 @@ def reload_settings():
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
     global DATABASE_NAME
     global CORE_AI_TYPE
+    global LOCALLLM_BASE_URL
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -338,6 +342,7 @@ def reload_settings():
     VOICEVOX_URL = get_setting('VOICEVOX_URL')
     VOICEVOX_STYLE_ID = get_setting('VOICEVOX_STYLE_ID')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
+    LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -901,7 +906,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
                 elif CORE_AI_TYPE == 'LocalLLM':
-                    #工事中
+                    bot_reply, public_img_url, public_img_url_s = localllm_functions(LOCALLLM_BASE_URL, temp_messages_final)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
