@@ -21,9 +21,9 @@ def localllm_functions(LOCALLLM_BASE_URL, messages_for_api):
     i_messages_for_api = messages_for_api.copy()
 
     response = run_conversation(api_base, i_messages_for_api)
-        if response:
-            bot_reply = response.choices[0].message.content
-        else:
-            bot_reply = "An error occurred while processing the question"
-        return bot_reply, public_img_url, public_img_url_s
+    if response:
+        bot_reply = response.choices[0].message.content
+    else:
+        bot_reply = "An error occurred while processing the question"
+    return bot_reply, public_img_url, public_img_url_s
     
