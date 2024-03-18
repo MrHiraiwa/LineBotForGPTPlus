@@ -33,7 +33,7 @@ from voicevox import put_audio_voicevox
 from vision import vision_api
 from maps import get_addresses
 from payment import create_checkout_session
-from functions import chatgpt_functions
+from gpt import chatgpt_functions
 from embedding import embedding_from_storage
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -119,13 +119,13 @@ REQUIRED_ENV_VARS = [
     "PAYMENT_QUICK_REPLY",
     "PAYMENT_RESULT_URL",
     "VOICEVOX_URL",
-    "VOICEVOX_STYLE_ID"
-    
+    "VOICEVOX_STYLE_ID",
+    "CORE_AI_TYPE"
 ]
 
 DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
-    'SYSTEM_PROMPT': 'あなたは有能な秘書です。',
+    'SYSTEM_PROMPT': 'あなたは有能な秘書です。あなたはインターネット検索ができます。あなたは絵が生成できます。',
     'PAINT_PROMPT': '',
     'GPT_MODEL': 'gpt-3.5-turbo-0125',
     'MAX_TOKEN_NUM': '2000',
@@ -197,7 +197,8 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_QUICK_REPLY': '💸支払い',
     'PAYMENT_RESULT_URL': 'http://example',
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
-    'VOICEVOX_STYLE_ID': '3'
+    'VOICEVOX_STYLE_ID': '3',
+    'CORE_AI_TYPE': 'GPT'
 }
 
 try:
@@ -224,6 +225,7 @@ def reload_settings():
     global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
     global DATABASE_NAME
+    global CORE_AI_TYPE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -335,6 +337,7 @@ def reload_settings():
     PAYMENT_RESULT_URL = get_setting('PAYMENT_RESULT_URL')
     VOICEVOX_URL = get_setting('VOICEVOX_URL')
     VOICEVOX_STYLE_ID = get_setting('VOICEVOX_STYLE_ID')
+    CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -889,9 +892,12 @@ def handle_message(event):
 
             messages = user['messages']
             try:
-                bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
-                if enable_quick_reply == True:
-                    public_img_url = []
+                if CORE_AI_TYPE == 'GPT':
+                    bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+                    if enable_quick_reply == True:
+                        public_img_url = []
+                elif CORE_AI_TYPE == 'Claude':
+                elif CORE_AI_TYPE == 'LocalLLM':
             except Exception as e:
                 print(f"Error {str(e)}")
                 bot_reply_list.append(['text', ERROR_MESSAGE])
