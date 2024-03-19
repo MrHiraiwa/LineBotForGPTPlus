@@ -236,10 +236,12 @@ class Generateimage(BaseTool):
             else:
                 print(f"Bucket {bucket_name} does not exist.")
                 return "SYSTEM:バケットが存在しません。"
+            print("checked bucket.")
 
             # PNG画像をダウンロード
             png_image = download_image(image_result)
             preview_image = create_preview_image(png_image)
+            print(f"png_image: {png_image}, preview_image: {preview_image}")
         
             png_image.seek(0)  # ストリームをリセット
             preview_image.seek(0)  # ストリームをリセット
@@ -247,6 +249,8 @@ class Generateimage(BaseTool):
             # 画像をアップロード
             public_img_url = upload_blob(bucket_name, png_image, blob_path)
             public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
+
+            print(f"public_img_url: {public_img_url}, public_img_url_s: {public_img_url_s}")
 
         
             return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。"
