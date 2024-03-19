@@ -44,6 +44,7 @@ class Clock(BaseTool):
 
 class Googlesearch(BaseTool):
     def use_tool(words):
+        print(f"words: {words}")
         num = 3
         start_index = 1
         search_lang = 'lang_ja'
