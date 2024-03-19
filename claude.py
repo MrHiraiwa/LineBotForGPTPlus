@@ -310,7 +310,7 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearch_tool_description, wikipediasearch_tool_parameters)
         scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
         generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
-        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool])
+        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool], CLAUDE_MODEL)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
 
         # re.DOTALLフラグを使って、改行を含むテキストもマッチさせる
