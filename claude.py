@@ -218,7 +218,6 @@ class Generateimage(BaseTool):
         prompt = " ".join(sentence) + "\n" + i_prompt
         public_img_url = ""
         public_img_url_s = ""
-        print(f"sentence: {sentence}")
     
         try:
             response = client.images.generate(
@@ -229,19 +228,15 @@ class Generateimage(BaseTool):
                 n=1,
             )
             image_result = response.data[0].url
-            print(f"image_result: {image_result}")
-            print(f"bucket_name: {bucket_name}, file_age: {file_age}")
             if bucket_exists(bucket_name):
                 set_bucket_lifecycle(bucket_name, file_age)
             else:
                 print(f"Bucket {bucket_name} does not exist.")
                 return "SYSTEM:バケットが存在しません。"
-            print("checked bucket.")
 
             # PNG画像をダウンロード
             png_image = download_image(image_result)
             preview_image = create_preview_image(png_image)
-            print(f"png_image: {png_image}, preview_image: {preview_image}")
         
             png_image.seek(0)  # ストリームをリセット
             preview_image.seek(0)  # ストリームをリセット
@@ -250,7 +245,6 @@ class Generateimage(BaseTool):
             public_img_url = upload_blob(bucket_name, png_image, blob_path)
             public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
 
-            print(f"public_img_url: {public_img_url}, public_img_url_s: {public_img_url_s}")
 
         
             return f"SYSTEM:{prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。"
@@ -313,20 +307,17 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
+def run_conversation_f(CLAUDE_MODEL, messages):
     try:
-        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool], SYSTEM_PROMPT)
+        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool])
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
-        print(f"response: {response}")
 
         # re.DOTALLフラグを使って、改行を含むテキストもマッチさせる
         result_match = re.search(r'<result>(.*?)</result>', response, re.DOTALL)
         if result_match:
             result_content = result_match.group(1)  # タグ内の文字列を取得
-            print(f"Extracted result: {result_content}")
             return result_content.strip()  # 先頭と末尾の空白文字を削除
         else:
-            print("No <result> tag found in response.")
             return response
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -344,9 +335,7 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     file_age = FILE_AGE
     i_messages_for_api = messages_for_api.copy()
     last_messages_for_api = i_messages_for_api[-1]
-    print(f"last_messages_for_api: {last_messages_for_api}")
-    response = run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
-    print(f"response: {response}, public_img_url: {public_img_url}, public_img_url_s: {public_img_url_s},")
+    response = run_conversation_f(CLAUDE_MODEL, i_messages_for_api)
     bot_reply = response
     #i_messages_for_api.append({'role': 'assistant', 'content': bot_reply})
     #i_messages_for_api.append({'role': 'user', 'content': 'SYSTEM:以上の結果を元に回答してください。'})
