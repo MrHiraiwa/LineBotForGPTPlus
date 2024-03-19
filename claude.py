@@ -334,6 +334,8 @@ def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         return None  # エラー時には None を返す
 
 def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+    global public_img_url, public_img_url_s
+    global i_prompt, user_id, message_id, bucket_name, file_age
     public_img_url = None
     public_img_url_s = None
     i_prompt = PAINT_PROMPT
