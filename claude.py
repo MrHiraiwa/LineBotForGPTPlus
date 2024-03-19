@@ -319,19 +319,18 @@ def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
         print(f"response: {response}")
 
-        # <result></result> タグ内の文字列を正規表現で検索し抽出
-        result_match = re.search(r'<result>(.*?)</result>', response)
+        # re.DOTALLフラグを使って、改行を含むテキストもマッチさせる
+        result_match = re.search(r'<result>(.*?)</result>', response, re.DOTALL)
         if result_match:
             result_content = result_match.group(1)  # タグ内の文字列を取得
             print(f"Extracted result: {result_content}")
-            return result_content
+            return result_content.strip()  # 先頭と末尾の空白文字を削除
         else:
             print("No <result> tag found in response.")
             return response
     except Exception as e:
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
-
 
 def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
     public_img_url = None
