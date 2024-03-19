@@ -38,7 +38,7 @@ class ToolUser:
         self.first_party = first_party
         if first_party:
             if model == "default":
-                self.model = "claude-3-opus-20240229"
+                self.model = "claude-3-haiku-20240307"
             else:
                 self.model=model
             self.client = Anthropic()
