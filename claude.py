@@ -231,6 +231,7 @@ class Generateimage(BaseTool):
             )
             image_result = response.data[0].url
             print(f"image_result: {image_result}")
+            print(f"bucket_name: {bucket_name}, "file_age: {file_age}")
             if bucket_exists(bucket_name):
                 set_bucket_lifecycle(bucket_name, file_age)
             else:
