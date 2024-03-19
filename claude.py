@@ -11,6 +11,7 @@ import json
 import wikipedia
 from PIL import Image
 from openai import OpenAI
+import re
 
 from anthropic_tools.base_tool import BaseTool
 from anthropic_tools.tool_user import ToolUser
@@ -307,15 +308,23 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
-
     try:
-        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool], SYSTEM_PROMPT)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
         print(f"response: {response}")
-        return response  # レスポンス全体を返す
+
+        # <result></result> タグ内の文字列を正規表現で検索し抽出
+        result_match = re.search(r'<result>(.*?)</result>', response)
+        if result_match:
+            result_content = result_match.group(1)  # タグ内の文字列を取得
+            print(f"Extracted result: {result_content}")
+            return result_content
+        else:
+            print("No <result> tag found in response.")
+            return response
     except Exception as e:
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
+
 
 def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
     public_img_url = None
