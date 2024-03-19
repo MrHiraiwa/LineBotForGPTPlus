@@ -26,9 +26,14 @@ claude_client = Anthropic(
     api_key=anthropic_api_key,
 )
 
+global public_img_url, public_img_url_s
 user_id = []
 bucket_name = []
 file_age = []
+
+public_img_url = ""
+public_img_url_s = ""
+
 
 class Clock(BaseTool):
     def use_tool():
