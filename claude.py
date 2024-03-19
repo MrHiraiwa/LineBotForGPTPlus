@@ -252,47 +252,7 @@ class Generateimage(BaseTool):
             print(f"generate_image error: {e}" )
             return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
 
-clock_tool_name = "perform_clock"
-clock_tool_description = "useful for when you need to know what time it is."
-clock_tool_parameters = [
-]
 
-googlesearch_tool_name = "perform_googlesearch"
-googlesearch_tool_description = "useful for when you need to answer questions about current events."
-googlesearch_tool_parameters = [
-    {"name": "words", "type": "str", "description": "a search key word"}
-]
-
-customsearch1_tool_name = "perform_customsearch1"
-customsearch1_tool_description = "unable use."
-customsearch1_tool_parameters = [
-    {"name": "words", "type": "str", "description": "a search key word"}
-]
-
-wikipediasearch_tool_name = "perform_wikipediasearch"
-wikipediasearch_tool_description = "useful for when you need to Read dictionary page by specifying the word."
-wikipediasearch_tool_parameters = [
-    {"name": "words", "type": "str", "description": "a search key word"}
-]
-
-scraping_tool_name = "perform_scraping"
-scraping_tool_description = "useful for when you need to read a web page by specifying the URL."
-scraping_tool_parameters = [
-    {"name": "URL", "type": "str", "description": "a URL for scraping"}
-]
-
-generateimage_tool_name = "perform_generateimage"
-generateimage_tool_description = "If you specify a long sentence, you can generate an image that matches the sentence."
-generateimage_tool_parameters = [
-    {"name": "sentence", "type": "str", "description": "a text for image generation"}
-]
-
-clock_tool = Clock(clock_tool_name, clock_tool_description, clock_tool_parameters)
-googlesearch_tool = Googlesearch(googlesearch_tool_name, googlesearch_tool_description, googlesearch_tool_parameters)
-customsearch1_tool = Customsearch1(customsearch1_tool_name, customsearch1_tool_description, customsearch1_tool_parameters)
-wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearch_tool_description, wikipediasearch_tool_parameters)
-scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
-generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
 
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
@@ -307,8 +267,49 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(CLAUDE_MODEL, messages):
+def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
     try:
+        clock_tool_name = "perform_clock"
+        clock_tool_description = "useful for when you need to know what time it is."
+        clock_tool_parameters = [
+        ]
+
+        googlesearch_tool_name = "perform_googlesearch"
+        googlesearch_tool_description = GOOGLE_DESCRIPTION
+        googlesearch_tool_parameters = [
+            {"name": "words", "type": "str", "description": "a search key word"}
+        ]
+
+        customsearch1_tool_name = "perform_customsearch1"
+        customsearch1_tool_description = CUSTOM_DESCRIPTION
+        customsearch1_tool_parameters = [
+            {"name": "words", "type": "str", "description": "a search key word"}
+        ]
+
+        wikipediasearch_tool_name = "perform_wikipediasearch"
+        wikipediasearch_tool_description = "useful for when you need to Read dictionary page by specifying the word."
+        wikipediasearch_tool_parameters = [
+            {"name": "words", "type": "str", "description": "a search key word"}
+        ]
+
+        scraping_tool_name = "perform_scraping"
+        scraping_tool_description = "useful for when you need to read a web page by specifying the URL."
+        scraping_tool_parameters = [
+            {"name": "URL", "type": "str", "description": "a URL for scraping"}
+        ]
+
+        generateimage_tool_name = "perform_generateimage"
+        generateimage_tool_description = "If you specify a long sentence, you can generate an image that matches the sentence."
+        generateimage_tool_parameters = [
+            {"name": "sentence", "type": "str", "description": "a text for image generation"}
+        ]
+
+        clock_tool = Clock(clock_tool_name, clock_tool_description, clock_tool_parameters)
+        googlesearch_tool = Googlesearch(googlesearch_tool_name, googlesearch_tool_description, googlesearch_tool_parameters)
+        customsearch1_tool = Customsearch1(customsearch1_tool_name, customsearch1_tool_description, customsearch1_tool_parameters)
+        wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearch_tool_description, wikipediasearch_tool_parameters)
+        scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
+        generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
         all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool])
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
 
@@ -335,7 +336,7 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     file_age = FILE_AGE
     i_messages_for_api = messages_for_api.copy()
     last_messages_for_api = i_messages_for_api[-1]
-    response = run_conversation_f(CLAUDE_MODEL, i_messages_for_api)
+    response = run_conversation_f(CLAUDE_MODEL, i_messages_for_api, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
     bot_reply = response
     i_messages_for_api.append({'role': 'assistant', 'content': bot_reply})
     i_messages_for_api.append({'role': 'user', 'content': 'SYSTEM:以上の結果を元に回答してください。'})
