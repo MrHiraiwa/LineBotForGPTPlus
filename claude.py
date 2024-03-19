@@ -294,8 +294,6 @@ wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearc
 scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
 generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
 
-all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool])
-
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
         response = claude_client.messages.create(
@@ -312,6 +310,7 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
 def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
 
     try:
+        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool], SYSTEM_PROMPT)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
         print(f"response: {response}")
         return response  # レスポンス全体を返す
@@ -333,10 +332,10 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     response = run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
     print(f"response: {response}")
     bot_reply = response
-    i_messages_for_api.append({'role': 'assistant', 'content': bot_reply})
-    i_messages_for_api.append({'role': 'user', 'content': 'SYSTEM:以上の結果を元に回答してください。'})
-    response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
-    print(f"response: {response}")
+    #i_messages_for_api.append({'role': 'assistant', 'content': bot_reply})
+    #i_messages_for_api.append({'role': 'user', 'content': 'SYSTEM:以上の結果を元に回答してください。'})
+    #response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
+    #print(f"response: {response}")
     bot_reply = response.content[0].text
 
     return bot_reply, public_img_url, public_img_url_s
