@@ -30,24 +30,14 @@ user_id = []
 bucket_name = []
 file_age = []
 
-def update_function_descriptions(functions, extra_description, function_name_to_update):
-    for func in functions:
-        if func["name"] == function_name_to_update:
-            func["description"] += extra_description
-
-def downdate_function_descriptions(functions, extra_description, function_name_to_update):
-    for func in functions:
-        if func["name"] == function_name_to_update:
-            func["description"] = ""
-
-class clock(BaseTool):
+class Clock(BaseTool):
     def use_tool():
         jst = pytz.timezone('Asia/Tokyo')
         nowDate = datetime.now(jst) 
         nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
         return "SYSTEM:現在時刻は" + nowDateStr + "です。"
 
-class googlesearch(BaseTool):
+class Googlesearch(BaseTool):
     def use_tool(words, num=3, start_index=1, search_lang='lang_ja'):
         base_url = "https://www.googleapis.com/customsearch/v1"
         params = {
@@ -74,7 +64,7 @@ class googlesearch(BaseTool):
 
         return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
-class customsearch1(BaseTool):
+class Customsearch1(BaseTool):
     def use_tool(words, num=3, start_index=1, search_lang='lang_ja'):
         base_url = "https://www.googleapis.com/customsearch/v1"
         params = {
@@ -101,7 +91,7 @@ class customsearch1(BaseTool):
 
         return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
-class wikipediasearch(BaseTool):
+class Wikipediasearch(BaseTool):
     def use_tool(prompt):
         try:
             wikipedia.set_lang("ja")
@@ -119,7 +109,7 @@ class wikipediasearch(BaseTool):
         except wikipedia.exceptions.PageError:
             return "SYSTEM: ページが見つかりませんでした。"
 
-class scraping(BaseTool):
+class Scraping(BaseTool):
     def use_tool(link):
         contents = ""
         headers = {
@@ -203,7 +193,7 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
     except Exception as e:
         print(f"Failed to upload file: {e}")
         raise
-class generateimage(BaseTool):
+class Generateimage(BaseTool):
     def use_tool(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
         filename = str(uuid.uuid4())
         blob_path = f'{user_id}/{message_id}.png'
@@ -280,6 +270,15 @@ generateimage_tool_parameters = [
     {"name": "sentence", "type": "string", "description": "text for image generation"},
 ]
 
+clock_tool = Clock(clock_tool_name, clock_tool_description, clock_tool_parameters)
+googlesearch_tool = Googlesearch(googlesearch_tool_name, googlesearch_tool_description, googlesearch_tool_parameters)
+customsearch1_tool = Customsearch1(customsearch1_tool_name, customsearch1_tool_description, customsearch1_tool_parameters)
+wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearch_tool_description, wikipediasearch_tool_parameters)
+scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
+generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
+
+all_tool_user = ToolUser([clock_tool, googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool])
+
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
         response = claude_client.messages.create(
@@ -294,24 +293,11 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages, google_description, custom_description, attempt):
-    update_function_descriptions(cf.functions, google_description, "get_googlesearch")
-    update_function_descriptions(cf.functions, custom_description, "get_customsearch1")
 
     try:
-        response = claude_client.messages.create(
-            max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            messages=messages,
-            model="claude-3-opus-20240229",
-            functions=cf.functions,
-            function_call="auto",
-        )
-        downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(cf.functions, custom_description, "get_customsearch1")
+        all_tool_user.use_tools(messages, execution_mode='automatic')
         return response  # レスポンス全体を返す
     except Exception as e:
-        downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(cf.functions, custom_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
