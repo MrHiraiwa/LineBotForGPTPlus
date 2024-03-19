@@ -260,7 +260,7 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
             max_tokens=1024,
             system=SYSTEM_PROMPT,
             messages=messages,
-            model="claude-3-opus-20240229",
+            model="claude-3-haiku-20240307",
         )
         return response  # レスポンス全体を返す
     except Exception as e:
