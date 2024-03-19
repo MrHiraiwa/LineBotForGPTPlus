@@ -253,7 +253,7 @@ class Generateimage(BaseTool):
             print(f"public_img_url: {public_img_url}, public_img_url_s: {public_img_url_s}")
 
         
-            return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。"
+            return f"SYSTEM:{prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。"
         except Exception as e:
             print(f"generate_image error: {e}" )
             return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
