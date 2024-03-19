@@ -29,7 +29,7 @@ claude_client = Anthropic(
 
 global public_img_url, public_img_url_s
 global i_prompt, user_id, message_id, bucket_name, file_age
-i_prompt = []
+i_prompt = ""
 user_id = []
 message_id = []
 bucket_name = []
@@ -215,7 +215,7 @@ class Generateimage(BaseTool):
         blob_path = f'{user_id}/{message_id}.png'
         preview_blob_path = f'{user_id}/{message_id}_s.png'
         client = OpenAI(api_key=openai_api_key)
-        prompt = sentence + "\n" + i_prompt
+        prompt = " ".join(sentence) + "\n" + i_prompt
         public_img_url = ""
         public_img_url_s = ""
     
