@@ -283,7 +283,7 @@ wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearc
 scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
 generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
 
-all_tool_user = ToolUser([clock_tool, googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool])
+all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool])
 
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
