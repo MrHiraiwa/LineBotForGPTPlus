@@ -11,6 +11,7 @@ import claude_config as cf
 import json
 import wikipedia
 from PIL import Image
+from openai import OpenAI
 
 from anthropic_tools.base_tool import BaseTool
 from anthropic_tools.tool_user import ToolUser
