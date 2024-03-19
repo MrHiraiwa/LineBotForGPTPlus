@@ -210,6 +210,7 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         raise
 class Generateimage(BaseTool):
     def use_tool(self, sentence):
+        global public_img_url, public_img_url_s
         filename = str(uuid.uuid4())
         blob_path = f'{user_id}/{message_id}.png'
         preview_blob_path = f'{user_id}/{message_id}_s.png'
@@ -332,7 +333,6 @@ def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         return None  # エラー時には None を返す
 
 def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
-    global public_img_url, public_img_url_s
     global i_prompt, user_id, message_id, bucket_name, file_age
     public_img_url = None
     public_img_url_s = None
