@@ -309,6 +309,7 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
 
 def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
+        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool], SYSTEM_PROMPT)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
         print(f"response: {response}")
 
