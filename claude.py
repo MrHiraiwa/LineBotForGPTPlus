@@ -295,7 +295,8 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
 def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages, google_description, custom_description, attempt):
 
     try:
-        all_tool_user.use_tools(messages, execution_mode='automatic')
+        response = all_tool_user.use_tools(messages, execution_mode='automatic')
+        print(f"response: {response}")
         return response  # レスポンス全体を返す
     except Exception as e:
         print(f"An error occurred: {e}")
