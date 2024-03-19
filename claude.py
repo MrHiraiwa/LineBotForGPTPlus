@@ -335,6 +335,6 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     #i_messages_for_api.append({'role': 'user', 'content': 'SYSTEM:以上の結果を元に回答してください。'})
     #response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
     #print(f"response: {response}")
-    bot_reply = response.content[0].text
+    #bot_reply = response.content[0].text
 
     return bot_reply, public_img_url, public_img_url_s
