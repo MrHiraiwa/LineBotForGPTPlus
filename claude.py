@@ -21,6 +21,7 @@ google_cse_id = os.getenv("GOOGLE_CSE_ID")
 google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
+openai_api_key = os.getenv('OPENAI_API_KEY')
 
 claude_client = Anthropic(
     # This is the default and can be omitted
@@ -214,7 +215,7 @@ class Generateimage(BaseTool):
         filename = str(uuid.uuid4())
         blob_path = f'{user_id}/{message_id}.png'
         preview_blob_path = f'{user_id}/{message_id}_s.png'
-        client = OpenAI()
+        client = OpenAI(api_key=openai_api_key)
         prompt = sentence + "\n" + i_prompt
         public_img_url = ""
         public_img_url_s = ""
