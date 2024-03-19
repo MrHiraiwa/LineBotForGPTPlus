@@ -43,7 +43,10 @@ class Clock(BaseTool):
         return "SYSTEM:現在時刻は" + nowDateStr + "です。"
 
 class Googlesearch(BaseTool):
-    def use_tool(words, num=3, start_index=1, search_lang='lang_ja'):
+    def use_tool(words):
+        num = 3
+        start_index = 1
+        search_lang = 'lang_ja'
         # wordsがリストの場合、スペース区切りの文字列に結合
         if isinstance(words, list):
             words = " ".join(words)
@@ -254,31 +257,31 @@ clock_tool_parameters = [
 googlesearch_tool_name = "perform_googlesearch"
 googlesearch_tool_description = "useful for when you need to answer questions about current events."
 googlesearch_tool_parameters = [
-    {"name": "words", "type": "str", "description": "search key word"}
+    {"name": "words", "type": "str", "description": "a search key word"}
 ]
 
 customsearch1_tool_name = "perform_customsearch1"
 customsearch1_tool_description = "unable use."
 customsearch1_tool_parameters = [
-    {"name": "words", "type": "str", "description": "search key word"}
+    {"name": "words", "type": "str", "description": "a search key word"}
 ]
 
 wikipediasearch_tool_name = "perform_wikipediasearch"
 wikipediasearch_tool_description = "useful for when you need to Read dictionary page by specifying the word."
 wikipediasearch_tool_parameters = [
-    {"name": "words", "type": "str", "description": "search key word"}
+    {"name": "words", "type": "str", "description": "a search key word"}
 ]
 
 scraping_tool_name = "perform_scraping"
 scraping_tool_description = "useful for when you need to read a web page by specifying the URL."
 scraping_tool_parameters = [
-    {"name": "URL", "type": "str", "description": "URL for scraping"}
+    {"name": "URL", "type": "str", "description": "a URL for scraping"}
 ]
 
 generateimage_tool_name = "perform_generateimage"
 generateimage_tool_description = "If you specify a long sentence, you can generate an image that matches the sentence."
 generateimage_tool_parameters = [
-    {"name": "sentence", "type": "str", "description": "text for image generation"}
+    {"name": "sentence", "type": "str", "description": "a text for image generation"}
 ]
 
 clock_tool = Clock(clock_tool_name, clock_tool_description, clock_tool_parameters)
