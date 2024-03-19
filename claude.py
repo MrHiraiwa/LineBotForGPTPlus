@@ -299,7 +299,7 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         ]
 
         generateimage_tool_name = "perform_generateimage"
-        generateimage_tool_description = "If you specify a long sentence, you can generate an image that matches the sentence."
+        generateimage_tool_description = "useful for when you need to  generate an image by the sentence."
         generateimage_tool_parameters = [
             {"name": "sentence", "type": "str", "description": "a text for image generation"}
         ]
