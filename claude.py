@@ -253,7 +253,6 @@ class Generateimage(BaseTool):
 clock_tool_name = "perform_clock"
 clock_tool_description = "useful for when you need to know what time it is."
 clock_tool_parameters = [
-    {"name": "dummy", "type": "str", "description": "dummy"}
 ]
 
 googlesearch_tool_name = "perform_googlesearch"
