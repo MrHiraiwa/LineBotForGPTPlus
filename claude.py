@@ -40,115 +40,119 @@ def downdate_function_descriptions(functions, extra_description, function_name_t
         if func["name"] == function_name_to_update:
             func["description"] = ""
 
-def clock():
-    jst = pytz.timezone('Asia/Tokyo')
-    nowDate = datetime.now(jst) 
-    nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
-    return "SYSTEM:現在時刻は" + nowDateStr + "です。"
+class clock(BaseTool):
+    def use_tool():
+        jst = pytz.timezone('Asia/Tokyo')
+        nowDate = datetime.now(jst) 
+        nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
+        return "SYSTEM:現在時刻は" + nowDateStr + "です。"
 
-def get_googlesearch(words, num=3, start_index=1, search_lang='lang_ja'):
-    base_url = "https://www.googleapis.com/customsearch/v1"
-    params = {
-        "key": google_api_key,
-        "cx": google_cse_id,
-        "q": words,
-        "num": num,
-        "start": start_index,
-        "lr": search_lang
-    }
+class googlesearch(BaseTool):
+    def use_tool(words, num=3, start_index=1, search_lang='lang_ja'):
+        base_url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            "key": google_api_key,
+            "cx": google_cse_id,
+            "q": words,
+            "num": num,
+            "start": start_index,
+            "lr": search_lang
+        }
 
-    response = requests.get(base_url, params=params)
-    response.raise_for_status()
-
-    search_results = response.json()
-
-    # 検索結果を文字列に整形
-    formatted_results = ""
-    for item in search_results.get("items", []):
-        title = item.get("title")
-        link = item.get("link")
-        snippet = item.get("snippet")
-        formatted_results += f"タイトル: {title}\nリンク: {link}\n概要: {snippet}\n\n"
-
-    return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
-
-def get_customsearch1(words, num=3, start_index=1, search_lang='lang_ja'):
-    base_url = "https://www.googleapis.com/customsearch/v1"
-    params = {
-        "key": google_api_key,
-        "cx": google_cse_id1,
-        "q": words,
-        "num": num,
-        "start": start_index,
-        "lr": search_lang
-    }
-
-    response = requests.get(base_url, params=params)
-    response.raise_for_status()
-
-    search_results = response.json()
-
-    # 検索結果を文字列に整形
-    formatted_results = ""
-    for item in search_results.get("items", []):
-        title = item.get("title")
-        link = item.get("link")
-        snippet = item.get("snippet")
-        formatted_results += f"タイトル: {title}\nリンク: {link}\n概要: {snippet}\n\n"
-
-    return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
-
-def search_wikipedia(prompt):
-    try:
-        wikipedia.set_lang("ja")
-        search_result = wikipedia.page(prompt)
-        summary = search_result.summary
-        page_url = search_result.url
-
-        # 結果を1000文字に切り詰める
-        if len(summary) > 1000:
-            summary = summary[:1000] + "..."
-
-        return f"SYSTEM: 以下は{page_url}の読み込み結果です。情報を提示するときは情報とともに参照元URLアドレスも案内してください。\n{summary}"
-    except wikipedia.exceptions.DisambiguationError as e:
-        return f"SYSTEM: 曖昧さ解消が必要です。オプション: {e.options}"
-    except wikipedia.exceptions.PageError:
-        return "SYSTEM: ページが見つかりませんでした。"
-
-
-def scraping(link):
-    contents = ""
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",
-    }
-    
-    try:
-        response = requests.get(link, headers=headers, timeout=5)
+        response = requests.get(base_url, params=params)
         response.raise_for_status()
-        response.encoding = response.apparent_encoding  # または特定のエンコーディングを指定
-        html = response.text
-    except requests.RequestException as e:
-        return f"SYSTEM: リンクの読み込み中にエラーが発生しました: {e}"
 
-    soup = BeautifulSoup(html, features="html.parser")
+        search_results = response.json()
 
-    # Remove all 'a' tags
-    for a in soup.findAll('a'):
-        a.decompose()
+        # 検索結果を文字列に整形
+        formatted_results = ""
+        for item in search_results.get("items", []):
+            title = item.get("title")
+            link = item.get("link")
+            snippet = item.get("snippet")
+            formatted_results += f"タイトル: {title}\nリンク: {link}\n概要: {snippet}\n\n"
 
-    content = soup.select_one("article, .post, .content")
+        return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
-    if content is None or content.text.strip() == "":
-        content = soup.select_one("body")
+class customsearch1(BaseTool):
+    def use_tool(words, num=3, start_index=1, search_lang='lang_ja'):
+        base_url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            "key": google_api_key,
+            "cx": google_cse_id1,
+            "q": words,
+            "num": num,
+            "start": start_index,
+            "lr": search_lang
+        }
 
-    if content is not None:
-        contents = ' '.join(content.text.split()).replace("。 ", "。\n").replace("! ", "!\n").replace("? ", "?\n").strip()
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()
 
-        # 結果を1000文字に切り詰める
-        if len(contents) > 1000:
-            contents = contents[:1000] + "..."
+        search_results = response.json()
 
-    return f"SYSTEM:以下はURL「{link}」の読み込み結果です。情報を提示するときは情報とともにURLも案内してください。\n" + contents
+        # 検索結果を文字列に整形
+        formatted_results = ""
+        for item in search_results.get("items", []):
+            title = item.get("title")
+            link = item.get("link")
+            snippet = item.get("snippet")
+            formatted_results += f"タイトル: {title}\nリンク: {link}\n概要: {snippet}\n\n"
+
+        return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
+
+class wikipediasearch(BaseTool):
+    def use_tool(prompt):
+        try:
+            wikipedia.set_lang("ja")
+            search_result = wikipedia.page(prompt)
+            summary = search_result.summary
+            page_url = search_result.url
+
+            # 結果を1000文字に切り詰める
+            if len(summary) > 2000:
+                summary = summary[:2000] + "..."
+
+            return f"SYSTEM: 以下は{page_url}の読み込み結果です。情報を提示するときは情報とともに参照元URLアドレスも案内してください。\n{summary}"
+        except wikipedia.exceptions.DisambiguationError as e:
+            return f"SYSTEM: 曖昧さ解消が必要です。オプション: {e.options}"
+        except wikipedia.exceptions.PageError:
+            return "SYSTEM: ページが見つかりませんでした。"
+
+class scraping(BaseTool):
+    def use_tool(link):
+        contents = ""
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",
+        }
+    
+        try:
+            response = requests.get(link, headers=headers, timeout=5)
+            response.raise_for_status()
+            response.encoding = response.apparent_encoding  # または特定のエンコーディングを指定
+            html = response.text
+        except requests.RequestException as e:
+            return f"SYSTEM: リンクの読み込み中にエラーが発生しました: {e}"
+
+        soup = BeautifulSoup(html, features="html.parser")
+
+        # Remove all 'a' tags
+        for a in soup.findAll('a'):
+            a.decompose()
+
+        content = soup.select_one("article, .post, .content")
+
+        if content is None or content.text.strip() == "":
+            content = soup.select_one("body")
+
+        if content is not None:
+            contents = ' '.join(content.text.split()).replace("。 ", "。\n").replace("! ", "!\n").replace("? ", "?\n").strip()
+
+            # 結果を1000文字に切り詰める
+            if len(contents) > 2000:
+                contents = contents[:2000] + "..."
+
+        return f"SYSTEM:以下はURL「{link}」の読み込み結果です。情報を提示するときは情報とともにURLも案内してください。\n" + contents
 
 def set_bucket_lifecycle(bucket_name, age):
     storage_client = storage.Client()
@@ -199,47 +203,82 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
     except Exception as e:
         print(f"Failed to upload file: {e}")
         raise
-
-def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
-    filename = str(uuid.uuid4())
-    blob_path = f'{user_id}/{message_id}.png'
-    preview_blob_path = f'{user_id}/{message_id}_s.png'
-    client = OpenAI()
-    prompt = paint_prompt + "\n" + i_prompt
-    public_img_url = ""
-    public_img_url_s = ""
+class generateimage(BaseTool):
+    def use_tool(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
+        filename = str(uuid.uuid4())
+        blob_path = f'{user_id}/{message_id}.png'
+        preview_blob_path = f'{user_id}/{message_id}_s.png'
+        client = OpenAI()
+        prompt = paint_prompt + "\n" + i_prompt
+        public_img_url = ""
+        public_img_url_s = ""
     
-    try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-        image_result = response.data[0].url
-        if bucket_exists(bucket_name):
-            set_bucket_lifecycle(bucket_name, file_age)
-        else:
-            print(f"Bucket {bucket_name} does not exist.")
-            return "SYSTEM:バケットが存在しません。", public_img_url, public_img_url_s
+        try:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size="1024x1024",
+                quality="standard",
+                n=1,
+            )
+            image_result = response.data[0].url
+            if bucket_exists(bucket_name):
+                set_bucket_lifecycle(bucket_name, file_age)
+            else:
+                print(f"Bucket {bucket_name} does not exist.")
+                return "SYSTEM:バケットが存在しません。", public_img_url, public_img_url_s
 
-        # PNG画像をダウンロード
-        png_image = download_image(image_result)
-        preview_image = create_preview_image(png_image)
+            # PNG画像をダウンロード
+            png_image = download_image(image_result)
+            preview_image = create_preview_image(png_image)
         
-        png_image.seek(0)  # ストリームをリセット
-        preview_image.seek(0)  # ストリームをリセット
+            png_image.seek(0)  # ストリームをリセット
+            preview_image.seek(0)  # ストリームをリセット
 
-        # 画像をアップロード
-        public_img_url = upload_blob(bucket_name, png_image, blob_path)
-        public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
+            # 画像をアップロード
+            public_img_url = upload_blob(bucket_name, png_image, blob_path)
+            public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
 
         
-        return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。", public_img_url, public_img_url_s
-    except Exception as e:
-        print(f"generate_image error: {e}" )
-        return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
+            return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。", public_img_url, public_img_url_s
+        except Exception as e:
+            print(f"generate_image error: {e}" )
+            return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
+
+clock_tool_name = "perform_clock"
+clock_tool_description = "useful for when you need to know what time it is."
+clock_tool_parameters = [
+]
+
+googlesearch_tool_name = "perform_googlesearch"
+googlesearch_tool_description = "useful for when you need to answer questions about current events."
+googlesearch_tool_parameters = [
+    {"name": "words", "type": "string", "description": "search key word"},
+]
+
+customsearch1_tool_name = "perform_customsearch1"
+customsearch1_tool_description = "unable use."
+customsearch1_tool_parameters = [
+    {"name": "words", "type": "string", "description": "search key word"},
+]
+
+wikipediasearch_tool_name = "perform_wikipediasearch"
+wikipediasearch_tool_description = "useful for when you need to Read dictionary page by specifying the word."
+wikipediasearch_tool_parameters = [
+    {"name": "words", "type": "string", "description": "search key word"},
+]
+
+scraping_tool_name = "perform_scraping"
+scraping_tool_description = "useful for when you need to read a web page by specifying the URL."
+scraping_tool_parameters = [
+    {"name": "URL", "type": "string", "description": "URL for scraping"},
+]
+
+generateimage_tool_name = "perform_generateimage"
+generateimage_tool_description = "If you specify a long sentence, you can generate an image that matches the sentence."
+generateimage_tool_parameters = [
+    {"name": "sentence", "type": "string", "description": "text for image generation"},
+]
 
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
