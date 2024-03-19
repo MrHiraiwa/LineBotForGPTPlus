@@ -107,10 +107,10 @@ class Customsearch1(BaseTool):
         return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
 class Wikipediasearch(BaseTool):
-    def use_tool(self, prompt):
+    def use_tool(self, words):
         try:
             wikipedia.set_lang("ja")
-            search_result = wikipedia.page(prompt)
+            search_result = wikipedia.page(words)
             summary = search_result.summary
             page_url = search_result.url
 
@@ -125,14 +125,14 @@ class Wikipediasearch(BaseTool):
             return "SYSTEM: ページが見つかりませんでした。"
 
 class Scraping(BaseTool):
-    def use_tool(self, link):
+    def use_tool(self, URL):
         contents = ""
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",
         }
     
         try:
-            response = requests.get(link, headers=headers, timeout=5)
+            response = requests.get(URL, headers=headers, timeout=5)
             response.raise_for_status()
             response.encoding = response.apparent_encoding  # または特定のエンコーディングを指定
             html = response.text
@@ -157,7 +157,7 @@ class Scraping(BaseTool):
             if len(contents) > 2000:
                 contents = contents[:2000] + "..."
 
-        return f"SYSTEM:以下はURL「{link}」の読み込み結果です。情報を提示するときは情報とともにURLも案内してください。\n" + contents
+        return f"SYSTEM:以下はURL「{URL}」の読み込み結果です。情報を提示するときは情報とともにURLも案内してください。\n" + contents
 
 def set_bucket_lifecycle(bucket_name, age):
     storage_client = storage.Client()
@@ -209,12 +209,12 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 class Generateimage(BaseTool):
-    def use_tool(self, paint_prompt):
+    def use_tool(self, sentence):
         filename = str(uuid.uuid4())
         blob_path = f'{user_id}/{message_id}.png'
         preview_blob_path = f'{user_id}/{message_id}_s.png'
         client = OpenAI()
-        prompt = paint_prompt + "\n" + i_prompt
+        prompt = sentence + "\n" + i_prompt
         public_img_url = ""
         public_img_url_s = ""
     
