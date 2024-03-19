@@ -337,7 +337,7 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     i_messages_for_api = messages_for_api.copy()
     last_messages_for_api = i_messages_for_api[-1]
     head_messages_for_api= [{'role': 'user', 'content': SYSTEM_PROMPT}] 
-    head_messages_for_api.expand(i_messages_for_api)
+    head_messages_for_api.extend(i_messages_for_api)
     response = run_conversation_f(CLAUDE_MODEL, head_messages_for_api, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
     bot_reply = response
     #print(f"bot_reply: {bot_reply}")
