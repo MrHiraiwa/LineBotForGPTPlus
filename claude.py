@@ -297,7 +297,7 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages, google_description, custom_description, attempt):
+def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
 
     try:
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
@@ -311,7 +311,8 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, mes
     public_img_url = None
     public_img_url_s = None
     i_messages_for_api = messages_for_api.copy()
-
+    response = run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api,)
+    i_messages_for_api.append({'role': 'assistant', 'content': response})
     response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
     print(f"response: {response}")
     bot_reply = response.content[0].text
