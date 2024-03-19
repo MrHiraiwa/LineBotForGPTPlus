@@ -219,6 +219,7 @@ class Generateimage(BaseTool):
         prompt = " ".join(sentence) + "\n" + i_prompt
         public_img_url = ""
         public_img_url_s = ""
+        print(f"sentence: {sentence}")
     
         try:
             response = client.images.generate(
@@ -229,6 +230,7 @@ class Generateimage(BaseTool):
                 n=1,
             )
             image_result = response.data[0].url
+            print(f"image_result: {image_result}")
             if bucket_exists(bucket_name):
                 set_bucket_lifecycle(bucket_name, file_age)
             else:
