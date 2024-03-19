@@ -27,7 +27,10 @@ claude_client = Anthropic(
 )
 
 global public_img_url, public_img_url_s
+global i_prompt, user_id, message_id, bucket_name, file_age
+i_prompt = []
 user_id = []
+message_id = []
 bucket_name = []
 file_age = []
 
@@ -36,22 +39,17 @@ public_img_url_s = ""
 
 
 class Clock(BaseTool):
-    def use_tool(dummy):
+    def use_tool(self):
         jst = pytz.timezone('Asia/Tokyo')
         nowDate = datetime.now(jst) 
         nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
         return "SYSTEM:現在時刻は" + nowDateStr + "です。"
 
 class Googlesearch(BaseTool):
-    def use_tool(words):
-        print(f"words: {words}")
+    def use_tool(self, words):
         num = 3
         start_index = 1
         search_lang = 'lang_ja'
-        # wordsがリストの場合、スペース区切りの文字列に結合
-        if isinstance(words, list):
-            words = " ".join(words)
-        # wordsが文字列の場合は、そのまま使用する（追加の条件）
 
         base_url = "https://www.googleapis.com/customsearch/v1"
         params = {
@@ -79,7 +77,10 @@ class Googlesearch(BaseTool):
         return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
 class Customsearch1(BaseTool):
-    def use_tool(words, num=3, start_index=1, search_lang='lang_ja'):
+    def use_tool(self, words):
+        num = 3
+        start_index = 1
+        search_lang = 'lang_ja'
         base_url = "https://www.googleapis.com/customsearch/v1"
         params = {
             "key": google_api_key,
@@ -106,7 +107,7 @@ class Customsearch1(BaseTool):
         return f"SYSTEM:Webページを検索しました。{words}と関係のありそうなURLを読み込んでください。\n" + formatted_results
 
 class Wikipediasearch(BaseTool):
-    def use_tool(prompt):
+    def use_tool(self, prompt):
         try:
             wikipedia.set_lang("ja")
             search_result = wikipedia.page(prompt)
@@ -124,7 +125,7 @@ class Wikipediasearch(BaseTool):
             return "SYSTEM: ページが見つかりませんでした。"
 
 class Scraping(BaseTool):
-    def use_tool(link):
+    def use_tool(self, link):
         contents = ""
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",
@@ -208,7 +209,7 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 class Generateimage(BaseTool):
-    def use_tool(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
+    def use_tool(self, paint_prompt):
         filename = str(uuid.uuid4())
         blob_path = f'{user_id}/{message_id}.png'
         preview_blob_path = f'{user_id}/{message_id}_s.png'
@@ -317,9 +318,14 @@ def run_conversation_f(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
+    i_prompt = PAINT_PROMPT
+    user_id = USER_ID
+    message_id = MESSAGE_ID
+    bucket_name = BUCKET_NAME
+    file_age = FILE_AGE
     i_messages_for_api = messages_for_api.copy()
     last_messages_for_api = i_messages_for_api[-1]
     print(f"last_messages_for_api: {last_messages_for_api}")
