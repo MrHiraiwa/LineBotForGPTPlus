@@ -44,11 +44,16 @@ class Clock(BaseTool):
 
 class Googlesearch(BaseTool):
     def use_tool(words, num=3, start_index=1, search_lang='lang_ja'):
+        # wordsがリストの場合、スペース区切りの文字列に結合
+        if isinstance(words, list):
+            words = " ".join(words)
+        # wordsが文字列の場合は、そのまま使用する（追加の条件）
+
         base_url = "https://www.googleapis.com/customsearch/v1"
         params = {
             "key": google_api_key,
             "cx": google_cse_id,
-            "q": words,
+            "q": words,  # 結合された検索クエリ
             "num": num,
             "start": start_index,
             "lr": search_lang
