@@ -895,8 +895,13 @@ def handle_message(event):
             temp_messages = "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
             total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
-                user['messages'].pop(0) # ユーザーメッセージを削除
-                user['messages'].pop(0) # 対応するアシスタントメッセージを削除
+                if user['messages'][0]['role'] == 'user':
+                    # 先頭がユーザーメッセージの場合、ユーザーメッセージとアシスタントメッセージを削除
+                    user['messages'].pop(0)
+                else:
+                    user['messages'].pop(0)
+                    user['messages'].pop(0)
+
                 total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
 
             try:
