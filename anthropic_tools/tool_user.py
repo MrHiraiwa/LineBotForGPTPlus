@@ -31,14 +31,14 @@ class ToolUser:
     To use this class, you should instantiate it with a list of tools (tool_user = ToolUser(tools)). You then interact with it as you would the normal claude API, by providing a prompt to tool_user.use_tools(prompt) and expecting a completion in return.
     """
 
-    def __init__(self, tools, temperature=0, max_retries=3, first_party=True, model="default"):
+    def __init__(self, tools, CLAUDE_MODEL, temperature=0, max_retries=3, first_party=True, model="default"):
         self.tools = tools
         self.temperature = temperature
         self.max_retries = max_retries
         self.first_party = first_party
         if first_party:
             if model == "default":
-                self.model = "claude-3-haiku-20240307"
+                self.model = CLAUDE_MODEL
             else:
                 self.model=model
             self.client = Anthropic()
