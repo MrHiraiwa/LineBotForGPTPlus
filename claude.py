@@ -12,6 +12,7 @@ import wikipedia
 from PIL import Image
 from openai import OpenAI
 import re
+import time
 
 from anthropic_tools.base_tool import BaseTool
 from anthropic_tools.tool_user import ToolUser
@@ -244,8 +245,8 @@ class Generateimage(BaseTool):
             # 画像をアップロード
             public_img_url = upload_blob(bucket_name, png_image, blob_path)
             public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
-
-
+            
+            time.sleep(2)
         
             return f"SYSTEM:{prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。"
         except Exception as e:
