@@ -31,6 +31,8 @@ def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
         # 状態をセッションに保存
         session['state'] = state
         session['line_user_id'] = line_user_id
+        
+        print(f"line_user_id: {line_user_id}")
 
         return authorization_url + f"&line_user_id={line_user_id}&openExternalBrowser=1"
     except Exception as e:
