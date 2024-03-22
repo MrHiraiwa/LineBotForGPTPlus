@@ -4,19 +4,19 @@ import os
 import google.auth.transport.requests
 
 # 環境変数からOAuth 2.0クライアントの設定を読み込む
-client_id = os.getenv("GOOGLE_CLIENT_ID")
-client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
 def create_oauth_session(line_user_id, GOOGLE_REDIRECT_URI):
     try:
         # クライアント設定
         client_config = {
             "web": {
-                "client_id": client_id,
-                "client_secret": client_secret,
+                "client_id": google_client_id,
+                "client_secret": google_client_secret,
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [redirect_uri],
+                "redirect_uris": GOOGLE_REDIRECT_URI,
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
             }
         }
