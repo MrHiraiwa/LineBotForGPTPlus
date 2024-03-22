@@ -1159,7 +1159,11 @@ def embedding():
 @app.route('/oauth_callback')
 def oauth_callback():
     state = session.get('state')
+    authorization_response = request.url
+    if authorization_response.startswith('http://'):
+        authorization_response = authorization_response.replace('http://', 'https://', 1)
 
+    
     # クライアント設定
     client_config = {
         "web": {
@@ -1177,7 +1181,7 @@ def oauth_callback():
             scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
             state=state)
         flow.redirect_uri = GACCOUNT_CALLBACK_URL
-        flow.fetch_token(authorization_response=request.url)
+        flow.fetch_token(authorization_response=authorization_response)
 
         # Googleからユーザー情報を取得
         credentials = flow.credentials
