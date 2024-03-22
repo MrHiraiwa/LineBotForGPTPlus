@@ -1160,10 +1160,10 @@ def embedding():
 def oauth_callback():
     state = session.get('state')
     authorization_response = request.url
+    line_user_id = session.get('line_user_id')
     if authorization_response.startswith('http://'):
         authorization_response = authorization_response.replace('http://', 'https://', 1)
 
-    
     # クライアント設定
     client_config = {
         "web": {
@@ -1183,24 +1183,16 @@ def oauth_callback():
         flow.redirect_uri = GACCOUNT_CALLBACK_URL
         flow.fetch_token(authorization_response=authorization_response)
 
-        # Googleからユーザー情報を取得
         credentials = flow.credentials
-        request_session = google.auth.transport.requests.Request()
         userinfo_endpoint = 'https://www.googleapis.com/oauth2/v3/userinfo'
-        response = request_session.request('GET', userinfo_endpoint, params={'access_token': credentials.token})
-
-        userinfo = response.json()
+        userinfo_response = requests.get(userinfo_endpoint, params={'access_token': credentials.token})
+        userinfo = userinfo_response.json()
 
         db = firestore.Client(database=DATABASE_NAME)
-
-        # Get the Firestore document reference
         doc_ref = db.collection('users').document(line_user_id)
 
-        # You might want to adjust this depending on your timezone
-        access_token = credentials.token
-
         doc_ref.update({
-             'access_token': access_token
+             'access_token': credentials.token
         })
 
         return f'ユーザー情報: <pre>{userinfo}</pre>'
