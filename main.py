@@ -122,6 +122,10 @@ REQUIRED_ENV_VARS = [
     "PAYMENT_RESULT_URL",
     "VOICEVOX_URL",
     "VOICEVOX_STYLE_ID",
+    "GACCOUNT_KEYWORDS",
+    "GACCOUNT_GUIDE_MESSAGE",
+    "GACCOUNT_FAIL_MESSAGE",
+    "GACCOUNT_QUICK_REPLY",
     "CORE_AI_TYPE",
     "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL"
@@ -202,6 +206,10 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_RESULT_URL': 'http://example',
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
     'VOICEVOX_STYLE_ID': '3',
+    'GACCOUNT_KEYWORDS': '👤Gアカウント',
+    'GACCOUNT_GUIDE_MESSAGE': 'ユーザーに「画面下の「👤Gアカウント登録」の項目をタップするとGoogleアカウントの登録画面が表示される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'GACCOUNT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
+    'GACCOUNT_QUICK_REPLY': '👤Gアカウント登録',
     'CORE_AI_TYPE': 'GPT',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
     'LOCALLLM_BASE_URL': 'http://127.0.0.1:5000/v1'
@@ -230,6 +238,7 @@ def reload_settings():
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
+    global GACCOUNT_KEYWORDS, GACCOUNT_GUIDE_MESSAGE, GACCOUNT_FAIL_MESSAGE, GACCOUNT_QUICK_REPLY,
     global DATABASE_NAME
     global CORE_AI_TYPE
     global CLAUDE_MODEL
@@ -345,6 +354,14 @@ def reload_settings():
     PAYMENT_RESULT_URL = get_setting('PAYMENT_RESULT_URL')
     VOICEVOX_URL = get_setting('VOICEVOX_URL')
     VOICEVOX_STYLE_ID = get_setting('VOICEVOX_STYLE_ID')
+    GACCOUNT_KEYWORDS = get_setting('GACCOUNT_KEYWORDS')
+    if GACCOUNT_KEYWORDS:
+        GACCOUNT_KEYWORDS = GACCOUNT_KEYWORDS.split(',')
+    else:
+        GACCOUNT_KEYWORDS = []
+    GACCOUNT_GUIDE_MESSAGE = get_setting('GACCOUNT_GUIDE_MESSAGE')
+    GACCOUNT_FAIL_MESSAGE = get_setting('GACCOUNT_FAIL_MESSAGE')
+    GACCOUNT_QUICK_REPLY = get_setting('GACCOUNT_QUICK_REPLY')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
@@ -857,6 +874,16 @@ def handle_message(event):
                     head_message = head_message + PAYMENT_GUIDE_MESSAGE
                 else:
                     bot_reply_list.append(['text', PAYMENT_FAIL_MESSAGE])
+                    line_reply(reply_token, bot_reply_list)
+                    return 'OK'
+            if any(word in user_message for word in GACCOUNT_KEYWORDS) and not exec_functions:
+                enable_quick_reply = True
+                if source_type == "user":
+                    checkout_url = create_checkout_session(user_id,)
+                    quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, checkout_url])
+                    head_message = head_message + GACCOUNT_GUIDE_MESSAGE
+                else:
+                    bot_reply_list.append(['text', GACCOUNT_FAIL_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
 
