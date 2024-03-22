@@ -1167,7 +1167,6 @@ def oauth_callback():
             "client_secret": google_client_secret,
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uri": GACCOUNT_CALLBACK_URL,
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         }
     }
@@ -1177,7 +1176,7 @@ def oauth_callback():
             client_config=client_config,
             scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
             state=state)
-
+        flow.redirect_uri = GACCOUNT_CALLBACK_URL
         flow.fetch_token(authorization_response=request.url)
 
         # Googleからユーザー情報を取得
