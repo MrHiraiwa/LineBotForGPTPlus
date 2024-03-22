@@ -7,7 +7,7 @@ import google.auth.transport.requests
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
-def create_oauth_session(line_user_id, GOOGLE_REDIRECT_URI):
+def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
     try:
         # クライアント設定
         client_config = {
@@ -16,7 +16,7 @@ def create_oauth_session(line_user_id, GOOGLE_REDIRECT_URI):
                 "client_secret": google_client_secret,
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [GOOGLE_REDIRECT_URI],
+                "redirect_uris": [GACCOUNT_CALLBACK_URL],
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
             }
         }
