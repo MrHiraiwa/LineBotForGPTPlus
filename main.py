@@ -1192,7 +1192,7 @@ def oauth_callback():
         doc_ref = db.collection('users').document(line_user_id)
 
         doc_ref.update({
-             'access_token': credentials.token
+             'google_access_token': credentials.token
         })
 
         return f'ユーザー情報: <pre>{userinfo}</pre>'
