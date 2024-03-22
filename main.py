@@ -1158,9 +1158,9 @@ def embedding():
 
 @app.route('/oauth_callback')
 def oauth_callback():
-    state = session.get('state')
+    line_user_id = request.args.get('line_user_id')
     authorization_response = request.url
-    line_user_id = session.get('line_user_id')
+    
     if authorization_response.startswith('http://'):
         authorization_response = authorization_response.replace('http://', 'https://', 1)
 
@@ -1178,8 +1178,7 @@ def oauth_callback():
     try:
         flow = Flow.from_client_config(
             client_config=client_config,
-            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
-            state=state)
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'])
         flow.redirect_uri = GACCOUNT_CALLBACK_URL
         flow.fetch_token(authorization_response=authorization_response)
 
