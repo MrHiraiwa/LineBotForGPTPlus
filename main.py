@@ -37,6 +37,7 @@ from gpt import chatgpt_functions
 from claude import claude_functions
 from localllm import localllm_functions
 from embedding import embedding_from_storage
+from gaccount import create_oauth_session
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -879,8 +880,8 @@ def handle_message(event):
             if any(word in user_message for word in GACCOUNT_KEYWORDS) and not exec_functions:
                 enable_quick_reply = True
                 if source_type == "user":
-                    checkout_url = create_checkout_session(user_id,)
-                    quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, checkout_url])
+                    oauth_url = create_oauth_session()
+                    quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, oauth_url])
                     head_message = head_message + GACCOUNT_GUIDE_MESSAGE
                 else:
                     bot_reply_list.append(['text', GACCOUNT_FAIL_MESSAGE])
