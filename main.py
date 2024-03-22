@@ -885,7 +885,7 @@ def handle_message(event):
             if any(word in user_message for word in GACCOUNT_KEYWORDS) and not exec_functions:
                 enable_quick_reply = True
                 if source_type == "user":
-                    oauth_url = create_oauth_session(GACCOUNT_CALLBACK_URL)
+                    oauth_url = create_oauth_session(user_id, GACCOUNT_CALLBACK_URL)
                     quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, oauth_url])
                     head_message = head_message + GACCOUNT_GUIDE_MESSAGE
                 else:
