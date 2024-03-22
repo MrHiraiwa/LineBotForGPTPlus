@@ -129,6 +129,7 @@ REQUIRED_ENV_VARS = [
     "GACCOUNT_GUIDE_MESSAGE",
     "GACCOUNT_FAIL_MESSAGE",
     "GACCOUNT_QUICK_REPLY",
+    "GACCOUNT_CALLBACK_URL",
     "CORE_AI_TYPE",
     "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL"
@@ -206,16 +207,17 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_GUIDE_MESSAGE': 'ユーザーに「画面下の「支払い」の項目をタップすると私の利用料の支払い画面が表示される」と案内して感謝の言葉を述べてください。以下の文章はユーザーから送られたものです。',
     'PAYMENT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
     'PAYMENT_QUICK_REPLY': '💸支払い',
-    'PAYMENT_RESULT_URL': 'http://example',
+    'PAYMENT_RESULT_URL': 'https://example',
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
     'VOICEVOX_STYLE_ID': '3',
     'GACCOUNT_KEYWORDS': '👤Gアカウント',
     'GACCOUNT_GUIDE_MESSAGE': 'ユーザーに「画面下の「👤Gアカウント登録」の項目をタップするとGoogleアカウントの登録画面が表示される」と案内してください。以下の文章はユーザーから送られたものです。',
     'GACCOUNT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
     'GACCOUNT_QUICK_REPLY': '👤Gアカウント登録',
+    'GACCOUNT_CALLBACK_URL': 'https://example',
     'CORE_AI_TYPE': 'GPT',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
-    'LOCALLLM_BASE_URL': 'http://127.0.0.1:5000/v1'
+    'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1'
 }
 
 try:
@@ -241,7 +243,7 @@ def reload_settings():
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
-    global GACCOUNT_KEYWORDS, GACCOUNT_GUIDE_MESSAGE, GACCOUNT_FAIL_MESSAGE, GACCOUNT_QUICK_REPLY,
+    global GACCOUNT_KEYWORDS, GACCOUNT_GUIDE_MESSAGE, GACCOUNT_FAIL_MESSAGE, GACCOUNT_QUICK_REPLY, GACCOUNT_CALLBACK_URL
     global DATABASE_NAME
     global CORE_AI_TYPE
     global CLAUDE_MODEL
@@ -365,6 +367,7 @@ def reload_settings():
     GACCOUNT_GUIDE_MESSAGE = get_setting('GACCOUNT_GUIDE_MESSAGE')
     GACCOUNT_FAIL_MESSAGE = get_setting('GACCOUNT_FAIL_MESSAGE')
     GACCOUNT_QUICK_REPLY = get_setting('GACCOUNT_QUICK_REPLY')
+    GACCOUNT_CALLBACK_URL = get_setting('GACCOUNT_CALLBACK_URL')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
@@ -882,7 +885,7 @@ def handle_message(event):
             if any(word in user_message for word in GACCOUNT_KEYWORDS) and not exec_functions:
                 enable_quick_reply = True
                 if source_type == "user":
-                    oauth_url = create_oauth_session()
+                    oauth_url = create_oauth_session(GACCOUNT_CALLBACK_URL)
                     quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, oauth_url])
                     head_message = head_message + GACCOUNT_GUIDE_MESSAGE
                 else:
@@ -1157,7 +1160,7 @@ def oauth_callback():
         'path/to/client_secrets.json',
         scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
         state=state,
-        redirect_uri=REDIRECT_URI)
+        redirect_uri=GACCOUNT_CALLBACK_URL)
 
     flow.fetch_token(authorization_response=request.url)
 
