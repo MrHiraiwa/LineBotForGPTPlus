@@ -14,8 +14,8 @@ def run_conversation(api_base, messages):
         response.raise_for_status()  # 追加: ステータスコードがHTTPエラーの場合、例外を発生させる
         return response.json()  # JSONレスポンスを返す
     except requests.exceptions.Timeout:
-        print("OpenAI API timed out")
-        return "OpenAI API timed out."
+        print("LocalLLM API timed out")
+        return "LocalLLM API timed out."
     except requests.exceptions.RequestException as e:
         # その他のリクエスト関連の例外を捕捉
         print(f"Request failed: {e}")
