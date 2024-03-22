@@ -8,6 +8,7 @@ google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
 def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
+    print(f"GACCOUNT_CALLBACK_URL: {GACCOUNT_CALLBACK_URL}")
     try:
         # クライアント設定
         client_config = {
