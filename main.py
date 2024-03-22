@@ -1160,6 +1160,8 @@ def embedding():
 def oauth_callback():
     line_user_id = request.args.get('line_user_id')
     authorization_response = request.url
+
+    print(f"line_user_id: {line_user_id}")
     
     if authorization_response.startswith('http://'):
         authorization_response = authorization_response.replace('http://', 'https://', 1)
