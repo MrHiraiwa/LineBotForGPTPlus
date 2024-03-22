@@ -1149,5 +1149,26 @@ def embedding():
     # 公開URLをレスポンスとして返す
     return Response(public_url, status=200)
 
+@app.route('/oauth_callback')
+def oauth_callback():
+    state = session['state']
+
+    flow = Flow.from_client_secrets_file(
+        'path/to/client_secrets.json',
+        scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
+        state=state,
+        redirect_uri=REDIRECT_URI)
+
+    flow.fetch_token(authorization_response=request.url)
+
+    # Googleからユーザー情報を取得
+    credentials = flow.credentials
+    request_session = google.auth.transport.requests.Request()
+    userinfo_endpoint = 'https://www.googleapis.com/oauth2/v3/userinfo'
+    response = request_session.request('GET', userinfo_endpoint, params={'access_token': credentials.token})
+
+    userinfo = response.json()
+    return f'ユーザー情報: <pre>{userinfo}</pre>'
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
