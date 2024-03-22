@@ -19,7 +19,7 @@ def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
             }
         }
-        GACCOUNT_CALLBACK_URL = GACCOUNT_CALLBACK_URL + f"?line_user_id={line_user_id}"
+        GACCOUNT_CALLBACK_URL = GACCOUNT_CALLBACK_URL
         # OAuth 2.0 クライアントフローを設定
         flow = Flow.from_client_config(
             client_config=client_config,
@@ -31,6 +31,7 @@ def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
         # 状態をセッションに保存
         session['state'] = state
         session['line_user_id'] = line_user_id
+        state = json.dumps({"session_id": session_id, "line_user_id": line_user_id})
         
         print(f"line_user_id: {line_user_id}")
 
