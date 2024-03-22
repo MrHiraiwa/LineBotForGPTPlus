@@ -1190,6 +1190,19 @@ def oauth_callback():
         response = request_session.request('GET', userinfo_endpoint, params={'access_token': credentials.token})
 
         userinfo = response.json()
+
+        db = firestore.Client(database=DATABASE_NAME)
+
+        # Get the Firestore document reference
+        doc_ref = db.collection('users').document(line_user_id)
+
+        # You might want to adjust this depending on your timezone
+        access_token = credentials.token
+
+        doc_ref.update({
+             'access_token': access_token
+        })
+
         return f'ユーザー情報: <pre>{userinfo}</pre>'
     except Exception as e:
         return f'認証プロセス中にエラーが発生しました: {e}'
