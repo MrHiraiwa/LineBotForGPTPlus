@@ -6,6 +6,7 @@ import google.auth.transport.requests
 # 環境変数からOAuth 2.0クライアントの設定を読み込む
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+app.secret_key = os.getenv('secret_key', default='YOUR-DEFAULT-SECRET-KEY')
 
 def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
     print(f"GACCOUNT_CALLBACK_URL: {GACCOUNT_CALLBACK_URL}")
