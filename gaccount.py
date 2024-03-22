@@ -1,14 +1,30 @@
+from flask import session
 from google_auth_oauthlib.flow import Flow
 import os
 import google.auth.transport.requests
 
-def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
+# 環境変数からOAuth 2.0クライアントの設定を読み込む
+client_id = os.getenv("GOOGLE_CLIENT_ID")
+client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+
+def create_oauth_session(line_user_id, GOOGLE_REDIRECT_URI):
     try:
+        # クライアント設定
+        client_config = {
+            "web": {
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "redirect_uris": [redirect_uri],
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            }
+        }
+
         # OAuth 2.0 クライアントフローを設定
-        flow = Flow.from_client_secrets_file(
-            'path/to/client_secrets.json',
-            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
-            redirect_uri=GACCOUNT_CALLBACK_URL)
+        flow = Flow.from_client_config(
+            client_config=client_config,
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'])
 
         authorization_url, state = flow.authorization_url(prompt='consent')
 
@@ -16,7 +32,6 @@ def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
         session['state'] = state
 
         return authorization_url
-        
     except Exception as e:
         # エラーを標準出力に記録
         print(f"Error creating oauth session for user {line_user_id}: {e}")
