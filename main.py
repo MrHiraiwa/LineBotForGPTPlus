@@ -26,6 +26,8 @@ from hashlib import md5
 import base64
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
+from google_auth_oauthlib.flow import Flow
+import google.auth.transport.requests
 
 from whisper import get_audio
 from voice import put_audio
