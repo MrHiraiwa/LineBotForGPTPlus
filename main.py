@@ -44,6 +44,10 @@ from gaccount import create_oauth_session
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
+
+google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+
 admin_password = os.environ["ADMIN_PASSWORD"]
 DATABASE_NAME = os.getenv('DATABASE_NAME', default='')
 secret_key = os.getenv('SECRET_KEY')
@@ -1154,24 +1158,38 @@ def embedding():
 
 @app.route('/oauth_callback')
 def oauth_callback():
-    state = session['state']
+    state = session.get('state')
 
-    flow = Flow.from_client_secrets_file(
-        'path/to/client_secrets.json',
-        scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
-        state=state,
-        redirect_uri=GACCOUNT_CALLBACK_URL)
+    # クライアント設定
+    client_config = {
+        "web": {
+            "client_id": google_client_id,
+            "client_secret": google_client_secret,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": GACCOUNT_CALLBACK_URL,
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        }
+    }
 
-    flow.fetch_token(authorization_response=request.url)
+    try:
+        flow = Flow.from_client_config(
+            client_config=client_config,
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'],
+            state=state)
 
-    # Googleからユーザー情報を取得
-    credentials = flow.credentials
-    request_session = google.auth.transport.requests.Request()
-    userinfo_endpoint = 'https://www.googleapis.com/oauth2/v3/userinfo'
-    response = request_session.request('GET', userinfo_endpoint, params={'access_token': credentials.token})
+        flow.fetch_token(authorization_response=request.url)
 
-    userinfo = response.json()
-    return f'ユーザー情報: <pre>{userinfo}</pre>'
+        # Googleからユーザー情報を取得
+        credentials = flow.credentials
+        request_session = google.auth.transport.requests.Request()
+        userinfo_endpoint = 'https://www.googleapis.com/oauth2/v3/userinfo'
+        response = request_session.request('GET', userinfo_endpoint, params={'access_token': credentials.token})
+
+        userinfo = response.json()
+        return f'ユーザー情報: <pre>{userinfo}</pre>'
+    except Exception as e:
+        return f'認証プロセス中にエラーが発生しました: {e}'
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
