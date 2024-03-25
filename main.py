@@ -612,6 +612,7 @@ def handle_message(event):
             public_img_url = []
             public_img_url_s = []
             enable_quick_reply = False
+            gaccount_access_token = ""
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -650,6 +651,7 @@ def handle_message(event):
                 audio_speed = user['audio_speed']
                 translate_language = user['translate_language']
                 updated_date = user['updated_date_string'].astimezone(jst)
+                gaccount_access_token = user['gaccount_access_token']
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -945,7 +947,7 @@ def handle_message(event):
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+                    bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
@@ -1233,7 +1235,7 @@ def oauth_callback():
         doc_ref = db.collection('users').document(user_id)
 
         doc_ref.update({
-             'google_access_token': credentials.token
+             'gaccount_access_token': credentials.token
         })
 
         return f'ユーザー情報: <pre>{userinfo}</pre>'
