@@ -274,6 +274,45 @@ def get_calender(gaccount_access_token, max_chars=1000):
         print(f"generate_image error: {e}" )
         return f"SYSTEM: SYSTEM:カレンダーのイベント取得にエラーが発生しました。{e}"
 
+def add_calendar(gaccount_access_token, summary, start_time, end_time, description=None, location=None):
+    try:
+        # アクセストークンからCredentialsオブジェクトを作成
+        credentials = Credentials(token=gaccount_access_token)
+    
+        # Google Calendar APIのserviceオブジェクトを構築
+        service = build('calendar', 'v3', credentials=credentials)
+    
+        # イベントの情報を設定
+        event = {
+            'summary': summary,
+            'location': location,
+            'description': description,
+            'start': {
+                'dateTime': start_time,
+                'timeZone': 'Asia/Tokyo',
+            },
+            'end': {
+                'dateTime': end_time,
+                'timeZone': 'Asia/Tokyo',
+            },
+            'reminders': {
+                'useDefault': False,
+                'overrides': [
+                    {'method': 'email', 'minutes': 24 * 60},
+                    {'method': 'popup', 'minutes': 10},
+                ],
+            },
+        }
+    
+        # イベントをカレンダーに追加
+        event_result = service.events().insert(calendarId='primary', body=event).execute()
+    
+        # 成功した場合、イベントの詳細を含むメッセージを返す
+        return f"イベントが追加されました: {event_result.get('htmlLink')}"
+    
+    except Exception as e:
+        return f"イベント追加に失敗しました: {e}"
+
 def get_mime_part(parts, mime_type='text/plain'):
     """再帰的に特定のMIMEタイプのパートを探す"""
     for part in parts:
@@ -372,6 +411,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     get_googlesearch_called = False
     get_customsearch1_called = False
     get_calender_called = False
+    add_calender_called = False
     get_gmail_called = False
 
     while attempt < max_attempts:
@@ -418,6 +458,12 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                     get_calender_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply = get_calender(gaccount_access_token)
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "add_calender" and not add_calender_called:
+                    add_calender_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply = get_calender(gaccount_access_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_gmail" and not get_gmail_called:
