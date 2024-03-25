@@ -97,13 +97,13 @@ functions = [
     },
     {
         # 関数の名称
-        "name": "get_calender",
+        "name": "get_calendar",
         # 関数の機能説明
         "description": "You can retrieve upcoming schedules."
     },
     {
         # 関数の名称
-        "name": "add_calender",
+        "name": "add_calendar",
         # 関数の機能説明
         "description": "You can add schedules.",
         "parameters": {
