@@ -13,6 +13,8 @@ import wikipedia
 from PIL import Image
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+import base64
+import email
 
 google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
@@ -303,6 +305,50 @@ def run_conversation_f(GPT_MODEL, messages, google_description, custom_descripti
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
+def get_gmail(gaccount_access_token, max_chars=1000):
+    try:
+        # アクセストークンからCredentialsオブジェクトを作成
+        credentials = Credentials(token=gaccount_access_token)
+
+        # Gmail APIのserviceオブジェクトを構築
+        service = build('gmail', 'v1', credentials=credentials)
+
+        # Gmail APIを呼び出して、直近のメッセージを取得
+        results = service.users().messages().list(userId='me', maxResults=5).execute()
+        messages = results.get('messages', [])
+
+        if not messages:
+            return "直近のメッセージはありません。"
+
+        # メッセージの概要を結合して最大1000文字までの文字列を生成
+        messages_str = ""
+        for msg in messages:
+            # メッセージの詳細を取得
+            msg_detail = service.users().messages().get(userId='me', id=msg['id']).execute()
+            payload = msg_detail['payload']
+            headers = payload.get('headers')
+            subject = [i['value'] for i in headers if i['name'] == 'Subject'][0]
+            try:
+                # メッセージ本文をデコード
+                msg_body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8')
+            except KeyError:
+                # メッセージ本文が存在しない場合（multipartメッセージ）
+                parts = payload.get('parts')[0]
+                msg_body = base64.urlsafe_b64decode(parts['body']['data']).decode('utf-8')
+            # HTMLタグを除去
+            soup = BeautifulSoup(msg_body, 'html.parser')
+            msg_text = soup.get_text()
+            message_str = f"Subject: {subject}\n{msg_text}\n\n"
+            if len(messages_str) + len(message_str) > max_chars:
+                break  # 最大文字数を超えたらループを抜ける
+            messages_str += message_str
+
+        return messages_str[:max_chars]
+        
+    except Exception as e:
+        print(f"get_gmail_messages error: {e}")
+        return f"SYSTEM: Gmailメッセージ取得にエラーが発生しました。{e}"
+
 def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
@@ -322,6 +368,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     get_googlesearch_called = False
     get_customsearch1_called = False
     get_calender_called = False
+    get_gmail_called = False
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, i_messages_for_api, google_description, custom_description, attempt)
@@ -367,6 +414,12 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                     get_calender_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply = get_calender(gaccount_access_token)
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "get_gmail" and not get_gmail_called:
+                    get_gmail_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply = get_gmail(gaccount_access_token)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
