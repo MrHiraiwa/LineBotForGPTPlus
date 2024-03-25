@@ -1161,12 +1161,36 @@ def start_oauth():
     user_id = request.args.get('user_id')
     print(f"user_id: {user_id}")
 
-    authorization_url = create_oauth_session(user_id, GACCOUNT_AUTH_URL)
-    
-    # ユーザーをOAuth認証URLにリダイレクト
-    return redirect(authorization_url)
+    try:
+        # クライアント設定
+        client_config = {
+            "web": {
+                "client_id": google_client_id,
+                "client_secret": google_client_secret,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            }
+        }
+        GACCOUNT_AUTH_URL = GACCOUNT_AUTH_URL
+        # OAuth 2.0 クライアントフローを設定
+        flow = Flow.from_client_config(
+            client_config=client_config,
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'])
+        flow.redirect_uri = GACCOUNT_AUTH_URL + '/oauth_callback'
 
+        authorization_url, state = flow.authorization_url(prompt='consent')
 
+        # 状態をセッションに保存
+        session['state'] = state
+        session['user_id'] = user_id
+            
+        print(f"user_id: {user_id}")
+
+        return authorization_url
+        
+        # ユーザーをOAuth認証URLにリダイレクト
+        return redirect(authorization_url)
 
 @app.route('/oauth_callback')
 def oauth_callback():
