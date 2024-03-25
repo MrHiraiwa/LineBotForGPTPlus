@@ -1160,7 +1160,6 @@ def embedding():
 @app.route('/start_oauth')
 def start_oauth():
     user_id = request.args.get('user_id')
-    print(f"user_id: {user_id}")
 
     try:
         # クライアント設定
@@ -1184,8 +1183,6 @@ def start_oauth():
         # 状態をセッションに保存
         session['state'] = state
         session['user_id'] = user_id
-            
-        print(f"user_id: {user_id}")
         
         # ユーザーをOAuth認証URLにリダイレクト
         return redirect(authorization_url)
@@ -1202,8 +1199,6 @@ def oauth_callback():
     state = session.get('state')
     user_id = session.get('user_id')
     authorization_response = request.url
-
-    print(f"user_id: {user_id}")
     
     if authorization_response.startswith('http://'):
         authorization_response = authorization_response.replace('http://', 'https://', 1)
