@@ -274,6 +274,15 @@ def get_calender(gaccount_access_token, max_chars=1000):
         print(f"generate_image error: {e}" )
         return f"SYSTEM: SYSTEM:カレンダーのイベント取得にエラーが発生しました。{e}"
 
+def get_mime_part(parts, mime_type='text/plain'):
+    """再帰的に特定のMIMEタイプのパートを探す"""
+    for part in parts:
+        if part['mimeType'] == mime_type:
+            return part
+        if 'parts' in part:
+            return get_mime_part(part['parts'], mime_type=mime_type)
+    return None
+
 def get_gmail(gaccount_access_token, max_chars=1000):
     try:
         credentials = Credentials(token=gaccount_access_token)
@@ -294,35 +303,23 @@ def get_gmail(gaccount_access_token, max_chars=1000):
 
             # メッセージ本文の処理
             parts = payload.get('parts', [])
-            print(f"parts: {parts}")
-            msg_body = ""
-            if parts:  # multipartメッセージの処理
-                for part in parts:
-                    if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
-                        msg_body = base64.urlsafe_b64decode(part['body'].get('data', '')).decode('utf-8')
-                        break  # 最初に見つかったtext/plainまたはtext/htmlパートを使用
-            else:  # 単一パートメッセージの処理
-                if payload['body'].get('data'):
-                    msg_body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8')
-                    print(f"msg_body1: {msg_body}")
-
-            # HTMLタグを除去（HTMLコンテンツの場合）
-            if msg_body and 'text/html' in part['mimeType']:
-                soup = BeautifulSoup(msg_body, 'html.parser')
-                msg_body = soup.get_text()
-                print(f"msg_body2: {msg_body}")
+            text_part = get_mime_part(parts, mime_type='text/plain') or get_mime_part(parts, mime_type='text/html')
+            if text_part:
+                msg_body_encoded = text_part['body'].get('data', '')
+                msg_body = base64.urlsafe_b64decode(msg_body_encoded).decode('utf-8')
+                if text_part['mimeType'] == 'text/html':
+                    soup = BeautifulSoup(msg_body, 'html.parser')
+                    msg_body = soup.get_text()
+            else:
+                msg_body = "本文が見つかりません。"
 
             message_str = f"Subject: {subject}\n{msg_body}\n\n"
             if len(messages_str) + len(message_str) > max_chars:
                 break
             messages_str += message_str
 
-        print(f"messages_str: {messages_str}")
-
         return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars]
-        
     except Exception as e:
-        print(f"Error: {e}")
         return f"SYSTEM: メール取得にエラーが発生しました。{e}"
 
 def run_conversation(GPT_MODEL, messages):
