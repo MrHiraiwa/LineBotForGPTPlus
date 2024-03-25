@@ -103,6 +103,43 @@ functions = [
     },
     {
         # 関数の名称
+        "name": "add_calender",
+        # 関数の機能説明
+        "description": "You can add schedules."
+        "parameters": {
+            "type": "object",
+            # 各引数
+            "properties": {
+                "summary": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "スケジュールのサマリー"
+                },
+                "start_time": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "開始時間"
+                },
+                "end_time": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "終了時間"
+                },
+                "description": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "説明"
+                },
+                "location": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "場所"
+                }
+            }
+        }
+    },
+    {
+        # 関数の名称
         "name": "get_gmail",
         # 関数の機能説明
         "description": "You can retrieve gmail message."
