@@ -245,7 +245,8 @@ def get_calender(gaccount_access_token, max_chars=1000):
         service = build('calendar', 'v3', credentials=credentials)
 
         # 現在時刻
-        now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z'はUTCを指定
+        jst = pytz.timezone('Asia/Tokyo')
+        now = datetime.now(jst).isoformat()
     
         # Google Calendar APIを呼び出して、直近の10件のイベントを取得
         events_result = service.events().list(calendarId='primary', timeMin=now,
