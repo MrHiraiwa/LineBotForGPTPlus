@@ -238,7 +238,7 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
 
 def get_calender(gaccount_access_token, max_chars=1000):
     # アクセストークンからCredentialsオブジェクトを作成
-    credentials = Credentials(token=access_token)
+    credentials = Credentials(token=gaccount_access_token)
     
     # Google Calendar APIのserviceオブジェクトを構築
     service = build('calendar', 'v3', credentials=credentials)
