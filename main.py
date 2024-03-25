@@ -1159,6 +1159,7 @@ def embedding():
 @app.route('/start_oauth')
 def start_oauth():
     user_id = request.args.get('user_id')
+    print(f"user_id: {user_id}")
 
     authorization_url = create_oauth_session(user_id, GACCOUNT_AUTH_URL)
     
@@ -1169,10 +1170,10 @@ def start_oauth():
 
 @app.route('/oauth_callback')
 def oauth_callback():
-    line_user_id = request.args.get('line_user_id')
+    user_id = request.args.get('user_id')
     authorization_response = request.url
 
-    print(f"line_user_id: {line_user_id}")
+    print(f"user_id: {user_id}")
     
     if authorization_response.startswith('http://'):
         authorization_response = authorization_response.replace('http://', 'https://', 1)
@@ -1201,7 +1202,7 @@ def oauth_callback():
         userinfo = userinfo_response.json()
 
         db = firestore.Client(database=DATABASE_NAME)
-        doc_ref = db.collection('users').document(line_user_id)
+        doc_ref = db.collection('users').document(user_id)
 
         doc_ref.update({
              'google_access_token': credentials.token
