@@ -1175,7 +1175,7 @@ def start_oauth():
         # OAuth 2.0 クライアントフローを設定
         flow = Flow.from_client_config(
             client_config=client_config,
-            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar', https://www.googleapis.com/auth/gmail.readonly])
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.readonly'])
         flow.redirect_uri = GACCOUNT_AUTH_URL + '/oauth_callback'
 
         authorization_url, state = flow.authorization_url(prompt='consent')
