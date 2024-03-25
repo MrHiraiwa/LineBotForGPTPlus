@@ -1190,6 +1190,13 @@ def start_oauth():
         
         # ユーザーをOAuth認証URLにリダイレクト
         return redirect(authorization_url)
+        
+    except Exception as e:
+        # エラーを標準出力に記録
+        print(f"Error creating oauth session for user {user_id}: {e}")
+
+        # エラーが発生した場合には None を返す
+        return None
 
 @app.route('/oauth_callback')
 def oauth_callback():
