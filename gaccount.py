@@ -7,7 +7,7 @@ import google.auth.transport.requests
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
-def create_oauth_session(line_user_id, GACCOUNT_AUTH_URL):
+def create_oauth_session(user_id, GACCOUNT_AUTH_URL):
     try:
         # クライアント設定
         client_config = {
@@ -30,14 +30,14 @@ def create_oauth_session(line_user_id, GACCOUNT_AUTH_URL):
 
         # 状態をセッションに保存
         session['state'] = state
-        session['line_user_id'] = line_user_id
+        session['user_id'] = user_id
             
-        print(f"line_user_id: {line_user_id}")
+        print(f"user_id: {user_id}")
 
         return authorization_url
     except Exception as e:
         # エラーを標準出力に記録
-        print(f"Error creating oauth session for user {line_user_id}: {e}")
+        print(f"Error creating oauth session for user {user_id}: {e}")
 
         # エラーが発生した場合には None を返す
         return None
