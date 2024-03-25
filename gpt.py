@@ -294,6 +294,7 @@ def get_gmail(gaccount_access_token, max_chars=1000):
 
             # メッセージ本文の処理
             parts = payload.get('parts', [])
+            print(f"parts: {parts}")
             msg_body = ""
             if parts:  # multipartメッセージの処理
                 for part in parts:
@@ -303,16 +304,20 @@ def get_gmail(gaccount_access_token, max_chars=1000):
             else:  # 単一パートメッセージの処理
                 if payload['body'].get('data'):
                     msg_body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8')
+                    print(f"msg_body1: {msg_body}")
 
             # HTMLタグを除去（HTMLコンテンツの場合）
             if msg_body and 'text/html' in part['mimeType']:
                 soup = BeautifulSoup(msg_body, 'html.parser')
                 msg_body = soup.get_text()
+                print(f"msg_body2: {msg_body}")
 
             message_str = f"Subject: {subject}\n{msg_body}\n\n"
             if len(messages_str) + len(message_str) > max_chars:
                 break
             messages_str += message_str
+
+        print(f"messages_str: {messages_str}")
 
         return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars]
         
