@@ -94,5 +94,11 @@ functions = [
                 }
             }
         }
+    },
+    {
+        # 関数の名称
+        "name": "get_calender",
+        # 関数の機能説明
+        "description": "You can retrieve upcoming schedules."
     }
 ]
