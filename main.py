@@ -1171,7 +1171,6 @@ def start_oauth():
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
             }
         }
-        GACCOUNT_AUTH_URL = GACCOUNT_AUTH_URL
         # OAuth 2.0 クライアントフローを設定
         flow = Flow.from_client_config(
             client_config=client_config,
