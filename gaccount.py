@@ -7,7 +7,7 @@ import google.auth.transport.requests
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
-def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
+def create_oauth_session(line_user_id, GACCOUNT_AUTH_URL):
     try:
         # クライアント設定
         client_config = {
@@ -19,12 +19,12 @@ def create_oauth_session(line_user_id, GACCOUNT_CALLBACK_URL):
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
             }
         }
-        GACCOUNT_CALLBACK_URL = GACCOUNT_CALLBACK_URL
+        GACCOUNT_AUTH_URL = GACCOUNT_AUTH_URL
         # OAuth 2.0 クライアントフローを設定
         flow = Flow.from_client_config(
             client_config=client_config,
             scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'])
-        flow.redirect_uri = GACCOUNT_CALLBACK_URL
+        flow.redirect_uri = GACCOUNT_AUTH_URL
 
         authorization_url, state = flow.authorization_url(prompt='consent')
 
