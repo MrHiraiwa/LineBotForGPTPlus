@@ -118,22 +118,22 @@ functions = [
                 "start_time": {
                     "type": "string",
                     # 引数の説明
-                    "description": "開始時間"
+                    "description": "スケジュールの開始時間を日本時間で指定(RFC3339)"
                 },
                 "end_time": {
                     "type": "string",
                     # 引数の説明
-                    "description": "終了時間"
+                    "description": "スケジュールの終了時間を日本時間で指定(RFC3339)"
                 },
                 "description": {
                     "type": "string",
                     # 引数の説明
-                    "description": "説明"
+                    "description": "スケジュールの説明"
                 },
                 "location": {
                     "type": "string",
                     # 引数の説明
-                    "description": "場所"
+                    "description": "スケジュールの内容を実施する場所"
                 }
             }
         }
