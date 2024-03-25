@@ -1160,7 +1160,7 @@ def embedding():
 def start_oauth():
     user_id = request.args.get('user_id')
 
-
+    authorization_url = create_oauth_session(user_id, GACCOUNT_AUTH_URL)
     
     # ユーザーをOAuth認証URLにリダイレクト
     return redirect(authorization_url)
