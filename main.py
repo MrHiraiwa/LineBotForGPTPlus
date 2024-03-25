@@ -39,7 +39,6 @@ from gpt import chatgpt_functions
 from claude import claude_functions
 from localllm import localllm_functions
 from embedding import embedding_from_storage
-from gaccount import create_oauth_session
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
