@@ -1185,8 +1185,6 @@ def start_oauth():
         session['user_id'] = user_id
             
         print(f"user_id: {user_id}")
-
-        return authorization_url
         
         # ユーザーをOAuth認証URLにリダイレクト
         return redirect(authorization_url)
