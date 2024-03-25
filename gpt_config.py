@@ -128,7 +128,7 @@ functions = [
                 "description": {
                     "type": "string",
                     # 引数の説明
-                    "description": "スケジュールの説明"
+                    "description": "スケジュールした内容の詳細な説明"
                 },
                 "location": {
                     "type": "string",
