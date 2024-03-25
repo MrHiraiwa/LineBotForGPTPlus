@@ -1156,6 +1156,17 @@ def embedding():
     # 公開URLをレスポンスとして返す
     return Response(public_url, status=200)
 
+@app.route('/start_oauth')
+def start_oauth():
+    user_id = request.args.get('user_id')
+
+
+    
+    # ユーザーをOAuth認証URLにリダイレクト
+    return redirect(authorization_url)
+
+
+
 @app.route('/oauth_callback')
 def oauth_callback():
     line_user_id = request.args.get('line_user_id')
