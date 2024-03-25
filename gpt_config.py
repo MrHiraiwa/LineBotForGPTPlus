@@ -105,7 +105,7 @@ functions = [
         # 関数の名称
         "name": "add_calender",
         # 関数の機能説明
-        "description": "You can add schedules."
+        "description": "You can add schedules.",
         "parameters": {
             "type": "object",
             # 各引数
