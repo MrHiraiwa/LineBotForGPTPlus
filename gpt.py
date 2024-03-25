@@ -287,7 +287,6 @@ def get_gmail(gaccount_access_token, max_chars=1000):
         messages = results.get('messages', [])
 
         if not messages:
-            print("直近のメッセージはありません。")
             return "直近のメッセージはありません。"
 
         # メッセージの概要を結合して最大1000文字までの文字列を生成
@@ -295,6 +294,7 @@ def get_gmail(gaccount_access_token, max_chars=1000):
         for msg in messages:
             # メッセージの詳細を取得
             msg_detail = service.users().messages().get(userId='me', id=msg['id']).execute()
+            print(f"msg_detail: {msg_detail}")
             payload = msg_detail['payload']
             headers = payload.get('headers')
             subject = [i['value'] for i in headers if i['name'] == 'Subject'][0]
