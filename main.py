@@ -1170,8 +1170,8 @@ def start_oauth():
 
 @app.route('/oauth_callback')
 def oauth_callback():
-    state = request.args.get('state')
-    user_id = request.args.get('user_id')
+    state = session.get('state')
+    user_id = session.get('user_id')
     authorization_response = request.url
 
     print(f"user_id: {user_id}")
