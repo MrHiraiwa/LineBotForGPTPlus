@@ -371,7 +371,7 @@ def reload_settings():
     GACCOUNT_GUIDE_MESSAGE = get_setting('GACCOUNT_GUIDE_MESSAGE')
     GACCOUNT_FAIL_MESSAGE = get_setting('GACCOUNT_FAIL_MESSAGE')
     GACCOUNT_QUICK_REPLY = get_setting('GACCOUNT_QUICK_REPLY')
-    GACCOUNT_AUTH_URL = get_setting('GACCOUNT_AUTHBACK_URL')
+    GACCOUNT_AUTH_URL = get_setting('GACCOUNT_AUTH_URL')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
@@ -889,8 +889,8 @@ def handle_message(event):
             if any(word in user_message for word in GACCOUNT_KEYWORDS) and not exec_functions:
                 enable_quick_reply = True
                 if source_type == "user":
-                    start_auth_url = GACCOUNT_AUTH_URL + '/start_oauth?user_id=' + user_id + '&'
-                    quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, oauth_url])
+                    start_auth_url = GACCOUNT_AUTH_URL + '/start_oauth?user_id=' + user_id + '&openExternalBrowser=1'
+                    quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, start_auth_url])
                     head_message = head_message + GACCOUNT_GUIDE_MESSAGE
                 else:
                     bot_reply_list.append(['text', GACCOUNT_FAIL_MESSAGE])
