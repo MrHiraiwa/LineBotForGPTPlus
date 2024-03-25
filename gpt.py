@@ -11,6 +11,8 @@ import gpt_config as cf
 import json
 import wikipedia
 from PIL import Image
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 
 google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
@@ -234,6 +236,36 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
+def get_calender(gaccount_access_token, max_chars=1000):
+    # アクセストークンからCredentialsオブジェクトを作成
+    credentials = Credentials(token=access_token)
+    
+    # Google Calendar APIのserviceオブジェクトを構築
+    service = build('calendar', 'v3', credentials=credentials)
+
+    # 現在時刻
+    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z'はUTCを指定
+    
+    # Google Calendar APIを呼び出して、直近の10件のイベントを取得
+    events_result = service.events().list(calendarId='primary', timeMin=now,
+                                          maxResults=10, singleEvents=True,
+                                          orderBy='startTime').execute()
+    events = events_result.get('items', [])
+    
+    if not events:
+        return "直近のイベントはありません。"
+
+    # イベントの詳細を結合して最大1000文字までの文字列を生成
+    events_str = ""
+    for event in events:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        event_str = f"{start} - {event['summary']}\n"
+        if len(events_str) + len(event_str) > max_chars:
+            break  # 最大文字数を超えたらループを抜ける
+        events_str += event_str
+
+    return events_str[:max_chars]  # 最大文字数までの文字列を返す
+
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
@@ -265,7 +297,7 @@ def run_conversation_f(GPT_MODEL, messages, google_description, custom_descripti
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
