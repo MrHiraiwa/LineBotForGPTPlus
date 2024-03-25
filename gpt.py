@@ -264,7 +264,7 @@ def get_calender(gaccount_access_token, max_chars=1000):
             break  # 最大文字数を超えたらループを抜ける
         events_str += event_str
 
-    return events_str[:max_chars]  # 最大文字数までの文字列を返す
+    return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars]
 
 def run_conversation(GPT_MODEL, messages):
     try:
@@ -315,6 +315,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     scraping_called = False
     get_googlesearch_called = False
     get_customsearch1_called = False
+    get_calender_called = False
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, i_messages_for_api, google_description, custom_description, attempt)
@@ -354,6 +355,12 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                     get_customsearch1_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply = get_customsearch1(arguments["words"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "get_calender" and not get_calender_called:
+                    get_calender_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply = get_calender(gaccount_access_token)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
