@@ -24,7 +24,7 @@ def create_oauth_session(line_user_id, GACCOUNT_AUTH_URL):
         flow = Flow.from_client_config(
             client_config=client_config,
             scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'])
-        flow.redirect_uri = GACCOUNT_AUTH_URL
+        flow.redirect_uri = GACCOUNT_AUTH_URL + '/oauth_callback'
 
         authorization_url, state = flow.authorization_url(prompt='consent')
 
