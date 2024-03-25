@@ -237,35 +237,40 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
 def get_calender(gaccount_access_token, max_chars=1000):
-    # アクセストークンからCredentialsオブジェクトを作成
-    credentials = Credentials(token=gaccount_access_token)
+    try:
+        # アクセストークンからCredentialsオブジェクトを作成
+        credentials = Credentials(token=gaccount_access_token)
     
-    # Google Calendar APIのserviceオブジェクトを構築
-    service = build('calendar', 'v3', credentials=credentials)
+        # Google Calendar APIのserviceオブジェクトを構築
+        service = build('calendar', 'v3', credentials=credentials)
 
-    # 現在時刻
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z'はUTCを指定
+        # 現在時刻
+        now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z'はUTCを指定
     
-    # Google Calendar APIを呼び出して、直近の10件のイベントを取得
-    events_result = service.events().list(calendarId='primary', timeMin=now,
+        # Google Calendar APIを呼び出して、直近の10件のイベントを取得
+        events_result = service.events().list(calendarId='primary', timeMin=now,
                                           maxResults=10, singleEvents=True,
                                           orderBy='startTime').execute()
-    events = events_result.get('items', [])
+        events = events_result.get('items', [])
     
-    if not events:
-        return "直近のイベントはありません。"
+        if not events:
+            return "直近のイベントはありません。"
 
-    # イベントの詳細を結合して最大1000文字までの文字列を生成
-    events_str = ""
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        event_str = f"{start} - {event['summary']}\n"
-        if len(events_str) + len(event_str) > max_chars:
-            break  # 最大文字数を超えたらループを抜ける
-        events_str += event_str
+        # イベントの詳細を結合して最大1000文字までの文字列を生成
+        events_str = ""
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            event_str = f"{start} - {event['summary']}\n"
+            if len(events_str) + len(event_str) > max_chars:
+                break  # 最大文字数を超えたらループを抜ける
+            events_str += event_str
 
-    return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars]
-
+        return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars]
+        
+    except Exception as e:
+        print(f"generate_image error: {e}" )
+        return f"SYSTEM: SYSTEM:カレンダーのイベント取得にエラーが発生しました。{e}"
+        
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
