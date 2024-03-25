@@ -308,7 +308,7 @@ def add_calendar(gaccount_access_token, summary, start_time, end_time, descripti
         event_result = service.events().insert(calendarId='primary', body=event).execute()
     
         # 成功した場合、イベントの詳細を含むメッセージを返す
-        return f"イベントが追加されました: {event_result.get('htmlLink')}"
+        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}"
     
     except Exception as e:
         return f"イベント追加に失敗しました: {e}"
@@ -463,7 +463,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                 elif function_call.name == "add_calender" and not add_calender_called:
                     add_calender_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply = get_calender(gaccount_access_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
+                    bot_reply = add_calender(gaccount_access_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_gmail" and not get_gmail_called:
