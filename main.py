@@ -1178,7 +1178,10 @@ def start_oauth():
             scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.readonly'])
         flow.redirect_uri = GACCOUNT_AUTH_URL + '/oauth_callback'
 
-        authorization_url, state = flow.authorization_url(prompt='consent')
+        authorization_url, state = flow.authorization_url(
+            prompt='consent',
+            access_type='offline'
+        )
 
         # 状態をセッションに保存
         session['state'] = state
@@ -1230,7 +1233,8 @@ def oauth_callback():
         doc_ref = db.collection('users').document(user_id)
 
         doc_ref.update({
-             'gaccount_access_token': credentials.token
+            'gaccount_access_token': credentials.token,
+            'gaccount_refresh_token': credentials.refresh_token
         })
 
         return f'ユーザー情報: <pre>{userinfo}</pre>'
