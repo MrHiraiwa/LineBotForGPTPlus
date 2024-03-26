@@ -344,7 +344,7 @@ def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_t
     except Exception as e:
         return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
-def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, summary, start_time, end_time, description=None, location=None):
+def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -356,19 +356,16 @@ def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, sum
     
         service = build('calendar', 'v3', credentials=credentials)
 
-        # イベント情報を更新するための辞書を作成
+        # 現在のイベント情報を取得
+        current_event = service.events().get(calendarId='primary', eventId=event_id).execute()
+
+        # 更新が提供されていない項目は現在の情報をそのまま使用
         updated_event = {
-            'summary': summary,
-            'location': location,
-            'description': description,
-            'start': {
-                'dateTime': start_time,
-                'timeZone': 'Asia/Tokyo',
-            },
-            'end': {
-                'dateTime': end_time,
-                'timeZone': 'Asia/Tokyo',
-            }
+            'summary': summary if summary is not None else current_event.get('summary'),
+            'location': location if location is not None else current_event.get('location'),
+            'description': description if description is not None else current_event.get('description'),
+            'start': {'dateTime': start_time, 'timeZone': 'Asia/Tokyo'} if start_time is not None else current_event.get('start'),
+            'end': {'dateTime': end_time, 'timeZone': 'Asia/Tokyo'} if end_time is not None else current_event.get('end'),
         }
         
         # イベントを更新
@@ -379,6 +376,7 @@ def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, sum
         return f"イベントが更新されました: {updated_event_result['summary']}", updated_access_token, gaccount_refresh_token
     except Exception as e:
         return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
 
 def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
     try:
