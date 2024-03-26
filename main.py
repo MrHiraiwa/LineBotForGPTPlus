@@ -1237,7 +1237,7 @@ def oauth_callback():
             'gaccount_refresh_token': credentials.refresh_token
         })
 
-        return f'ユーザー情報: <pre>{userinfo}</pre>'
+        return redirect(url_for('oauth'))
     except Exception as e:
         return f'認証プロセス中にエラーが発生しました: {e}'
 
