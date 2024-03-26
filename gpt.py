@@ -272,19 +272,22 @@ def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
     
         # Google Calendar APIを呼び出して、直近の10件のイベントを取得
         events_result = service.events().list(calendarId='primary', timeMin=now,
-                                              maxResults=10, singleEvents=True,
+                                              maxResults=50, singleEvents=True,
                                               orderBy='startTime').execute()
         events = events_result.get('items', [])
     
         if not events:
             return "直近のイベントはありません。", "", ""  # イベントがない場合はアクセストークンとリフレッシュトークンと共にメッセージを返す
 
-        # イベントの詳細とIDを結合して最大1000文字までの文字列を生成
+        # イベントの詳細を結合して最大1000文字までの文字列を生成
         events_str = ""
         for event in events:
-            event_id = event['id']  # イベントIDを取得
             start = event['start'].get('dateTime', event['start'].get('date'))
-            event_str = f"ID: {event_id} - {start} - {event['summary']}\n"  # イベントIDも含めて文字列を生成
+            end = event['end'].get('dateTime', event['end'].get('date'))
+            summary = event.get('summary', '無題')
+            description = event.get('description', '説明なし')
+            location = event.get('location', '場所なし')
+            event_str = f"Summary: {summary}, Start: {start}, End: {end}, Description: {description}, Location: {location}\n"
             if len(events_str) + len(event_str) > max_chars:
                 break  # 最大文字数を超えたらループを抜ける
             events_str += event_str
