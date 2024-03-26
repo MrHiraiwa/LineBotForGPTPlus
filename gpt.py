@@ -349,7 +349,6 @@ def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_t
         return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
 def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
-    print(f"event_id: {event_id}, summary: {summary}, start_time: {start_time}, end_time: {end_time}, description: {description}, location: {location}")
     try:
         credentials = create_credentials(
             gaccount_access_token,
