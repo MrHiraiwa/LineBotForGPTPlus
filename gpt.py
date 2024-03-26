@@ -488,7 +488,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                 elif function_call.name == "get_calendar" and not get_calendar_called:
                     get_calendar_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "add_calendar" and not add_calendar_called:
