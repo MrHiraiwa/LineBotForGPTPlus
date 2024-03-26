@@ -344,6 +344,64 @@ def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_t
     except Exception as e:
         return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
+def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, summary, start_time, end_time, description=None, location=None):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        if credentials.expired:
+            credentials.refresh(Request())
+    
+        service = build('calendar', 'v3', credentials=credentials)
+
+        # イベント情報を更新するための辞書を作成
+        updated_event = {
+            'summary': summary,
+            'location': location,
+            'description': description,
+            'start': {
+                'dateTime': start_time,
+                'timeZone': 'Asia/Tokyo',
+            },
+            'end': {
+                'dateTime': end_time,
+                'timeZone': 'Asia/Tokyo',
+            }
+        }
+        
+        # イベントを更新
+        updated_event_result = service.events().update(calendarId='primary', eventId=event_id, body=updated_event).execute()
+
+        updated_access_token = credentials.token
+
+        return f"イベントが更新されました: {updated_event_result['summary']}", updated_access_token, gaccount_refresh_token
+    except Exception as e:
+        return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
+def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        if credentials.expired:
+            credentials.refresh(Request())
+    
+        service = build('calendar', 'v3', credentials=credentials)
+        
+        # イベントを削除
+        service.events().delete(calendarId='primary', eventId=event_id).execute()
+
+        updated_access_token = credentials.token
+
+        return "イベントが削除されました", updated_access_token, gaccount_refresh_token
+    except Exception as e:
+        return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
+
 def get_mime_part(parts, mime_type='text/plain'):
     """再帰的に特定のMIMEタイプのパートを探す"""
     for part in parts:
@@ -495,6 +553,18 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                     add_calendar_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "update_calendar" and not update_calendar_called:
+                    update_calendar_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token,arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "delete_calendar" and not delete_calendar_called:
+                    delete_calendar_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_gmail" and not get_gmail_called:
