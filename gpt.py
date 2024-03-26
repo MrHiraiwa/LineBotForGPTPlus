@@ -22,6 +22,8 @@ google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 gpt_client = OpenAI(api_key=openai_api_key)
+
+
     
 user_id = []
 bucket_name = []
@@ -237,6 +239,15 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
     except Exception as e:
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
+
+def create_credentials(access_token, refresh_token, client_id, client_secret):
+    return Credentials(
+        token=access_token,
+        refresh_token=refresh_token,
+        client_id=client_id,
+        client_secret=client_secret,
+        token_uri='https://oauth2.googleapis.com/token'
+    )
 
 def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
     try:
