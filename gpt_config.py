@@ -192,7 +192,7 @@ functions = [
                 "event_id": {
                     "type": "string",
                     # 引数の説明
-                    "description": "スケジュールのイベントID"
+                    "description": "削除対象のスケジュールのイベントID"
                 }
             }
         }
