@@ -263,7 +263,6 @@ def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
         if credentials.expired:
             credentials.refresh(Request())
 
-    
         # Google Calendar APIのserviceオブジェクトを構築
         service = build('calendar', 'v3', credentials=credentials)
 
@@ -273,18 +272,19 @@ def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
     
         # Google Calendar APIを呼び出して、直近の10件のイベントを取得
         events_result = service.events().list(calendarId='primary', timeMin=now,
-                                          maxResults=10, singleEvents=True,
-                                          orderBy='startTime').execute()
+                                              maxResults=10, singleEvents=True,
+                                              orderBy='startTime').execute()
         events = events_result.get('items', [])
     
         if not events:
-            return "直近のイベントはありません。"
+            return "直近のイベントはありません。", "", ""  # イベントがない場合はアクセストークンとリフレッシュトークンと共にメッセージを返す
 
-        # イベントの詳細を結合して最大1000文字までの文字列を生成
+        # イベントの詳細とIDを結合して最大1000文字までの文字列を生成
         events_str = ""
         for event in events:
+            event_id = event['id']  # イベントIDを取得
             start = event['start'].get('dateTime', event['start'].get('date'))
-            event_str = f"{start} - {event['summary']}\n"
+            event_str = f"ID: {event_id} - {start} - {event['summary']}\n"  # イベントIDも含めて文字列を生成
             if len(events_str) + len(event_str) > max_chars:
                 break  # 最大文字数を超えたらループを抜ける
             events_str += event_str
@@ -294,8 +294,8 @@ def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
         return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars], updated_access_token, gaccount_refresh_token
         
     except Exception as e:
-        print(f"generate_image error: {e}" )
-        return f"SYSTEM: SYSTEM:カレンダーのイベント取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+        print(f"Error during calendar event retrieval: {e}")
+        return f"SYSTEM: カレンダーのイベント取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_time, end_time, description=None, location=None):
     try:
