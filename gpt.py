@@ -515,4 +515,4 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
         else:
             return ERROR_MESSAGE + " Fail to connect OpenAI."
     
-    return bot_reply, public_img_url, public_img_url_s gaccount_access_token, gaccount_refresh_token 
+    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
