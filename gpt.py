@@ -501,6 +501,8 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     get_customsearch1_called = False
     get_calendar_called = False
     add_calendar_called = False
+    update_calendar_called = False
+    delete_calendar_called = False
     get_gmail_called = False
 
     while attempt < max_attempts:
