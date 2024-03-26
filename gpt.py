@@ -509,10 +509,10 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                         bot_reply = response.choices[0].message.content
                     else:
                         bot_reply = "An error occurred while processing the question"
-                    return bot_reply, public_img_url, public_img_url_s
+                    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
             else:
-                return response.choices[0].message.content, public_img_url, public_img_url_s
+                return response.choices[0].message.content, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
-            return ERROR_MESSAGE + " Fail to connect OpenAI."
+            return ERROR_MESSAGE + " Fail to connect OpenAI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
     
     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
