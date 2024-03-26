@@ -11,6 +11,12 @@ import gpt_config as cf
 import json
 import wikipedia
 from PIL import Image
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
+
+import base64
+import email
 
 google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
@@ -18,6 +24,9 @@ google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 gpt_client = OpenAI(api_key=openai_api_key)
+
+google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
     
 user_id = []
 bucket_name = []
@@ -234,6 +243,219 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
+def create_credentials(gaccount_access_token, gaccount_refresh_token):
+    return Credentials(
+        token=gaccount_access_token,
+        refresh_token=gaccount_refresh_token,
+        client_id=google_client_id,
+        client_secret=google_client_secret,
+        token_uri='https://oauth2.googleapis.com/token'
+    )
+
+def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        # トークン更新をチェック
+        if credentials.expired:
+            credentials.refresh(Request())
+
+        # Google Calendar APIのserviceオブジェクトを構築
+        service = build('calendar', 'v3', credentials=credentials)
+
+        # 現在時刻
+        jst = pytz.timezone('Asia/Tokyo')
+        now = datetime.now(jst).isoformat()
+    
+        # Google Calendar APIを呼び出して、直近のイベントを取得
+        events_result = service.events().list(calendarId='primary', timeMin=now,
+                                              maxResults=50, singleEvents=True,
+                                              orderBy='startTime').execute()
+        events = events_result.get('items', [])
+    
+        if not events:
+            return "直近のイベントはありません。", "", ""  # イベントがない場合はアクセストークンとリフレッシュトークンと共にメッセージを返す
+
+        # イベントの詳細を結合して最大1000文字までの文字列を生成
+        events_str = ""
+        for event in events:
+            event_id = event['id']
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
+            summary = event.get('summary', '無題')
+            description = event.get('description', '説明なし')
+            location = event.get('location', '場所なし')
+            event_str = f"ID: {event_id}, Summary: {summary}, Start: {start}, End: {end}, Description: {description}, Location: {location}\n"
+            if len(events_str) + len(event_str) > max_chars:
+                break  # 最大文字数を超えたらループを抜ける
+            events_str += event_str
+
+        updated_access_token = credentials.token
+
+        return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars], updated_access_token, gaccount_refresh_token
+        
+    except Exception as e:
+        print(f"Error during calendar event retrieval: {e}")
+        return f"SYSTEM: カレンダーのイベント取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
+def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_time, end_time, description=None, location=None):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        # トークン更新をチェック
+        if credentials.expired:
+            credentials.refresh(Request())
+    
+        # Google Calendar APIのserviceオブジェクトを構築
+        service = build('calendar', 'v3', credentials=credentials)
+    
+        # イベントの情報を設定
+        event = {
+            'summary': summary,
+            'location': location,
+            'description': description,
+            'start': {
+                'dateTime': start_time,
+                'timeZone': 'Asia/Tokyo',
+            },
+            'end': {
+                'dateTime': end_time,
+                'timeZone': 'Asia/Tokyo',
+            },
+            'reminders': {
+                'useDefault': False,
+                'overrides': [
+                    {'method': 'email', 'minutes': 24 * 60},
+                    {'method': 'popup', 'minutes': 10},
+                ],
+            },
+        }
+    
+        # イベントをカレンダーに追加
+        event_result = service.events().insert(calendarId='primary', body=event).execute()
+
+        updated_access_token = credentials.token
+    
+        # 成功した場合、イベントの詳細を含むメッセージを返す
+        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, gaccount_refresh_token
+    
+    except Exception as e:
+        return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
+def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        if credentials.expired:
+            credentials.refresh(Request())
+    
+        service = build('calendar', 'v3', credentials=credentials)
+
+        # 現在のイベント情報を取得
+        current_event = service.events().get(calendarId='primary', eventId=event_id).execute()
+
+        # 更新が提供されていない項目は現在の情報をそのまま使用
+        updated_event = {
+            'summary': summary if summary is not None else current_event.get('summary'),
+            'location': location if location is not None else current_event.get('location'),
+            'description': description if description is not None else current_event.get('description'),
+            'start': {'dateTime': start_time, 'timeZone': 'Asia/Tokyo'} if start_time is not None else current_event.get('start'),
+            'end': {'dateTime': end_time, 'timeZone': 'Asia/Tokyo'} if end_time is not None else current_event.get('end'),
+        }
+        
+        # イベントを更新
+        updated_event_result = service.events().update(calendarId='primary', eventId=event_id, body=updated_event).execute()
+
+        updated_access_token = credentials.token
+
+        return f"イベントが更新されました: {updated_event_result['summary']}", updated_access_token, gaccount_refresh_token
+    except Exception as e:
+        return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
+def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        if credentials.expired:
+            credentials.refresh(Request())
+    
+        service = build('calendar', 'v3', credentials=credentials)
+        
+        # 削除するイベントの詳細を取得（特にsummaryを含む）
+        event_to_delete = service.events().get(calendarId='primary', eventId=event_id).execute()
+        event_summary = event_to_delete.get('summary', '無題のイベント')  # イベントにsummaryがない場合のデフォルト値
+
+        # イベントを削除
+        service.events().delete(calendarId='primary', eventId=event_id).execute()
+
+        updated_access_token = credentials.token
+
+        return f"イベント「{event_summary}」が削除されました", updated_access_token, gaccount_refresh_token
+    except Exception as e:
+        return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
+
+
+def get_mime_part(parts, mime_type='text/plain'):
+    """再帰的に特定のMIMEタイプのパートを探す"""
+    for part in parts:
+        if part['mimeType'] == mime_type:
+            return part
+        if 'parts' in part:
+            return get_mime_part(part['parts'], mime_type=mime_type)
+    return None
+
+def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
+    try:
+        credentials = Credentials(token=gaccount_access_token)
+        service = build('gmail', 'v1', credentials=credentials)
+
+        results = service.users().messages().list(userId='me', maxResults=5).execute()
+        messages = results.get('messages', [])
+
+        if not messages:
+            return "直近のメッセージはありません。"
+
+        messages_str = ""
+        for msg in messages:
+            msg_detail = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
+            payload = msg_detail.get('payload', {})
+            headers = payload.get('headers', [])
+            subject = next((i['value'] for i in headers if i['name'].lower() == 'subject'), "No Subject")
+
+            # メッセージ本文の処理
+            parts = payload.get('parts', [])
+            text_part = get_mime_part(parts, mime_type='text/plain') or get_mime_part(parts, mime_type='text/html')
+            if text_part:
+                msg_body_encoded = text_part['body'].get('data', '')
+                msg_body = base64.urlsafe_b64decode(msg_body_encoded).decode('utf-8')
+                if text_part['mimeType'] == 'text/html':
+                    soup = BeautifulSoup(msg_body, 'html.parser')
+                    msg_body = soup.get_text()
+            else:
+                msg_body = "本文が見つかりません。"
+
+            message_str = f"Subject: {subject}\n{msg_body}\n\n"
+            if len(messages_str) + len(message_str) > max_chars:
+                break
+            messages_str += message_str
+
+        return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars]
+    except Exception as e:
+        return f"SYSTEM: メール取得にエラーが発生しました。{e}"
+
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
@@ -265,7 +487,7 @@ def run_conversation_f(GPT_MODEL, messages, google_description, custom_descripti
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -283,6 +505,11 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     scraping_called = False
     get_googlesearch_called = False
     get_customsearch1_called = False
+    get_calendar_called = False
+    add_calendar_called = False
+    update_calendar_called = False
+    delete_calendar_called = False
+    get_gmail_called = False
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, i_messages_for_api, google_description, custom_description, attempt)
@@ -324,16 +551,46 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
                     bot_reply = get_customsearch1(arguments["words"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
+                elif function_call.name == "get_calendar" and not get_calendar_called:
+                    get_calendar_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "add_calendar" and not add_calendar_called:
+                    add_calendar_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "update_calendar" and not update_calendar_called:
+                    update_calendar_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "delete_calendar" and not delete_calendar_called:
+                    delete_calendar_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "get_gmail" and not get_gmail_called:
+                    get_gmail_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply = get_gmail(gaccount_access_token, gaccount_refresh_token)
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
                 else:
                     response = run_conversation(GPT_MODEL, i_messages_for_api)
                     if response:
                         bot_reply = response.choices[0].message.content
                     else:
                         bot_reply = "An error occurred while processing the question"
-                    return bot_reply, public_img_url, public_img_url_s
+                    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
             else:
-                return response.choices[0].message.content, public_img_url, public_img_url_s
+                return response.choices[0].message.content, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
-            return ERROR_MESSAGE + " Fail to connect OpenAI."
+            return ERROR_MESSAGE + " Fail to connect OpenAI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
     
-    return bot_reply, public_img_url, public_img_url_s
+    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 

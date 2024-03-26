@@ -26,6 +26,8 @@ from hashlib import md5
 import base64
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
+from google_auth_oauthlib.flow import Flow
+import google.auth.transport.requests
 
 from whisper import get_audio
 from voice import put_audio
@@ -41,6 +43,10 @@ from embedding import embedding_from_storage
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CHANNEL_SECRET"])
+
+google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+
 admin_password = os.environ["ADMIN_PASSWORD"]
 DATABASE_NAME = os.getenv('DATABASE_NAME', default='')
 secret_key = os.getenv('SECRET_KEY')
@@ -122,6 +128,11 @@ REQUIRED_ENV_VARS = [
     "PAYMENT_RESULT_URL",
     "VOICEVOX_URL",
     "VOICEVOX_STYLE_ID",
+    "GACCOUNT_KEYWORDS",
+    "GACCOUNT_GUIDE_MESSAGE",
+    "GACCOUNT_FAIL_MESSAGE",
+    "GACCOUNT_QUICK_REPLY",
+    "GACCOUNT_AUTH_URL",
     "CORE_AI_TYPE",
     "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL"
@@ -199,12 +210,17 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_GUIDE_MESSAGE': 'ユーザーに「画面下の「支払い」の項目をタップすると私の利用料の支払い画面が表示される」と案内して感謝の言葉を述べてください。以下の文章はユーザーから送られたものです。',
     'PAYMENT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
     'PAYMENT_QUICK_REPLY': '💸支払い',
-    'PAYMENT_RESULT_URL': 'http://example',
+    'PAYMENT_RESULT_URL': 'https://example.com',
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
     'VOICEVOX_STYLE_ID': '3',
+    'GACCOUNT_KEYWORDS': 'googleアカウント登録,Googleアカウント登録',
+    'GACCOUNT_GUIDE_MESSAGE': 'ユーザーに「画面下の「👤Gアカウント登録」の項目をタップするとGoogleアカウントの登録画面が表示される」と案内してください。以下の文章はユーザーから送られたものです。',
+    'GACCOUNT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
+    'GACCOUNT_QUICK_REPLY': '👤Gアカウント登録',
+    'GACCOUNT_AUTH_URL': 'https://example.com',
     'CORE_AI_TYPE': 'GPT',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
-    'LOCALLLM_BASE_URL': 'http://127.0.0.1:5000/v1'
+    'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1'
 }
 
 try:
@@ -230,6 +246,7 @@ def reload_settings():
     global TRANSLATE_JAPANESE_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_ORDER
     global PAYMENT_KEYWORDS, PAYMENT_PRICE_ID, PAYMENT_GUIDE_MESSAGE, PAYMENT_FAIL_MESSAGE, PAYMENT_QUICK_REPLY, PAYMENT_RESULT_URL
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
+    global GACCOUNT_KEYWORDS, GACCOUNT_GUIDE_MESSAGE, GACCOUNT_FAIL_MESSAGE, GACCOUNT_QUICK_REPLY, GACCOUNT_AUTH_URL
     global DATABASE_NAME
     global CORE_AI_TYPE
     global CLAUDE_MODEL
@@ -345,6 +362,15 @@ def reload_settings():
     PAYMENT_RESULT_URL = get_setting('PAYMENT_RESULT_URL')
     VOICEVOX_URL = get_setting('VOICEVOX_URL')
     VOICEVOX_STYLE_ID = get_setting('VOICEVOX_STYLE_ID')
+    GACCOUNT_KEYWORDS = get_setting('GACCOUNT_KEYWORDS')
+    if GACCOUNT_KEYWORDS:
+        GACCOUNT_KEYWORDS = GACCOUNT_KEYWORDS.split(',')
+    else:
+        GACCOUNT_KEYWORDS = []
+    GACCOUNT_GUIDE_MESSAGE = get_setting('GACCOUNT_GUIDE_MESSAGE')
+    GACCOUNT_FAIL_MESSAGE = get_setting('GACCOUNT_FAIL_MESSAGE')
+    GACCOUNT_QUICK_REPLY = get_setting('GACCOUNT_QUICK_REPLY')
+    GACCOUNT_AUTH_URL = get_setting('GACCOUNT_AUTH_URL')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
@@ -586,6 +612,8 @@ def handle_message(event):
             public_img_url = []
             public_img_url_s = []
             enable_quick_reply = False
+            gaccount_access_token = ""
+            gaccount_refresh_token = ""
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -624,6 +652,8 @@ def handle_message(event):
                 audio_speed = user['audio_speed']
                 translate_language = user['translate_language']
                 updated_date = user['updated_date_string'].astimezone(jst)
+                gaccount_access_token = user.get('gaccount_access_token', "")
+                gaccount_refresh_token = user.get('gaccount_refresh_token', "")
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -859,6 +889,16 @@ def handle_message(event):
                     bot_reply_list.append(['text', PAYMENT_FAIL_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
+            if any(word in user_message for word in GACCOUNT_KEYWORDS) and not exec_functions:
+                enable_quick_reply = True
+                if source_type == "user":
+                    start_auth_url = GACCOUNT_AUTH_URL + '/start_oauth?user_id=' + user_id + '&openExternalBrowser=1'
+                    quick_reply_items.append(['uri', GACCOUNT_QUICK_REPLY, start_auth_url])
+                    head_message = head_message + GACCOUNT_GUIDE_MESSAGE
+                else:
+                    bot_reply_list.append(['text', GACCOUNT_FAIL_MESSAGE])
+                    line_reply(reply_token, bot_reply_list)
+                    return 'OK'
 
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
@@ -909,7 +949,7 @@ def handle_message(event):
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
@@ -968,6 +1008,9 @@ def handle_message(event):
             # daily_usage をインクリメント
             user['daily_usage'] = daily_usage
             user['updated_date_string'] = nowDate
+
+            user['gaccount_access_token'] = gaccount_access_token
+            user['gaccount_refresh_token'] = gaccount_refresh_token
 
             # Firestore ドキュメントを更新
             transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
@@ -1118,6 +1161,96 @@ def embedding():
 
     # 公開URLをレスポンスとして返す
     return Response(public_url, status=200)
+
+@app.route('/start_oauth')
+def start_oauth():
+    user_id = request.args.get('user_id')
+
+    try:
+        # クライアント設定
+        client_config = {
+            "web": {
+                "client_id": google_client_id,
+                "client_secret": google_client_secret,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            }
+        }
+        # OAuth 2.0 クライアントフローを設定
+        flow = Flow.from_client_config(
+            client_config=client_config,
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.readonly'])
+        flow.redirect_uri = GACCOUNT_AUTH_URL + '/oauth_callback'
+
+        authorization_url, state = flow.authorization_url(
+            prompt='consent',
+            access_type='offline'
+        )
+
+        # 状態をセッションに保存
+        session['state'] = state
+        session['user_id'] = user_id
+        
+        # ユーザーをOAuth認証URLにリダイレクト
+        return redirect(authorization_url)
+        
+    except Exception as e:
+        # エラーを標準出力に記録
+        print(f"Error creating oauth session for user {user_id}: {e}")
+
+        # エラーが発生した場合には None を返す
+        return None
+
+@app.route('/oauth_callback')
+def oauth_callback():
+    state = session.get('state')
+    user_id = session.get('user_id')
+    authorization_response = request.url
+    
+    if authorization_response.startswith('http://'):
+        authorization_response = authorization_response.replace('http://', 'https://', 1)
+
+    # クライアント設定
+    client_config = {
+        "web": {
+            "client_id": google_client_id,
+            "client_secret": google_client_secret,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        }
+    }
+
+    try:
+        flow = Flow.from_client_config(
+            client_config=client_config,
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.readonly'])
+        flow.redirect_uri = GACCOUNT_AUTH_URL + '/oauth_callback'
+        flow.fetch_token(authorization_response=authorization_response)
+
+        credentials = flow.credentials
+        userinfo_endpoint = 'https://www.googleapis.com/oauth2/v3/userinfo'
+        userinfo_response = requests.get(userinfo_endpoint, params={'access_token': credentials.token})
+        userinfo = userinfo_response.json()
+
+        db = firestore.Client(database=DATABASE_NAME)
+        doc_ref = db.collection('users').document(user_id)
+
+        doc_ref.update({
+            'gaccount_access_token': credentials.token,
+            'gaccount_refresh_token': credentials.refresh_token
+        })
+
+        return redirect(url_for('oauth'))
+    except Exception as e:
+        return f'認証プロセス中にエラーが発生しました: {e}'
+
+
+@app.route('/oauth', methods=['GET'])
+def oauth():
+    return render_template('oauth.html')
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
