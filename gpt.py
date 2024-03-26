@@ -378,7 +378,6 @@ def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, sum
     except Exception as e:
         return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
-
 def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
     try:
         credentials = create_credentials(
@@ -391,14 +390,19 @@ def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
     
         service = build('calendar', 'v3', credentials=credentials)
         
+        # 削除するイベントの詳細を取得（特にsummaryを含む）
+        event_to_delete = service.events().get(calendarId='primary', eventId=event_id).execute()
+        event_summary = event_to_delete.get('summary', '無題のイベント')  # イベントにsummaryがない場合のデフォルト値
+
         # イベントを削除
         service.events().delete(calendarId='primary', eventId=event_id).execute()
 
         updated_access_token = credentials.token
 
-        return "イベントが削除されました", updated_access_token, gaccount_refresh_token
+        return f"イベント「{event_summary}」が削除されました", updated_access_token, gaccount_refresh_token
     except Exception as e:
         return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
 
 
 def get_mime_part(parts, mime_type='text/plain'):
