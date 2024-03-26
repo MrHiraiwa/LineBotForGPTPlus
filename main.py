@@ -213,7 +213,7 @@ DEFAULT_ENV_VARS = {
     'PAYMENT_RESULT_URL': 'https://example.com',
     'VOICEVOX_URL': 'https://xxxxxxxxxxxxx.x.run.app',
     'VOICEVOX_STYLE_ID': '3',
-    'GACCOUNT_KEYWORDS': 'googleアカウント登録',
+    'GACCOUNT_KEYWORDS': 'googleアカウント登録,Googleアカウント登録',
     'GACCOUNT_GUIDE_MESSAGE': 'ユーザーに「画面下の「👤Gアカウント登録」の項目をタップするとGoogleアカウントの登録画面が表示される」と案内してください。以下の文章はユーザーから送られたものです。',
     'GACCOUNT_FAIL_MESSAGE': '支払いはシングルチャットで実施してください。',
     'GACCOUNT_QUICK_REPLY': '👤Gアカウント登録',
