@@ -13,6 +13,8 @@ import wikipedia
 from PIL import Image
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
+
 import base64
 import email
 
@@ -23,7 +25,8 @@ google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 openai_api_key = os.getenv('OPENAI_API_KEY')
 gpt_client = OpenAI(api_key=openai_api_key)
 
-
+google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
     
 user_id = []
 bucket_name = []
@@ -240,19 +243,26 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
 
-def create_credentials(access_token, refresh_token, client_id, client_secret):
+def create_credentials(gaccount_access_token, gaccount_refresh_token):
     return Credentials(
-        token=access_token,
-        refresh_token=refresh_token,
-        client_id=client_id,
-        client_secret=client_secret,
+        token=gaccount_access_token,
+        refresh_token=gaccount_refresh_token,
+        client_id=google_client_id,
+        client_secret=google_client_secret,
         token_uri='https://oauth2.googleapis.com/token'
     )
 
 def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
     try:
-        # アクセストークンからCredentialsオブジェクトを作成
-        credentials = Credentials(token=gaccount_access_token)
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        # トークン更新をチェック
+        if credentials.expired:
+            credentials.refresh(Request())
+
     
         # Google Calendar APIのserviceオブジェクトを構築
         service = build('calendar', 'v3', credentials=credentials)
@@ -279,16 +289,24 @@ def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
                 break  # 最大文字数を超えたらループを抜ける
             events_str += event_str
 
-        return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars]
+        updated_access_token = credentials.token
+
+        return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars], updated_access_token, gaccount_refresh_token
         
     except Exception as e:
         print(f"generate_image error: {e}" )
-        return f"SYSTEM: SYSTEM:カレンダーのイベント取得にエラーが発生しました。{e}"
+        return f"SYSTEM: SYSTEM:カレンダーのイベント取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_time, end_time, description=None, location=None):
     try:
-        # アクセストークンからCredentialsオブジェクトを作成
-        credentials = Credentials(token=gaccount_access_token)
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+
+        # トークン更新をチェック
+        if credentials.expired:
+            credentials.refresh(Request())
     
         # Google Calendar APIのserviceオブジェクトを構築
         service = build('calendar', 'v3', credentials=credentials)
@@ -317,12 +335,14 @@ def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_t
     
         # イベントをカレンダーに追加
         event_result = service.events().insert(calendarId='primary', body=event).execute()
+
+        updated_access_token = credentials.token
     
         # 成功した場合、イベントの詳細を含むメッセージを返す
-        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}"
+        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, gaccount_refresh_token
     
     except Exception as e:
-        return f"イベント追加に失敗しました: {e}"
+        return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
 def get_mime_part(parts, mime_type='text/plain'):
     """再帰的に特定のMIMEタイプのパートを探す"""
