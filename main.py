@@ -909,7 +909,7 @@ def handle_message(event):
         
             if 'start_free_day' in user:
                 # print(f"nowDate: {nowDate.date()}, start_free_day: {start_free_day.date()}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
-                if (nowDate.date() - start_free_day.date()) < FREE_LIMIT_DAY:
+                if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
             if  source_type == "group" or source_type == "room":
                 if daily_usage >= GROUP_MAX_DAILY_USAGE:
