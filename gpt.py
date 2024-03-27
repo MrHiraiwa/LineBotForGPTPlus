@@ -277,7 +277,7 @@ def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
         events = events_result.get('items', [])
     
         if not events:
-            return "直近のイベントはありません。", "", ""  # イベントがない場合はアクセストークンとリフレッシュトークンと共にメッセージを返す
+            return "直近のイベントはありません。", credentials.token, credentials.refresh_token  # イベントがない場合はアクセストークンとリフレッシュトークンと共にメッセージを返す
 
         # イベントの詳細を結合して最大1000文字までの文字列を生成
         events_str = ""
@@ -295,7 +295,7 @@ def get_calendar(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
 
         updated_access_token = credentials.token
 
-        return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars], updated_access_token, gaccount_refresh_token
+        return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars], updated_access_token, credentials.refresh_token
         
     except Exception as e:
         print(f"Error during calendar event retrieval: {e}")
@@ -343,7 +343,7 @@ def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_t
         updated_access_token = credentials.token
     
         # 成功した場合、イベントの詳細を含むメッセージを返す
-        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, gaccount_refresh_token
+        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, credentials.refresh_token
     
     except Exception as e:
         return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
@@ -377,7 +377,7 @@ def update_calendar(gaccount_access_token, gaccount_refresh_token, event_id, sum
 
         updated_access_token = credentials.token
 
-        return f"イベントが更新されました: {updated_event_result['summary']}", updated_access_token, gaccount_refresh_token
+        return f"イベントが更新されました: {updated_event_result['summary']}", updated_access_token, credentials.refresh_token
     except Exception as e:
         return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
@@ -402,7 +402,7 @@ def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
 
         updated_access_token = credentials.token
 
-        return f"イベント「{event_summary}」が削除されました", updated_access_token, gaccount_refresh_token
+        return f"イベント「{event_summary}」が削除されました", updated_access_token, credentials.refresh_token
     except Exception as e:
         return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
