@@ -910,10 +910,9 @@ def handle_message(event):
             if 'start_free_day' in user:
                 # print(f"nowDate: {nowDate.date()}, start_free_day: {start_free_day.date()}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 days_difference = (nowDate.date() - start_free_day.date()).days
-                print(f"Days difference: {days_difference}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
+                # print(f"Days difference: {days_difference}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
-                    dailyUsage = None
-            print(f"dailyUsage: {dailyUsage}")
+                    daily_usage = None
             if  source_type == "group" or source_type == "room":
                 if MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= GROUP_MAX_DAILY_USAGE:
                     bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
