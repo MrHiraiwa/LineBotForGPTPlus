@@ -913,8 +913,9 @@ def handle_message(event):
                 print(f"Days difference: {days_difference}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
+            print(f"dailyUsage: {dailyUsage}")
             if  source_type == "group" or source_type == "room":
-                if daily_usage >= GROUP_MAX_DAILY_USAGE:
+                if MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= GROUP_MAX_DAILY_USAGE:
                     bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
