@@ -614,6 +614,7 @@ def handle_message(event):
             enable_quick_reply = False
             gaccount_access_token = ""
             gaccount_refresh_token = ""
+            free_duration = False
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -912,17 +913,17 @@ def handle_message(event):
                 days_difference = (nowDate.date() - start_free_day.date()).days
                 # print(f"Days difference: {days_difference}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
-                    daily_usage = None
+                    free_duration = True
             if  source_type == "group" or source_type == "room":
-                if MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= GROUP_MAX_DAILY_USAGE:
+                if MAX_DAILY_USAGE is not None and free_duration == False and daily_usage >= GROUP_MAX_DAILY_USAGE:
                     bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
-            elif MAX_DAILY_USAGE is not None and daily_usage is not None and daily_usage >= MAX_DAILY_USAGE:
+            elif MAX_DAILY_USAGE is not None and free_duration == False and daily_usage >= MAX_DAILY_USAGE:
                 bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
-            elif MAX_DAILY_USAGE is not None and daily_usage is not None and monthly_usage >= MAX_MONTHLY_USAGE:
+            elif MAX_DAILY_USAGE is not None and free_duration == False and monthly_usage >= MAX_MONTHLY_USAGE:
                 bot_reply_list.append(['text', MAX_MONTHLY_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 return 'OK'
