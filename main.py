@@ -910,7 +910,7 @@ def handle_message(event):
         
             if 'start_free_day' in user:
                 # print(f"nowDate: {nowDate.date()}, start_free_day: {start_free_day.date()}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
-                days_difference = (nowDate.date() - start_free_day.date()).days
+                #days_difference = (nowDate.date() - start_free_day.date()).days
                 # print(f"Days difference: {days_difference}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     free_duration = True
