@@ -530,7 +530,7 @@ def update_monthly_usage(transaction, doc_ref):
             last_updated = snapshot.get('last_updated')
             last_updated_date = last_updated.astimezone(jst).date() if last_updated else None
             monthly_usage = snapshot.get('monthly_usage') if snapshot.exists and 'monthly_usage' in snapshot.to_dict() else 0
-            monthly_free = snapshot.get('monthly_free')
+            monthly_free = snapshot.get('monthly_free', False)
             if last_updated_date is None or last_updated_date.month != nowDate.month:
                 monthly_usage = 1  # 新しい月になったら1にリセット
                 monthly_free = False # 新しい月になったら無料期間をリセット
