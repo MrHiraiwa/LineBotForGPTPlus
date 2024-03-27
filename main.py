@@ -525,18 +525,23 @@ def update_monthly_usage(transaction, doc_ref):
     try:
         snapshot = doc_ref.get(transaction=transaction)
         monthly_usage = 0
-
+        monthly_free = False
         if snapshot.exists:
             last_updated = snapshot.get('last_updated')
             last_updated_date = last_updated.astimezone(jst).date() if last_updated else None
             monthly_usage = snapshot.get('monthly_usage') if snapshot.exists and 'monthly_usage' in snapshot.to_dict() else 0
+            monthly_free = snapshot.get('monthly_free')
             if last_updated_date is None or last_updated_date.month != nowDate.month:
                 monthly_usage = 1  # 新しい月になったら1にリセット
+                monthly_free = False # 新しい月になったら無料期間をリセット
+    
             else:
                 monthly_usage += 1  # 同じ月ならインクリメント
+                
             # ドキュメントを更新
             transaction.update(doc_ref, {
                 'monthly_usage': monthly_usage,
+                'monthly_free': monthly_free,
                 'last_updated': nowDate
             })
         else:
@@ -547,7 +552,7 @@ def update_monthly_usage(transaction, doc_ref):
                 'last_updated': nowDate
             })
     
-        return monthly_usage
+        return monthly_usage, monthly_free
     except Exception as e:
         print(f"Error: {e}")
         raise
@@ -584,7 +589,7 @@ def handle_message(event):
         
         doc_ref = db.collection('settings').document('counter')
         transaction = db.transaction()
-        monthly_usage = update_monthly_usage(transaction, doc_ref)
+        monthly_usage, monthly_free = update_monthly_usage(transaction, doc_ref)
         
         doc_ref = db.collection(u'users').document(user_id)
         
@@ -907,13 +912,16 @@ def handle_message(event):
             
             if any(word in user_message for word in NG_KEYWORDS):
                 head_message = head_message + NG_MESSAGE 
-        
+
+            if monthly_free == True:
+                free_duration = True
             if 'start_free_day' in user:
                 # print(f"nowDate: {nowDate.date()}, start_free_day: {start_free_day.date()}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 #days_difference = (nowDate.date() - start_free_day.date()).days
                 # print(f"Days difference: {days_difference}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     free_duration = True
+            
             if  source_type == "group" or source_type == "room":
                 if MAX_DAILY_USAGE is not None and free_duration == False and daily_usage >= GROUP_MAX_DAILY_USAGE:
                     bot_reply_list.append(['text', MAX_DAILY_MESSAGE])
