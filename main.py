@@ -908,7 +908,9 @@ def handle_message(event):
                 head_message = head_message + NG_MESSAGE 
         
             if 'start_free_day' in user:
-                print(f"nowDATE: {nowDate.date()}, start_free_day: {start_free_day.date().days}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
+                test_nowDATE = nowDate.date()
+                test_start_free_day = start_free_day.date().days
+                print(f"test_nowDATE: {test_nowDATE}, test_start_free_day: {test_start_free_day}, FREE_LIMIT_DAY: {FREE_LIMIT_DAY}")
                 if (nowDate.date() - start_free_day.date()).days < FREE_LIMIT_DAY:
                     dailyUsage = None
             if  source_type == "group" or source_type == "room":
