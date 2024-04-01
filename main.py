@@ -693,7 +693,7 @@ def handle_message(event):
                 user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
-            if blocked_account == True:
+            elif blocked_account == True:
                 bot_reply_list.append(['text', BLOCKED_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 user['messages'] = []
