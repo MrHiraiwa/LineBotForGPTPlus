@@ -135,7 +135,8 @@ REQUIRED_ENV_VARS = [
     "GACCOUNT_AUTH_URL",
     "CORE_AI_TYPE",
     "CLAUDE_MODEL",
-    "LOCALLLM_BASE_URL"
+    "LOCALLLM_BASE_URL",
+    "BLOCKED_MESSAGE"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -220,7 +221,8 @@ DEFAULT_ENV_VARS = {
     'GACCOUNT_AUTH_URL': 'https://example.com',
     'CORE_AI_TYPE': 'GPT',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
-    'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1'
+    'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1',
+    'BLOCKED_MESSAGE': 'システム管理者によりアカウントがブロックされました。'
 }
 
 try:
@@ -251,6 +253,7 @@ def reload_settings():
     global CORE_AI_TYPE
     global CLAUDE_MODEL
     global LOCALLLM_BASE_URL
+    global BLOCKED_MESSAGE
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -374,6 +377,7 @@ def reload_settings():
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
+    BLOCKED_MESSAGE = get_setting('BLOCKED_MESSAGE')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -622,6 +626,7 @@ def handle_message(event):
             gaccount_access_token = ""
             gaccount_refresh_token = ""
             free_duration = False
+            blocked_account = False
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -662,6 +667,7 @@ def handle_message(event):
                 updated_date = user['updated_date_string'].astimezone(jst)
                 gaccount_access_token = user.get('gaccount_access_token', "")
                 gaccount_refresh_token = user.get('gaccount_refresh_token', "")
+                blocked_account = user.get('blocked_account', False)
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -683,6 +689,12 @@ def handle_message(event):
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
                 bot_reply_list.append(['text', FORGET_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                user['messages'] = []
+                transaction.set(doc_ref, user, merge=True)
+                return 'OK'
+            if blocked_account == True:
+                bot_reply_list.append(['text', BLOCKED_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
                 user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
@@ -1025,6 +1037,7 @@ def handle_message(event):
 
             user['gaccount_access_token'] = gaccount_access_token
             user['gaccount_refresh_token'] = gaccount_refresh_token
+            user['blocked_account'] = blocked_account
 
             # Firestore ドキュメントを更新
             transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
