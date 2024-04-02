@@ -708,7 +708,6 @@ def handle_message(event):
             elif blocked_account == True:
                 bot_reply_list.append(['text', BLOCKED_ACCOUNT_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
-                transaction.set(doc_ref, user, merge=True)
                 return 'OK'
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
                 exec_functions == True
