@@ -683,7 +683,7 @@ def handle_message(event):
                     
             else:
                 if BLOCKED_NEW_ACCOUNTS == "True":
-                    bot_reply_list.append(['text', BLOCKED_ACCOUNT_MESSAGE])
+                    bot_reply_list.append(['text', BLOCKED_NEW_ACCOUNTS_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
                 
@@ -708,7 +708,6 @@ def handle_message(event):
             elif blocked_account == True:
                 bot_reply_list.append(['text', BLOCKED_ACCOUNT_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
-                user['messages'] = []
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
