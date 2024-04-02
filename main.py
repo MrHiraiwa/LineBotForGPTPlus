@@ -136,7 +136,9 @@ REQUIRED_ENV_VARS = [
     "CORE_AI_TYPE",
     "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL",
-    "BLOCKED_MESSAGE"
+    "BLOCKED_ACCOUNT_MESSAGE",
+    "BLOCKED_NEW_ACCOUNTS",
+    "BLOCKED_NEW_ACCOUNTS_MESSAGE"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -222,7 +224,9 @@ DEFAULT_ENV_VARS = {
     'CORE_AI_TYPE': 'GPT',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
     'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1',
-    'BLOCKED_MESSAGE': 'システム管理者によりアカウントがブロックされました。'
+    'BLOCKED_ACCOUNT_MESSAGE': 'システム管理者によりアカウントがブロックされました。',
+    'BLOCKED_NEW_ACCOUNTS': 'False',
+    'BLOCKED_NEW_ACCOUNTS_MESSAGE': '現在、新規利用者の登録を停止しています。'
 }
 
 try:
@@ -253,7 +257,8 @@ def reload_settings():
     global CORE_AI_TYPE
     global CLAUDE_MODEL
     global LOCALLLM_BASE_URL
-    global BLOCKED_MESSAGE
+    global BLOCKED_ACCOUNT_MESSAGE, BLOCKED_NEW_ACCOUNTS, BLOCKED_NEW_ACCOUNTS_MESSAGE
+    
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
         BOT_NAME = BOT_NAME.split(',')
@@ -377,7 +382,9 @@ def reload_settings():
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
-    BLOCKED_MESSAGE = get_setting('BLOCKED_MESSAGE')
+    BLOCKED_ACCOUNT_MESSAGE = get_setting('BLOCKED_ACCOUNT_MESSAGE')
+    BLOCKED_NEW_ACCOUNTS = get_setting('BLOCKED_NEW_ACCOUNTS')
+    BLOCKED_NEW_ACCOUNTS_MESSAGE = get_setting('BLOCKED_NEW_ACCOUNTS_MESSAGE')
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -675,6 +682,11 @@ def handle_message(event):
                     daily_usage = daily_usage + 1
                     
             else:
+                if BLOCKED_NEW_ACCOUNTS == "True":
+                    bot_reply_list.append(['text', BLOCKED_NEW_ACCOUNTS_MESSAGE])
+                    line_reply(reply_token, bot_reply_list)
+                    return 'OK'
+                
                 user = {
                     'messages': messages,
                     'updated_date_string': nowDate,
@@ -694,10 +706,8 @@ def handle_message(event):
                 transaction.set(doc_ref, user, merge=True)
                 return 'OK'
             elif blocked_account == True:
-                bot_reply_list.append(['text', BLOCKED_MESSAGE])
+                bot_reply_list.append(['text', BLOCKED_ACCOUNT_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
-                user['messages'] = []
-                transaction.set(doc_ref, user, merge=True)
                 return 'OK'
             elif CHANGE_TO_TEXT_QUICK_REPLY in user_message and (LINE_REPLY == "Audio" or LINE_REPLY == "VV"):
                 exec_functions == True
