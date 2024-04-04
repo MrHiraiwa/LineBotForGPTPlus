@@ -541,11 +541,12 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token="", gaccount_refresh_token="", max_attempts=5):
+def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, i_gaccount_access_token="", i_gaccount_refresh_token="", max_attempts=5):
     global i_prompt, user_id, message_id, bucket_name, file_age
     global public_img_url, public_img_url_s
     global gaccount_access_token, gaccount_refresh_token
-    
+    gaccount_access_token = i_gaccount_access_token
+    gaccount_refresh_token = i_gaccount_refresh_token
     public_img_url = None
     public_img_url_s = None
     i_prompt = PAINT_PROMPT
