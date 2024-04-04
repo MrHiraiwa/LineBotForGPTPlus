@@ -250,7 +250,7 @@ class Generateimage(BaseTool):
             
             time.sleep(2)
         
-            return f"SYSTEM:{prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。"
+            return f"SYSTEM:{prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨をメッセージで伝えてください。"
         except Exception as e:
             print(f"generate_image error: {e}" )
             return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
