@@ -523,11 +523,11 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearch_tool_description, wikipediasearch_tool_parameters)
         scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
         generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
-        getcalender_tool = Getcalendar(getcalender_tool_name, getcalender_tool_description, getcalender_tool_parameters)
-        addcalender_tool = Addcalender(addcalender_tool_name, addcalender_tool_description, addcalender_tool_parameters)
-        updatecalender_tool = Updatecalender(updatecalender_tool_name, updatecalender_tool_description, updatecalender_tool_parameters)
-        deletecalender_tool = Deletecalender(deletecalender_tool_name, deletecalender_tool_description, deletecalender_tool_parameters)
-        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool, getcalender_tool, addcalender_tool, updatecalender_tool, deletecalender_tool], CLAUDE_MODEL)
+        getcalendar_tool = Getcalendar(getcalendar_tool_name, getcalendar_tool_description, getcalendar_tool_parameters)
+        addcalendar_tool = Addcalendar(addcalendar_tool_name, addcalendar_tool_description, addcalendar_tool_parameters)
+        updatecalendar_tool = Updatecalendar(updatecalendar_tool_name, updatecalendar_tool_description, updatecalendar_tool_parameters)
+        deletecalendar_tool = Deletecalendar(deletecalendar_tool_name, deletecalendar_tool_description, deletecalendar_tool_parameters)
+        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool, getcalendar_tool, addcalendar_tool, updatecalendar_tool, deletecalendar_tool], CLAUDE_MODEL)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
 
         # re.DOTALLフラグを使って、改行を含むテキストもマッチさせる
