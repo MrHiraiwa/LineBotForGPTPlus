@@ -37,6 +37,8 @@ file_age = []
 
 public_img_url = ""
 public_img_url_s = ""
+gaccount_access_token = ""
+gaccount_refresh_token = ""
 
 
 class Clock(BaseTool):
@@ -262,8 +264,8 @@ def create_credentials(gaccount_access_token, gaccount_refresh_token):
         token_uri='https://oauth2.googleapis.com/token'
     )
     
-class get_calendar(BaseTool):
-    def use_tool(self, gaccount_access_token, gaccount_refresh_token, max_chars=1000):
+class Getcalendar(BaseTool):
+    def use_tool(self, max_chars=1000):
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -312,8 +314,8 @@ class get_calendar(BaseTool):
             print(f"Error during calendar event retrieval: {e}")
             return f"SYSTEM: カレンダーのイベント取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-class add_calendar(BaseTool):
-    def use_tool(self, gaccount_access_token, gaccount_refresh_token, summary, start_time, end_time, description=None, location=None):
+class Addcalendar(BaseTool):
+    def use_tool(self, summary, start_time, end_time, description=None, location=None):
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -360,8 +362,8 @@ class add_calendar(BaseTool):
         except Exception as e:
             return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
-class update_calendar(BaseTool):
-    def use_tool(self, gaccount_access_token, gaccount_refresh_token, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
+class Updatecalendar(BaseTool):
+    def use_tool(self, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -394,8 +396,8 @@ class update_calendar(BaseTool):
         except Exception as e:
             return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
-class delete_calendar(BaseTool):
-    def use_tool(self, gaccount_access_token, gaccount_refresh_token, event_id):
+class Deletecalendar(BaseTool):
+    def use_tool(self, event_id):
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -512,7 +514,11 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearch_tool_description, wikipediasearch_tool_parameters)
         scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
         generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
-        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool], CLAUDE_MODEL)
+        getcalender_tool = Getcalendar(getcalender_tool_name, getcalender_tool_description, getcalender_tool_parameters)
+        addcalender_tool = Addcalender(addcalender_tool_name, addcalender_tool_description, addcalender_tool_parameters)
+        updatecalender_tool = Updatecalender(updatecalender_tool_name, updatecalender_tool_description, updatecalender_tool_parameters)
+        deletecalender_tool = Deletecalender(deletecalender_tool_name, deletecalender_tool_description, deletecalender_tool_parameters)
+        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool, getcalender_tool, addcalender_tool, updatecalender_tool, deletecalender_tool], CLAUDE_MODEL)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
 
         # re.DOTALLフラグを使って、改行を含むテキストもマッチさせる
@@ -526,9 +532,11 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token="", gaccount_refresh_token="", max_attempts=5):
     global i_prompt, user_id, message_id, bucket_name, file_age
     global public_img_url, public_img_url_s
+    global gaccount_access_token, gaccount_refresh_token
+    
     public_img_url = None
     public_img_url_s = None
     i_prompt = PAINT_PROMPT
