@@ -266,6 +266,7 @@ def create_credentials(gaccount_access_token, gaccount_refresh_token):
     
 class Getcalendar(BaseTool):
     def use_tool(self, max_chars=1000):
+        global gaccount_access_token, gaccount_refresh_token
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -290,7 +291,9 @@ class Getcalendar(BaseTool):
             events = events_result.get('items', [])
     
             if not events:
-                return "直近のイベントはありません。", credentials.token, credentials.refresh_token  # イベントがない場合はアクセストークンとリフレッシュトークンと共にメッセージを返す
+                gaccount_access_token = credentials.token
+                gaccount_refresh_token = credentials.refresh_token
+                return "直近のイベントはありません。"
 
             # イベントの詳細を結合して最大1000文字までの文字列を生成
             events_str = ""
@@ -306,16 +309,18 @@ class Getcalendar(BaseTool):
                     break  # 最大文字数を超えたらループを抜ける
                 events_str += event_str
 
-            updated_access_token = credentials.token
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
 
-            return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars], updated_access_token, credentials.refresh_token
+            return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars]
         
         except Exception as e:
             print(f"Error during calendar event retrieval: {e}")
-            return f"SYSTEM: カレンダーのイベント取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+            return f"SYSTEM: カレンダーのイベント取得にエラーが発生しました。{e}"
 
 class Addcalendar(BaseTool):
     def use_tool(self, summary, start_time, end_time, description=None, location=None):
+        global gaccount_access_token, gaccount_refresh_token
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -353,17 +358,18 @@ class Addcalendar(BaseTool):
     
             # イベントをカレンダーに追加
             event_result = service.events().insert(calendarId='primary', body=event).execute()
-
-            updated_access_token = credentials.token
     
             # 成功した場合、イベントの詳細を含むメッセージを返す
-            return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, credentials.refresh_token
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
+            return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}"
     
         except Exception as e:
-            return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+            return f"イベント追加に失敗しました: {e}"
 
 class Updatecalendar(BaseTool):
     def use_tool(self, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
+        global gaccount_access_token, gaccount_refresh_token
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -390,14 +396,16 @@ class Updatecalendar(BaseTool):
             # イベントを更新
             updated_event_result = service.events().update(calendarId='primary', eventId=event_id, body=updated_event).execute()
 
-            updated_access_token = credentials.token
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
 
-            return f"イベントが更新されました: {updated_event_result['summary']}", updated_access_token, credentials.refresh_token
+            return f"イベントが更新されました: {updated_event_result['summary']}"
         except Exception as e:
-            return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+            return f"イベント更新に失敗しました: {e}"
 
 class Deletecalendar(BaseTool):
     def use_tool(self, event_id):
+        global gaccount_access_token, gaccount_refresh_token
         try:
             credentials = create_credentials(
                 gaccount_access_token,
@@ -416,11 +424,12 @@ class Deletecalendar(BaseTool):
             # イベントを削除
             service.events().delete(calendarId='primary', eventId=event_id).execute()
 
-            updated_access_token = credentials.token
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
 
-            return f"イベント「{event_summary}」が削除されました", updated_access_token, credentials.refresh_token
+            return f"イベント「{event_summary}」が削除されました"
         except Exception as e:
-            return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+            return f"イベント削除に失敗しました: {e}"
 
 
 
@@ -550,11 +559,5 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     head_messages_for_api.extend(i_messages_for_api)
     response = run_conversation_f(CLAUDE_MODEL, head_messages_for_api, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
     bot_reply = response
-    #print(f"bot_reply: {bot_reply}")
-    #i_messages_for_api.append({'role': 'assistant', 'content': bot_reply})
-    #i_messages_for_api.append({'role': 'user', 'content': 'SYSTEM:以上の結果を元に回答してください。'})
-    #response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
-    #bot_reply = response.content[0].text
-    #print(f"bot_reply: {bot_reply}")
 
-    return bot_reply, public_img_url, public_img_url_s
+    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
