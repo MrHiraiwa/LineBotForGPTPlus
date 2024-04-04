@@ -37,6 +37,8 @@ file_age = []
 
 public_img_url = ""
 public_img_url_s = ""
+gaccount_access_token = ""
+gaccount_refresh_token = ""
 
 
 class Clock(BaseTool):
@@ -253,6 +255,182 @@ class Generateimage(BaseTool):
             print(f"generate_image error: {e}" )
             return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
 
+def create_credentials(gaccount_access_token, gaccount_refresh_token):
+    return Credentials(
+        token=gaccount_access_token,
+        refresh_token=gaccount_refresh_token,
+        client_id=google_client_id,
+        client_secret=google_client_secret,
+        token_uri='https://oauth2.googleapis.com/token'
+    )
+    
+class Getcalendar(BaseTool):
+    def use_tool(self, max_chars=1000):
+        global gaccount_access_token, gaccount_refresh_token
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            # トークン更新をチェック
+            if credentials.expired:
+                credentials.refresh(Request())
+
+            # Google Calendar APIのserviceオブジェクトを構築
+            service = build('calendar', 'v3', credentials=credentials)
+
+            # 現在時刻
+            jst = pytz.timezone('Asia/Tokyo')
+            now = datetime.now(jst).isoformat()
+    
+            # Google Calendar APIを呼び出して、直近のイベントを取得
+            events_result = service.events().list(calendarId='primary', timeMin=now,
+                                                  maxResults=50, singleEvents=True,
+                                                  orderBy='startTime').execute()
+            events = events_result.get('items', [])
+    
+            if not events:
+                gaccount_access_token = credentials.token
+                gaccount_refresh_token = credentials.refresh_token
+                return "直近のイベントはありません。"
+
+            # イベントの詳細を結合して最大1000文字までの文字列を生成
+            events_str = ""
+            for event in events:
+                event_id = event['id']
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                end = event['end'].get('dateTime', event['end'].get('date'))
+                summary = event.get('summary', '無題')
+                description = event.get('description', '説明なし')
+                location = event.get('location', '場所なし')
+                event_str = f"ID: {event_id}, Summary: {summary}, Start: {start}, End: {end}, Description: {description}, Location: {location}\n"
+                if len(events_str) + len(event_str) > max_chars:
+                    break  # 最大文字数を超えたらループを抜ける
+                events_str += event_str
+
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
+
+            return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars]
+        
+        except Exception as e:
+            print(f"Error during calendar event retrieval: {e}")
+            return f"SYSTEM: カレンダーのイベント取得にエラーが発生しました。{e}"
+
+class Addcalendar(BaseTool):
+    def use_tool(self, summary, start_time, end_time, description=None, location=None):
+        global gaccount_access_token, gaccount_refresh_token
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            # トークン更新をチェック
+            if credentials.expired:
+                credentials.refresh(Request())
+    
+            # Google Calendar APIのserviceオブジェクトを構築
+            service = build('calendar', 'v3', credentials=credentials)
+    
+            # イベントの情報を設定
+            event = {
+                'summary': summary,
+                'location': location,
+                'description': description,
+                'start': {
+                    'dateTime': start_time,
+                    'timeZone': 'Asia/Tokyo',
+                },
+                'end': {
+                    'dateTime': end_time,
+                    'timeZone': 'Asia/Tokyo',
+                },
+                'reminders': {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 24 * 60},
+                        {'method': 'popup', 'minutes': 10},
+                    ],
+                },
+            }
+    
+            # イベントをカレンダーに追加
+            event_result = service.events().insert(calendarId='primary', body=event).execute()
+    
+            # 成功した場合、イベントの詳細を含むメッセージを返す
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
+            return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}"
+    
+        except Exception as e:
+            return f"イベント追加に失敗しました: {e}"
+
+class Updatecalendar(BaseTool):
+    def use_tool(self, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
+        global gaccount_access_token, gaccount_refresh_token
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            if credentials.expired:
+                credentials.refresh(Request())
+    
+            service = build('calendar', 'v3', credentials=credentials)
+
+            # 現在のイベント情報を取得
+            current_event = service.events().get(calendarId='primary', eventId=event_id).execute()
+
+            # 更新が提供されていない項目は現在の情報をそのまま使用
+            updated_event = {
+                'summary': summary if summary is not None else current_event.get('summary'),
+                'location': location if location is not None else current_event.get('location'),
+                'description': description if description is not None else current_event.get('description'),
+                'start': {'dateTime': start_time, 'timeZone': 'Asia/Tokyo'} if start_time is not None else current_event.get('start'),
+                'end': {'dateTime': end_time, 'timeZone': 'Asia/Tokyo'} if end_time is not None else current_event.get('end'),
+            }
+        
+            # イベントを更新
+            updated_event_result = service.events().update(calendarId='primary', eventId=event_id, body=updated_event).execute()
+
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
+
+            return f"イベントが更新されました: {updated_event_result['summary']}"
+        except Exception as e:
+            return f"イベント更新に失敗しました: {e}"
+
+class Deletecalendar(BaseTool):
+    def use_tool(self, event_id):
+        global gaccount_access_token, gaccount_refresh_token
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            if credentials.expired:
+                credentials.refresh(Request())
+    
+            service = build('calendar', 'v3', credentials=credentials)
+        
+            # 削除するイベントの詳細を取得（特にsummaryを含む）
+            event_to_delete = service.events().get(calendarId='primary', eventId=event_id).execute()
+            event_summary = event_to_delete.get('summary', '無題のイベント')  # イベントにsummaryがない場合のデフォルト値
+
+            # イベントを削除
+            service.events().delete(calendarId='primary', eventId=event_id).execute()
+
+            gaccount_access_token = credentials.token
+            gaccount_refresh_token = credentials.refresh_token
+
+            return f"イベント「{event_summary}」が削除されました"
+        except Exception as e:
+            return f"イベント削除に失敗しました: {e}"
+
 
 
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
@@ -305,13 +483,51 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
             {"name": "sentence", "type": "str", "description": "a text for image generation"}
         ]
 
+        getcalendar_tool_name = "perform_getcalendar"
+        getcalendar_tool_description = "You can add schedules."
+        getcalendar_tool_parameters = [
+        ]
+
+        addcalendar_tool_name = "perform_addcalendar"
+        addcalendar_tool_description = "You can add schedules."
+        addcalendar_tool_parameters = [
+            {"name": "summary", "type": "str", "description": "スケジュールのサマリー(必須)"},
+            {"name": "start_time", "type": "str", "description": "スケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "end_time", "type": "str", "description": "スケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "description", "type": "str", "description": "スケジュールした内容の詳細な説明(必須)"},
+            {"name": "location", "type": "str", "description": "スケジュールの内容を実施する場所(必須)"}
+        ]
+
+        updatecalendar_tool_name = "perform_updatecalendar"
+        updatecalendar_tool_description = "You can update schedules by the event ID of the schedule."
+        updatecalendar_tool_parameters = [
+            {"name": "event_id", "type": "str", "description": "スケジュールのイベントID(必須)"},
+            {"name": "summary", "type": "str", "description": "更新後のスケジュールのサマリー(必須)"},
+            {"name": "start_time", "type": "str", "description": "更新後のスケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "end_time", "type": "str", "description": "更新後のスケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "description", "type": "str", "description": "更新後のスケジュールした内容の詳細な説明(必須)"},
+            {"name": "location", "type": "str", "description": "更新後のスケジュールの内容を実施する場所(必須)"},
+            
+        ]
+        
+        deletecalendar_tool_name = "perform_deletecalendar"
+        deletecalendar_tool_description = "You can delete schedules by the event ID of the schedule."
+        deletecalendar_tool_parameters = [
+            {"name": "event_id", "type": "str", "description": "削除対象のスケジュールのイベントID(必須)"}
+        ]
+
+
         clock_tool = Clock(clock_tool_name, clock_tool_description, clock_tool_parameters)
         googlesearch_tool = Googlesearch(googlesearch_tool_name, googlesearch_tool_description, googlesearch_tool_parameters)
         customsearch1_tool = Customsearch1(customsearch1_tool_name, customsearch1_tool_description, customsearch1_tool_parameters)
         wikipediasearch_tool = Wikipediasearch(wikipediasearch_tool_name, wikipediasearch_tool_description, wikipediasearch_tool_parameters)
         scraping_tool = Scraping(scraping_tool_name, scraping_tool_description, scraping_tool_parameters)
         generateimage_tool = Generateimage(generateimage_tool_name, generateimage_tool_description, generateimage_tool_parameters)
-        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool], CLAUDE_MODEL)
+        getcalendar_tool = Getcalendar(getcalendar_tool_name, getcalendar_tool_description, getcalendar_tool_parameters)
+        addcalendar_tool = Addcalendar(addcalendar_tool_name, addcalendar_tool_description, addcalendar_tool_parameters)
+        updatecalendar_tool = Updatecalendar(updatecalendar_tool_name, updatecalendar_tool_description, updatecalendar_tool_parameters)
+        deletecalendar_tool = Deletecalendar(deletecalendar_tool_name, deletecalendar_tool_description, deletecalendar_tool_parameters)
+        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool, getcalendar_tool, addcalendar_tool, updatecalendar_tool, deletecalendar_tool], CLAUDE_MODEL)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
 
         # re.DOTALLフラグを使って、改行を含むテキストもマッチさせる
@@ -325,9 +541,12 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, max_attempts=5):
+def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, i_gaccount_access_token="", i_gaccount_refresh_token="", max_attempts=5):
     global i_prompt, user_id, message_id, bucket_name, file_age
     global public_img_url, public_img_url_s
+    global gaccount_access_token, gaccount_refresh_token
+    gaccount_access_token = i_gaccount_access_token
+    gaccount_refresh_token = i_gaccount_refresh_token
     public_img_url = None
     public_img_url_s = None
     i_prompt = PAINT_PROMPT
@@ -341,11 +560,5 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     head_messages_for_api.extend(i_messages_for_api)
     response = run_conversation_f(CLAUDE_MODEL, head_messages_for_api, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
     bot_reply = response
-    #print(f"bot_reply: {bot_reply}")
-    #i_messages_for_api.append({'role': 'assistant', 'content': bot_reply})
-    #i_messages_for_api.append({'role': 'user', 'content': 'SYSTEM:以上の結果を元に回答してください。'})
-    #response = run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, i_messages_for_api)
-    #bot_reply = response.content[0].text
-    #print(f"bot_reply: {bot_reply}")
 
-    return bot_reply, public_img_url, public_img_url_s
+    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
