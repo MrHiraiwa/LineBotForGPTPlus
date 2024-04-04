@@ -424,9 +424,11 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
 
         results = service.users().messages().list(userId='me', maxResults=5).execute()
         messages = results.get('messages', [])
+        
+        updated_access_token = credentials.token
 
         if not messages:
-            return "直近のメッセージはありません。"
+            return "直近のメッセージはありません。", updated_access_token, credentials.refresh_token
 
         messages_str = ""
         for msg in messages:
@@ -452,9 +454,9 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
                 break
             messages_str += message_str
 
-        return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars]
+        return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars], updated_access_token, credentials.refresh_token
     except Exception as e:
-        return f"SYSTEM: メール取得にエラーが発生しました。{e}"
+        return f"SYSTEM: メール取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 def run_conversation(GPT_MODEL, messages):
     try:
