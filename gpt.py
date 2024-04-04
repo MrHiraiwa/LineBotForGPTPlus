@@ -495,8 +495,12 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
             functions=functions,
             function_call="auto",
         )
+        downdate_function_descriptions(functions, google_description, "get_googlesearch")
+        downdate_function_descriptions(functions, custom_description, "get_customsearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
+        downdate_function_descriptions(functions, google_description, "get_googlesearch")
+        downdate_function_descriptions(functions, custom_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
