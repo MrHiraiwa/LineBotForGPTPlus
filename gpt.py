@@ -470,24 +470,23 @@ def run_conversation(GPT_MODEL, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
-
-    #ここでfunctionsファイルを構成
+    # ここでfunctionsリストを構成
     functions = []
-    if any(word in "googlesearch" for word in FUNCTIONS):
-        functions = functions.extend(cf.googlesearch)
-    if any(word in "customsearch" for word in FUNCTIONS):
-        functions = functions.extend(cf.customsearch) 
-    if any(word in "wikipedia" for word in FUNCTIONS):
-        functions = functions.extend(cf.wikipedia) 
-    if any(word in "scraping" for word in FUNCTIONS):
-        functions = functions.extend(cf.scraping) 
-    if any(word in "generateimage" for word in FUNCTIONS):
-        functions = functions.extend(cf.generateimage) 
-    if any(word in "googlecalender" for word in FUNCTIONS):
-        functions = functions.extend(cf.googlecalender)
-    
-    update_function_descriptions(cf.functions, google_description, "get_googlesearch")
-    update_function_descriptions(cf.functions, custom_description, "get_customsearch1")
+    if "googlesearch" in FUNCTIONS:
+        functions += cf.googlesearch  # extendの代わりに+=を使用
+        update_function_descriptions(functions, google_description, "get_googlesearch")
+    if "customsearch" in FUNCTIONS:
+        functions += cf.customsearch
+        update_function_descriptions(functions, custom_description, "get_customsearch1")
+    if "wikipedia" in FUNCTIONS:
+        functions += cf.wikipedia
+    if "scraping" in FUNCTIONS:
+        functions += cf.scraping
+    if "generateimage" in FUNCTIONS:
+        functions += cf.generateimage
+    if "googlecalender" in FUNCTIONS:
+        functions += cf.googlecalender
+
 
     try:
         response = gpt_client.chat.completions.create(
@@ -496,12 +495,8 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
             functions=functions,
             function_call="auto",
         )
-        downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(cf.functions, custom_description, "get_customsearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
-        downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(cf.functions, custom_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
