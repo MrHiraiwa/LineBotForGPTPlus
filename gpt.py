@@ -484,8 +484,8 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
         functions += cf.scraping
     if "generateimage" in FUNCTIONS:
         functions += cf.generateimage
-    if "googlecalender" in FUNCTIONS:
-        functions += cf.googlecalender
+    if "googlecalendar" in FUNCTIONS:
+        functions += cf.googlecalendar
 
 
     try:
