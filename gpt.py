@@ -238,7 +238,7 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
         public_img_url_s = upload_blob(bucket_name, preview_image, preview_blob_path)
 
         
-        return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。", public_img_url, public_img_url_s
+        return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨をメッセージで伝えてください。", public_img_url, public_img_url_s
     except Exception as e:
         print(f"generate_image error: {e}" )
         return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
@@ -424,9 +424,11 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
 
         results = service.users().messages().list(userId='me', maxResults=5).execute()
         messages = results.get('messages', [])
+        
+        updated_access_token = credentials.token
 
         if not messages:
-            return "直近のメッセージはありません。"
+            return "直近のメッセージはありません。", updated_access_token, credentials.refresh_token
 
         messages_str = ""
         for msg in messages:
@@ -452,9 +454,9 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
                 break
             messages_str += message_str
 
-        return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars]
+        return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars], updated_access_token, credentials.refresh_token
     except Exception as e:
-        return f"SYSTEM: メール取得にエラーが発生しました。{e}"
+        return f"SYSTEM: メール取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 def run_conversation(GPT_MODEL, messages):
     try:
@@ -467,27 +469,38 @@ def run_conversation(GPT_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(GPT_MODEL, messages, google_description, custom_description, attempt):
-    update_function_descriptions(cf.functions, google_description, "get_googlesearch")
-    update_function_descriptions(cf.functions, custom_description, "get_customsearch1")
+def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
+    # ここでfunctionsリストを構成
+    functions = []
+    if "googlesearch" in FUNCTIONS:
+        functions += cf.googlesearch  # extendの代わりに+=を使用
+        update_function_descriptions(functions, google_description, "get_googlesearch")
+    if "customsearch" in FUNCTIONS:
+        functions += cf.customsearch
+        update_function_descriptions(functions, custom_description, "get_customsearch1")
+    if "wikipedia" in FUNCTIONS:
+        functions += cf.wikipedia
+    if "scraping" in FUNCTIONS:
+        functions += cf.scraping
+    if "generateimage" in FUNCTIONS:
+        functions += cf.generateimage
+    if "googlecalender" in FUNCTIONS:
+        functions += cf.googlecalender
+
 
     try:
         response = gpt_client.chat.completions.create(
             model=GPT_MODEL,
             messages=messages,
-            functions=cf.functions,
+            functions=functions,
             function_call="auto",
         )
-        downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(cf.functions, custom_description, "get_customsearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
-        downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(cf.functions, custom_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
+def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -512,7 +525,7 @@ def chatgpt_functions(GPT_MODEL, messages_for_api, USER_ID, message_id, ERROR_ME
     get_gmail_called = False
 
     while attempt < max_attempts:
-        response = run_conversation_f(GPT_MODEL, i_messages_for_api, google_description, custom_description, attempt)
+        response = run_conversation_f(GPT_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:

@@ -250,7 +250,7 @@ class Generateimage(BaseTool):
             
             time.sleep(2)
         
-            return f"SYSTEM:{prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨を伝えてください。"
+            return f"SYSTEM:{prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨をメッセージで伝えてください。"
         except Exception as e:
             print(f"generate_image error: {e}" )
             return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
@@ -446,7 +446,7 @@ def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
+def run_conversation_f(CLAUDE_MODEL, FUNCTIONS, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
     try:
         clock_tool_name = "perform_clock"
         clock_tool_description = "useful for when you need to know what time it is."
@@ -527,7 +527,27 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         addcalendar_tool = Addcalendar(addcalendar_tool_name, addcalendar_tool_description, addcalendar_tool_parameters)
         updatecalendar_tool = Updatecalendar(updatecalendar_tool_name, updatecalendar_tool_description, updatecalendar_tool_parameters)
         deletecalendar_tool = Deletecalendar(deletecalendar_tool_name, deletecalendar_tool_description, deletecalendar_tool_parameters)
-        all_tool_user = ToolUser([googlesearch_tool, customsearch1_tool, wikipediasearch_tool, scraping_tool, generateimage_tool, getcalendar_tool, addcalendar_tool, updatecalendar_tool, deletecalendar_tool], CLAUDE_MODEL)
+
+        functions = []
+        functions.append(clock_tool)
+
+        if "googlesearch" in FUNCTIONS:
+            functions.append(googlesearch_tool)
+        if "customsearch" in FUNCTIONS:
+            functions.append(customsearch1_tool)
+        if "wikipedia" in FUNCTIONS:
+            functions.append(wikipediasearch_tool)
+        if "scraping" in FUNCTIONS:
+            functions.append(scraping_tool)
+        if "generateimage" in FUNCTIONS:
+            functions.append(generateimage_tool)
+        if "googlecalender" in FUNCTIONS:
+            functions.append(getcalendar_tool)
+            functions.append(addcalendar_tool)
+            functions.append(updatecalendar_tool)
+            functions.append(deletecalendar_tool)
+        
+        all_tool_user = ToolUser(functions, CLAUDE_MODEL)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
 
         # re.DOTALLフラグを使って、改行を含むテキストもマッチさせる
@@ -541,7 +561,7 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, i_gaccount_access_token="", i_gaccount_refresh_token="", max_attempts=5):
+def claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, i_gaccount_access_token="", i_gaccount_refresh_token="", max_attempts=5):
     global i_prompt, user_id, message_id, bucket_name, file_age
     global public_img_url, public_img_url_s
     global gaccount_access_token, gaccount_refresh_token
@@ -558,7 +578,7 @@ def claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT ,messages_for_api, USER_ID, MES
     last_messages_for_api = i_messages_for_api[-1]
     head_messages_for_api= [{'role': 'user', 'content': SYSTEM_PROMPT}] 
     head_messages_for_api.extend(i_messages_for_api)
-    response = run_conversation_f(CLAUDE_MODEL, head_messages_for_api, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+    response = run_conversation_f(CLAUDE_MODEL, FUNCTIONS, head_messages_for_api, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
     bot_reply = response
 
     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token

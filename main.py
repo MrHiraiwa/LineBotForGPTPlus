@@ -58,6 +58,7 @@ REQUIRED_ENV_VARS = [
     "SYSTEM_PROMPT",
     "PAINT_PROMPT",
     "GPT_MODEL",
+    "FUNCTIONS",
     "MAX_DAILY_USAGE",
     "MAX_MONTHLY_USAGE",
     "GROUP_MAX_DAILY_USAGE",
@@ -146,6 +147,7 @@ DEFAULT_ENV_VARS = {
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。あなたはインターネット検索ができます。あなたは絵が生成できます。',
     'PAINT_PROMPT': '',
     'GPT_MODEL': 'gpt-3.5-turbo-0125',
+    'FUNCTIONS': 'googlesearch,customsearch,wikipedia,scraping,generateimage,googlecalender',
     'MAX_TOKEN_NUM': '2000',
     'MAX_DAILY_USAGE': '1000',
     'MAX_MONTHLY_USAGE': '31000',
@@ -236,7 +238,7 @@ except Exception as e:
     raise
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, PAINT_PROMPT, GPT_MODEL
+    global BOT_NAME, SYSTEM_PROMPT, PAINT_PROMPT, GPT_MODEL, FUNCTIONS
     global MAX_TOKEN_NUM, MAX_DAILY_USAGE, MAX_MONTHLY_USAGE, GROUP_MAX_DAILY_USAGE, FREE_LIMIT_DAY, MAX_DAILY_MESSAGE, MAX_MONTHLY_MESSAGE
     global NG_MESSAGE, NG_KEYWORDS
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
@@ -267,6 +269,11 @@ def reload_settings():
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
     PAINT_PROMPT = get_setting('PAINT_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
+    FUNCTIONS = get_setting('FUNCTIONS')
+    if FUNCTIONS:
+        FUNCTIONS = FUNCTIONS.split(',')
+    else:
+        FUNCTIONS = []
     MAX_TOKEN_NUM = int(get_setting('MAX_TOKEN_NUM') or 2000)
     MAX_DAILY_USAGE = int(get_setting('MAX_DAILY_USAGE') or 0)
     MAX_MONTHLY_USAGE = int(get_setting('MAX_MONTHLY_USAGE') or 0)
@@ -985,7 +992,7 @@ def handle_message(event):
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
@@ -993,7 +1000,7 @@ def handle_message(event):
                     temp_messages_final = []
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
