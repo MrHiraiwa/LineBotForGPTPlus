@@ -147,7 +147,7 @@ DEFAULT_ENV_VARS = {
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。あなたはインターネット検索ができます。あなたは絵が生成できます。',
     'PAINT_PROMPT': '',
     'GPT_MODEL': 'gpt-3.5-turbo-0125',
-    'FUNCTIONS': 'googlesearch,customsearch,wikipedia,scraping,generateimage,googlecalender',
+    'FUNCTIONS': 'googlesearch,customsearch,wikipedia,scraping,generateimage,googlecalendar',
     'MAX_TOKEN_NUM': '2000',
     'MAX_DAILY_USAGE': '1000',
     'MAX_MONTHLY_USAGE': '31000',
