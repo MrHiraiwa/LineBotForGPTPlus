@@ -472,6 +472,40 @@ def run_conversation_f(CLAUDE_MODEL, messages, GOOGLE_DESCRIPTION, CUSTOM_DESCRI
             {"name": "sentence", "type": "str", "description": "a text for image generation"}
         ]
 
+        getcalendar_tool_name = "perform_getcalendar"
+        getcalendar_tool_description = "You can add schedules."
+        getcalendar_tool_parameters = [
+        ]
+
+        addcalendar_tool_name = "perform_addcalendar"
+        addcalendar_tool_description = "You can add schedules."
+        addcalendar_tool_parameters = [
+            {"name": "summary", "type": "str", "description": "スケジュールのサマリー(必須)"},
+            {"name": "start_time", "type": "str", "description": "スケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "end_time", "type": "str", "description": "スケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "description", "type": "str", "description": "スケジュールした内容の詳細な説明(必須)"},
+            {"name": "location", "type": "str", "description": "スケジュールの内容を実施する場所(必須)"}
+        ]
+
+        updatecalendar_tool_name = "perform_updatecalendar"
+        updatecalendar_tool_description = "You can update schedules by the event ID of the schedule."
+        updatecalendar_tool_parameters = [
+            {"name": "event_id", "type": "str", "description": "スケジュールのイベントID(必須)"},
+            {"name": "summary", "type": "str", "description": "更新後のスケジュールのサマリー(必須)"},
+            {"name": "start_time", "type": "str", "description": "更新後のスケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "end_time", "type": "str", "description": "更新後のスケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"},
+            {"name": "description", "type": "str", "description": "更新後のスケジュールした内容の詳細な説明(必須)"},
+            {"name": "location", "type": "str", "description": "更新後のスケジュールの内容を実施する場所(必須)"},
+            
+        ]
+        
+        deletecalendar_tool_name = "perform_deletecalendar"
+        deletecalendar_tool_description = "You can delete schedules by the event ID of the schedule."
+        deletecalendar_tool_parameters = [
+            {"name": "event_id", "type": "str", "description": "削除対象のスケジュールのイベントID(必須)"}
+        ]
+
+
         clock_tool = Clock(clock_tool_name, clock_tool_description, clock_tool_parameters)
         googlesearch_tool = Googlesearch(googlesearch_tool_name, googlesearch_tool_description, googlesearch_tool_parameters)
         customsearch1_tool = Customsearch1(customsearch1_tool_name, customsearch1_tool_description, customsearch1_tool_parameters)
