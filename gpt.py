@@ -495,6 +495,7 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
             functions=functions,
             function_call="auto",
         )
+        print(f"functions: {functions}")
         return response  # レスポンス全体を返す
     except Exception as e:
         print(f"An error occurred: {e}")
