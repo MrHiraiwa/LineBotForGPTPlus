@@ -473,17 +473,17 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
 
     #ここでfunctionsファイルを構成
     functions = []
-    any(word in "googlesearch" for word in FUNCTIONS):
+    if any(word in "googlesearch" for word in FUNCTIONS):
         functions = functions.extend(cf.googlesearch)
-    any(word in "customsearch" for word in FUNCTIONS):
+    if any(word in "customsearch" for word in FUNCTIONS):
         functions = functions.extend(cf.customsearch) 
-    any(word in "wikipedia" for word in FUNCTIONS):
+    if any(word in "wikipedia" for word in FUNCTIONS):
         functions = functions.extend(cf.wikipedia) 
-    any(word in "scraping" for word in FUNCTIONS):
+    if any(word in "scraping" for word in FUNCTIONS):
         functions = functions.extend(cf.scraping) 
-    any(word in "generateimage" for word in FUNCTIONS):
+    if any(word in "generateimage" for word in FUNCTIONS):
         functions = functions.extend(cf.generateimage) 
-    any(word in "googlecalender" for word in FUNCTIONS):
+    if any(word in "googlecalender" for word in FUNCTIONS):
         functions = functions.extend(cf.googlecalender)
     
     update_function_descriptions(cf.functions, google_description, "get_googlesearch")
