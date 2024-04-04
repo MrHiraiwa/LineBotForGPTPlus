@@ -253,6 +253,173 @@ class Generateimage(BaseTool):
             print(f"generate_image error: {e}" )
             return f"SYSTEM: 画像生成にエラーが発生しました。{e}"
 
+def create_credentials(gaccount_access_token, gaccount_refresh_token):
+    return Credentials(
+        token=gaccount_access_token,
+        refresh_token=gaccount_refresh_token,
+        client_id=google_client_id,
+        client_secret=google_client_secret,
+        token_uri='https://oauth2.googleapis.com/token'
+    )
+    
+class get_calendar(BaseTool):
+    def use_tool(self, gaccount_access_token, gaccount_refresh_token, max_chars=1000):
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            # トークン更新をチェック
+            if credentials.expired:
+                credentials.refresh(Request())
+
+            # Google Calendar APIのserviceオブジェクトを構築
+            service = build('calendar', 'v3', credentials=credentials)
+
+            # 現在時刻
+            jst = pytz.timezone('Asia/Tokyo')
+            now = datetime.now(jst).isoformat()
+    
+            # Google Calendar APIを呼び出して、直近のイベントを取得
+            events_result = service.events().list(calendarId='primary', timeMin=now,
+                                                  maxResults=50, singleEvents=True,
+                                                  orderBy='startTime').execute()
+            events = events_result.get('items', [])
+    
+            if not events:
+                return "直近のイベントはありません。", credentials.token, credentials.refresh_token  # イベントがない場合はアクセストークンとリフレッシュトークンと共にメッセージを返す
+
+            # イベントの詳細を結合して最大1000文字までの文字列を生成
+            events_str = ""
+            for event in events:
+                event_id = event['id']
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                end = event['end'].get('dateTime', event['end'].get('date'))
+                summary = event.get('summary', '無題')
+                description = event.get('description', '説明なし')
+                location = event.get('location', '場所なし')
+                event_str = f"ID: {event_id}, Summary: {summary}, Start: {start}, End: {end}, Description: {description}, Location: {location}\n"
+                if len(events_str) + len(event_str) > max_chars:
+                    break  # 最大文字数を超えたらループを抜ける
+                events_str += event_str
+
+            updated_access_token = credentials.token
+
+            return "SYSTEM:カレンダーのイベントを取得しました。イベント内容を要約してください。" + events_str[:max_chars], updated_access_token, credentials.refresh_token
+        
+        except Exception as e:
+            print(f"Error during calendar event retrieval: {e}")
+            return f"SYSTEM: カレンダーのイベント取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
+class add_calendar(BaseTool):
+    def use_tool(self, gaccount_access_token, gaccount_refresh_token, summary, start_time, end_time, description=None, location=None):
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            # トークン更新をチェック
+            if credentials.expired:
+                credentials.refresh(Request())
+    
+            # Google Calendar APIのserviceオブジェクトを構築
+            service = build('calendar', 'v3', credentials=credentials)
+    
+            # イベントの情報を設定
+            event = {
+                'summary': summary,
+                'location': location,
+                'description': description,
+                'start': {
+                    'dateTime': start_time,
+                    'timeZone': 'Asia/Tokyo',
+                },
+                'end': {
+                    'dateTime': end_time,
+                    'timeZone': 'Asia/Tokyo',
+                },
+                'reminders': {
+                    'useDefault': False,
+                    'overrides': [
+                        {'method': 'email', 'minutes': 24 * 60},
+                        {'method': 'popup', 'minutes': 10},
+                    ],
+                },
+            }
+    
+            # イベントをカレンダーに追加
+            event_result = service.events().insert(calendarId='primary', body=event).execute()
+
+            updated_access_token = credentials.token
+    
+            # 成功した場合、イベントの詳細を含むメッセージを返す
+            return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, credentials.refresh_token
+    
+        except Exception as e:
+            return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
+class update_calendar(BaseTool):
+    def use_tool(self, gaccount_access_token, gaccount_refresh_token, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            if credentials.expired:
+                credentials.refresh(Request())
+    
+            service = build('calendar', 'v3', credentials=credentials)
+
+            # 現在のイベント情報を取得
+            current_event = service.events().get(calendarId='primary', eventId=event_id).execute()
+
+            # 更新が提供されていない項目は現在の情報をそのまま使用
+            updated_event = {
+                'summary': summary if summary is not None else current_event.get('summary'),
+                'location': location if location is not None else current_event.get('location'),
+                'description': description if description is not None else current_event.get('description'),
+                'start': {'dateTime': start_time, 'timeZone': 'Asia/Tokyo'} if start_time is not None else current_event.get('start'),
+                'end': {'dateTime': end_time, 'timeZone': 'Asia/Tokyo'} if end_time is not None else current_event.get('end'),
+            }
+        
+            # イベントを更新
+            updated_event_result = service.events().update(calendarId='primary', eventId=event_id, body=updated_event).execute()
+
+            updated_access_token = credentials.token
+
+            return f"イベントが更新されました: {updated_event_result['summary']}", updated_access_token, credentials.refresh_token
+        except Exception as e:
+            return f"イベント更新に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
+class delete_calendar(BaseTool):
+    def use_tool(self, gaccount_access_token, gaccount_refresh_token, event_id):
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+
+            if credentials.expired:
+                credentials.refresh(Request())
+    
+            service = build('calendar', 'v3', credentials=credentials)
+        
+            # 削除するイベントの詳細を取得（特にsummaryを含む）
+            event_to_delete = service.events().get(calendarId='primary', eventId=event_id).execute()
+            event_summary = event_to_delete.get('summary', '無題のイベント')  # イベントにsummaryがない場合のデフォルト値
+
+            # イベントを削除
+            service.events().delete(calendarId='primary', eventId=event_id).execute()
+
+            updated_access_token = credentials.token
+
+            return f"イベント「{event_summary}」が削除されました", updated_access_token, credentials.refresh_token
+        except Exception as e:
+            return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
+
 
 
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
