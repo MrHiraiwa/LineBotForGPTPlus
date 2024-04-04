@@ -98,7 +98,7 @@ scraping = [
         }
     }
 ]
-googlecalender = [
+googlecalendar = [
     {
         # 関数の名称
         "name": "get_calendar",
