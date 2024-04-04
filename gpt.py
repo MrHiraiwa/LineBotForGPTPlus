@@ -471,7 +471,20 @@ def run_conversation(GPT_MODEL, messages):
 
 def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
 
-    #ここで設定ファイルを構成
+    #ここでfunctionsファイルを構成
+    functions = []
+    any(word in "googlesearch" for word in FUNCTIONS):
+        functions = functions.extend(cf.googlesearch)
+    any(word in "customsearch" for word in FUNCTIONS):
+        functions = functions.extend(cf.customsearch) 
+    any(word in "wikipedia" for word in FUNCTIONS):
+        functions = functions.extend(cf.wikipedia) 
+    any(word in "scraping" for word in FUNCTIONS):
+        functions = functions.extend(cf.scraping) 
+    any(word in "generateimage" for word in FUNCTIONS):
+        functions = functions.extend(cf.generateimage) 
+    any(word in "googlecalender" for word in FUNCTIONS):
+        functions = functions.extend(cf.googlecalender)
     
     update_function_descriptions(cf.functions, google_description, "get_googlesearch")
     update_function_descriptions(cf.functions, custom_description, "get_customsearch1")
@@ -480,7 +493,7 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
         response = gpt_client.chat.completions.create(
             model=GPT_MODEL,
             messages=messages,
-            functions=cf.functions,
+            functions=functions,
             function_call="auto",
         )
         downdate_function_descriptions(cf.functions, google_description, "get_googlesearch")
