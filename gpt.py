@@ -512,6 +512,7 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
 
         return f"SYSTEM: メールの内容を取得しました。\n" + body, updated_access_token, credentials.refresh_token
     except Exception as e:
+        print(f"e: {e}")
         return f"SYSTEM: メールの内容取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 
