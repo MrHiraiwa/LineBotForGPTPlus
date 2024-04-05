@@ -147,7 +147,7 @@ DEFAULT_ENV_VARS = {
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。あなたはインターネット検索ができます。あなたは絵が生成できます。',
     'PAINT_PROMPT': '',
     'GPT_MODEL': 'gpt-3.5-turbo-0125',
-    'FUNCTIONS': 'googlesearch,customsearch,wikipedia,scraping,generateimage,googlecalendar,googlemail',
+    'FUNCTIONS': 'googlesearch,customsearch,wikipedia,scraping,generateimage,googlecalendar,googlemail,stripepayment',
     'MAX_TOKEN_NUM': '2000',
     'MAX_DAILY_USAGE': '1000',
     'MAX_MONTHLY_USAGE': '31000',
@@ -916,7 +916,7 @@ def handle_message(event):
                 quick_reply_items.append(['message', TRANSLATE_KOREAN_QUICK_REPLY, TRANSLATE_KOREAN_QUICK_REPLY])
                 quick_reply_items.append(['message', TRANSLATE_THAIAN_QUICK_REPLY, TRANSLATE_THAIAN_QUICK_REPLY])
                 head_message = head_message + TRANSLATE_GUIDE_MESSAGE
-            if any(word in user_message for word in PAYMENT_KEYWORDS) and not exec_functions:
+            if any(word in user_message for word in PAYMENT_KEYWORDS) and "stripepayment" in FUNCTIONS and not exec_functions:
                 enable_quick_reply = True
                 if source_type == "user":
                     checkout_url = create_checkout_session(user_id, PAYMENT_PRICE_ID, PAYMENT_RESULT_URL + '/success', PAYMENT_RESULT_URL + '/cansel')
@@ -926,7 +926,7 @@ def handle_message(event):
                     bot_reply_list.append(['text', PAYMENT_FAIL_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
-            if any(word in user_message for word in GACCOUNT_KEYWORDS) and not exec_functions:
+            if any(word in user_message for word in GACCOUNT_KEYWORDS) and ("googlecalender" in FUNCTIONS or "googlemail" in FUNCTIONS) and not exec_functions:
                 enable_quick_reply = True
                 if source_type == "user":
                     start_auth_url = GACCOUNT_AUTH_URL + '/start_oauth?user_id=' + user_id + '&openExternalBrowser=1'
