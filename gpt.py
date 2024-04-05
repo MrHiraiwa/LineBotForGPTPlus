@@ -428,7 +428,7 @@ def get_mime_part(parts, mime_type='text/plain'):
             return get_mime_part(part['parts'], mime_type=mime_type)
     return None
 
-def get_gmail_details(gaccount_access_token, gaccount_refresh_token, max_results=20):
+def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -467,9 +467,9 @@ def get_gmail_details(gaccount_access_token, gaccount_refresh_token, max_results
                 'date_received': date_parsed
             })
 
-        return "SYSTEM: メールの一覧を受信しました。\n" + messages_details, updated_access_token, credentials.refresh_token
+        return "SYSTEM: メール一覧を受信しました。\n" + messages_details, updated_access_token, credentials.refresh_token
     except Exception as e:
-        return f"SYSTEM: メール取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+        return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
         
 def run_conversation(GPT_MODEL, messages):
     try:
