@@ -429,7 +429,14 @@ def get_mime_part(parts, mime_type='text/plain'):
 
 def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
     try:
-        credentials = Credentials(token=gaccount_access_token)
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+        
+        if credentials.expired:
+            credentials.refresh(Request())
+        
         service = build('gmail', 'v1', credentials=credentials)
 
         results = service.users().messages().list(userId='me', maxResults=5).execute()
