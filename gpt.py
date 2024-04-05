@@ -437,6 +437,8 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
         
         updated_access_token = credentials.token
 
+        print(f"messages: {messages}")
+
         if not messages:
             return "直近のメッセージはありません。", updated_access_token, credentials.refresh_token
 
