@@ -427,7 +427,7 @@ def get_mime_part(parts, mime_type='text/plain'):
             return get_mime_part(part['parts'], mime_type=mime_type)
     return None
 
-def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
+def get_gmail_details(gaccount_access_token, gaccount_refresh_token, max_results=20):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -439,44 +439,37 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_chars=1000):
         
         service = build('gmail', 'v1', credentials=credentials)
 
-        results = service.users().messages().list(userId='me', maxResults=5).execute()
+        # maxResultsを20に設定して20件のメールを取得
+        results = service.users().messages().list(userId='me', maxResults=max_results).execute()
         messages = results.get('messages', [])
         
         updated_access_token = credentials.token
 
-        print(f"messages: {messages}")
-
         if not messages:
-            return "直近のメッセージはありません。", updated_access_token, credentials.refresh_token
+            return "SYSTEM: 直近のメッセージはありません。", updated_access_token, credentials.refresh_token
 
-        messages_str = ""
+        messages_details = []
         for msg in messages:
-            msg_detail = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
-            payload = msg_detail.get('payload', {})
-            headers = payload.get('headers', [])
+            msg_detail = service.users().messages().get(userId='me', id=msg['id'], format='metadata').execute()
+            headers = msg_detail.get('payload', {}).get('headers', [])
+            
+            # 必要な情報をヘッダーから取得
             subject = next((i['value'] for i in headers if i['name'].lower() == 'subject'), "No Subject")
+            from_email = next((i['value'] for i in headers if i['name'].lower() == 'from'), "Unknown Sender")
+            date_received = next((i['value'] for i in headers if i['name'].lower() == 'date'), "No Date")
+            date_parsed = parser.parse(date_received).strftime('%Y-%m-%d %H:%M:%S')
+            
+            messages_details.append({
+                'id': msg['id'],
+                'from': from_email,
+                'subject': subject,
+                'date_received': date_parsed
+            })
 
-            # メッセージ本文の処理
-            parts = payload.get('parts', [])
-            text_part = get_mime_part(parts, mime_type='text/plain') or get_mime_part(parts, mime_type='text/html')
-            if text_part:
-                msg_body_encoded = text_part['body'].get('data', '')
-                msg_body = base64.urlsafe_b64decode(msg_body_encoded).decode('utf-8')
-                if text_part['mimeType'] == 'text/html':
-                    soup = BeautifulSoup(msg_body, 'html.parser')
-                    msg_body = soup.get_text()
-            else:
-                msg_body = "本文が見つかりません。"
-
-            message_str = f"Subject: {subject}\n{msg_body}\n\n"
-            if len(messages_str) + len(message_str) > max_chars:
-                break
-            messages_str += message_str
-
-        return "SYSTEM: メールの一覧を受信しました。\n" + messages_str[:max_chars], updated_access_token, credentials.refresh_token
+        return "SYSTEM: メールの一覧を受信しました。\n" + messages_details, updated_access_token, credentials.refresh_token
     except Exception as e:
         return f"SYSTEM: メール取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
-
+        
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
