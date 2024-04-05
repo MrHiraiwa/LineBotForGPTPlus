@@ -508,9 +508,10 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
             if body_data:
                 body = base64.urlsafe_b64decode(body_data).decode('utf-8')
 
-        return body
+        return f"SYSTEM: メールの内容を取得しました。\n" + body, , updated_access_token, credentials.refresh_token
     except Exception as e:
-        return f"Error: {e}"
+        return f"SYSTEM: メールの内容取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
 
 def run_conversation(GPT_MODEL, messages):
     try:
