@@ -446,8 +446,6 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
         
         updated_access_token = credentials.token
 
-        print(f"messages: {messages}")
-
         if not messages:
             return "SYSTEM: 直近のメッセージはありません。", updated_access_token, credentials.refresh_token
 
@@ -469,7 +467,9 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
                 'date_received': date_parsed
             })
 
-        return "SYSTEM: メール一覧を受信しました。\n" + messages_details, updated_access_token, credentials.refresh_token
+        messages_str = "\n".join([f"ID: {m['id']}, From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
+        
+        return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
