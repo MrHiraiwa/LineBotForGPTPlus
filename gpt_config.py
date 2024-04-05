@@ -202,3 +202,11 @@ googlecalendar = [
         }
     }   
 ]
+googlemail = [
+    {
+        # 関数の名称
+        "name": "get_gmail",
+        # 関数の機能説明
+        "description": "You can read Gmail."
+    }
+]
