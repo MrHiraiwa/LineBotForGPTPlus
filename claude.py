@@ -541,7 +541,7 @@ def run_conversation_f(CLAUDE_MODEL, FUNCTIONS, messages, GOOGLE_DESCRIPTION, CU
             functions.append(scraping_tool)
         if "generateimage" in FUNCTIONS:
             functions.append(generateimage_tool)
-        if "googlecalender" in FUNCTIONS:
+        if "googlecalendar" in FUNCTIONS:
             functions.append(getcalendar_tool)
             functions.append(addcalendar_tool)
             functions.append(updatecalendar_tool)
