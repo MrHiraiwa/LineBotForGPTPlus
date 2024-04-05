@@ -208,7 +208,7 @@ googlemail = [
         "name": "get_gmail_list",
         # 関数の機能説明
         "description": "You can get Gmail list."
-    }
+    },
     {
         # 関数の名称
         "name": "get_gmail_content",
@@ -224,5 +224,6 @@ googlemail = [
                     "description": "参照対象のGmailのメッセージID(必須)"
                 }
             }
+        }
     }
 ]
