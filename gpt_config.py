@@ -205,8 +205,24 @@ googlecalendar = [
 googlemail = [
     {
         # 関数の名称
-        "name": "get_gmail",
+        "name": "get_gmail_list",
         # 関数の機能説明
-        "description": "You can read Gmail."
+        "description": "You can get Gmail list."
+    }
+    {
+        # 関数の名称
+        "name": "get_gmail_content",
+        # 関数の機能説明
+        "description": "You can read Gmail content  by the message ID of Gmail."
+        "parameters": {
+            "type": "object",
+            # 各引数
+            "properties": {
+                "message_id": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "参照対象のGmailのメッセージID(必須)"
+                }
+            }
     }
 ]
