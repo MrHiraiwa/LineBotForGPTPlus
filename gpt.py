@@ -584,6 +584,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
     delete_calendar_called = False
     get_gmail_list_called = False
     get_gmail_content_called = False
+    
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
@@ -655,7 +656,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
-                elif function_call.name == "get_gmail_content" and not get_content_list_called:
+                elif function_call.name == "get_gmail_content" and not get_gmail_content_called:
                     get_gmail_content_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
