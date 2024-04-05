@@ -33,14 +33,24 @@ bucket_name = []
 file_age = []
 
 def update_function_descriptions(functions, extra_description, function_name_to_update):
+    # 関数リストの深いコピーを作成します。
+    # これにより、元のリストは変更されずに保持されます。
+    updated_functions = []
     for func in functions:
-        if func["name"] == function_name_to_update:
-            func["description"] += extra_description
+        # 辞書（またはオブジェクト）のコピーを作成します。
+        updated_func = func.copy()
+        if updated_func["name"] == function_name_to_update:
+            updated_func["description"] += extra_description
+        updated_functions.append(updated_func)
+    
+    # 変更された新しいリストを返します。
+    return updated_functions
 
-def downdate_function_descriptions(functions, extra_description, function_name_to_update):
-    for func in functions:
-        if func["name"] == function_name_to_update:
-            func["description"] = ""
+
+#def downdate_function_descriptions(functions, extra_description, function_name_to_update):
+#    for func in functions:
+#        if func["name"] == function_name_to_update:
+#            func["description"] = ""
 
 def clock():
     jst = pytz.timezone('Asia/Tokyo')
@@ -474,10 +484,10 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
     functions = []
     if "googlesearch" in FUNCTIONS:
         functions += cf.googlesearch  # extendの代わりに+=を使用
-        update_function_descriptions(functions, google_description, "get_googlesearch")
+        functions = update_function_descriptions(functions, google_description, "get_googlesearch")
     if "customsearch" in FUNCTIONS:
         functions += cf.customsearch
-        update_function_descriptions(functions, custom_description, "get_customsearch1")
+        functions = update_function_descriptions(functions, custom_description, "get_customsearch1")
     if "wikipedia" in FUNCTIONS:
         functions += cf.wikipedia
     if "scraping" in FUNCTIONS:
@@ -495,12 +505,13 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
             functions=functions,
             function_call="auto",
         )
-        downdate_function_descriptions(functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(functions, custom_description, "get_customsearch1")
+        # print(f"functions: {functions}")
+        # downdate_function_descriptions(functions, google_description, "get_googlesearch")
+        # downdate_function_descriptions(functions, custom_description, "get_customsearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
-        downdate_function_descriptions(functions, google_description, "get_googlesearch")
-        downdate_function_descriptions(functions, custom_description, "get_customsearch1")
+        # downdate_function_descriptions(functions, google_description, "get_googlesearch")
+        # downdate_function_descriptions(functions, custom_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
