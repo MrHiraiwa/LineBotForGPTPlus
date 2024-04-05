@@ -428,7 +428,7 @@ def get_mime_part(parts, mime_type='text/plain'):
             return get_mime_part(part['parts'], mime_type=mime_type)
     return None
 
-def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
+def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -473,7 +473,45 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
+def get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
         
+        if credentials.expired:
+            credentials.refresh(Request())
+        
+        service = build('gmail', 'v1', credentials=credentials)
+        
+        # 指定されたIDのメールを取得
+        message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+
+        # メールのパートから本文を取得
+        payload = message.get('payload', {})
+        parts = payload.get('parts', [])
+        body = ""
+        if parts:
+            for part in parts:
+                if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
+                    body_data = part['body'].get('data', '')
+                    body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                    if part['mimeType'] == 'text/html':
+                        soup = BeautifulSoup(body, 'html.parser')
+                        body = soup.get_text()
+                    break  # 最初に見つかったテキストまたはHTMLパートの内容を使用
+        else:
+            # パートがない場合は、payloadから直接本文を取得
+            body_data = payload.get('body', {}).get('data', '')
+            if body_data:
+                body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+
+        return body
+    except Exception as e:
+        return f"Error: {e}"
+
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
@@ -544,7 +582,8 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
     add_calendar_called = False
     update_calendar_called = False
     delete_calendar_called = False
-    get_gmail_called = False
+    get_gmail_list_called = False
+    get_gmail_content_called = False
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
@@ -610,10 +649,16 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                     bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
-                elif function_call.name == "get_gmail" and not get_gmail_called:
-                    get_gmail_called = True
+                elif function_call.name == "get_gmail_list" and not get_gmail_list_called:
+                    get_gmail_list_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail(gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "get_gmail_content" and not get_content_list_called:
+                    get_gmail_content_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
