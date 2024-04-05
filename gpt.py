@@ -496,7 +496,8 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
         functions += cf.generateimage
     if "googlecalendar" in FUNCTIONS:
         functions += cf.googlecalendar
-
+    if "googlemail" in FUNCTIONS:
+        functions += cf.googlemail
 
     try:
         response = gpt_client.chat.completions.create(
