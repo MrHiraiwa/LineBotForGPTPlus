@@ -213,7 +213,7 @@ googlemail = [
         # 関数の名称
         "name": "get_gmail_content",
         # 関数の機能説明
-        "description": "You can read Gmail content  by the message ID of Gmail."
+        "description": "You can read Gmail content  by the message ID of Gmail.",
         "parameters": {
             "type": "object",
             # 各引数
