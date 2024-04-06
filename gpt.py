@@ -475,7 +475,7 @@ def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20
         print(f"e: {e}")
         return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_query, max_results=3):
+def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_query, max_results=5):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -510,11 +510,15 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_quer
                     if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
                         body_data = part['body'].get('data', '')
                         body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                        if len(body) > 500:
+                            body = body[:500]  # 本文を500文字にカット
                         break
             else:
                 body_data = payload.get('body', {}).get('data', '')
                 if body_data:
                     body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                    if len(body) > 500:
+                        body = body[:500]  # 本文を500文字にカット
 
             emails_content.append({
                 'subject': subject,
@@ -524,13 +528,12 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_quer
             })
 
         # メールの内容を文字列に変換
-        emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body']}" for email in emails_content])
+        emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body'][:500]}" for email in emails_content])
         
         return "SYSTEM: 検索条件に一致するメールを受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
-
 
 def run_conversation(GPT_MODEL, messages):
     try:
