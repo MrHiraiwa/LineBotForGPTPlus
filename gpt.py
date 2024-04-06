@@ -467,7 +467,7 @@ def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20
                 'date_received': date_parsed
             })
 
-        messages_str = "\n".join([f"ID: {m['id']}, From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
+        messages_str = "\n".join([f"Message ID: {m['id']}, From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
         
         return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
     except Exception as e:
