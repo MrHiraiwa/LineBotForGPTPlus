@@ -207,21 +207,21 @@ googlemail = [
         # 関数の名称
         "name": "get_gmail_list",
         # 関数の機能説明
-        "description": "You can get Gmail list."
+        "description": "You can get Gmail latest list."
     },
     {
         # 関数の名称
         "name": "get_gmail_content",
         # 関数の機能説明
-        "description": "You can read Gmail content  by the message ID of Gmail.",
+        "description": "You can read Gmail content  by a search query",
         "parameters": {
             "type": "object",
             # 各引数
             "properties": {
-                "message_id": {
+                "search_query": {
                     "type": "string",
                     # 引数の説明
-                    "description": "参照対象のGmailのメッセージID(必須)"
+                    "description": "検索文字列(必須)"
                 }
             }
         }

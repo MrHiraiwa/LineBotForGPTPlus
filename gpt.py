@@ -428,6 +428,7 @@ def get_mime_part(parts, mime_type='text/plain'):
             return get_mime_part(part['parts'], mime_type=mime_type)
     return None
 
+
 def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20):
     try:
         credentials = create_credentials(
@@ -467,14 +468,14 @@ def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20
                 'date_received': date_parsed
             })
 
-        messages_str = "\n".join([f"ID: {m['id']}, From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
+        messages_str = "\n".join([f"From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
         
         return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-def get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id):
+def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_query, max_results=5):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -486,34 +487,53 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
         
         service = build('gmail', 'v1', credentials=credentials)
 
-        updated_access_token = credentials.token
+        # メールを検索するためのクエリを使用
+        results = service.users().messages().list(userId='me', q=search_query, maxResults=max_results).execute()
+        messages = results.get('messages', [])
         
-        # 指定されたIDのメールを取得
-        message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+        updated_access_token = credentials.token
 
-        # メールのパートから本文を取得
-        payload = message.get('payload', {})
-        parts = payload.get('parts', [])
-        body = ""
-        if parts:
-            for part in parts:
-                if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
-                    body_data = part['body'].get('data', '')
+        emails_content = []
+        for msg in messages:
+            txt = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
+            payload = txt.get('payload', {})
+            headers = payload.get('headers', [])
+
+            subject = next((i['value'] for i in headers if i['name'].lower() == 'subject'), "No Subject")
+            from_email = next((i['value'] for i in headers if i['name'].lower() == 'from'), "Unknown Sender")
+            date_received = next((i['value'] for i in headers if i['name'].lower() == 'date'), "No Date")
+
+            # メール本文の取得
+            body = ""
+            if 'parts' in payload:
+                for part in payload['parts']:
+                    if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
+                        body_data = part['body'].get('data', '')
+                        body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                        if len(body) > 500:
+                            body = body[:500]  # 本文を500文字にカット
+                        break
+            else:
+                body_data = payload.get('body', {}).get('data', '')
+                if body_data:
                     body = base64.urlsafe_b64decode(body_data).decode('utf-8')
-                    if part['mimeType'] == 'text/html':
-                        soup = BeautifulSoup(body, 'html.parser')
-                        body = soup.get_text()
-                    break  # 最初に見つかったテキストまたはHTMLパートの内容を使用
-        else:
-            # パートがない場合は、payloadから直接本文を取得
-            body_data = payload.get('body', {}).get('data', '')
-            if body_data:
-                body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                    if len(body) > 500:
+                        body = body[:500]  # 本文を500文字にカット
 
-        return f"SYSTEM: メールの内容を取得しました。\n" + body, updated_access_token, credentials.refresh_token
+            emails_content.append({
+                'subject': subject,
+                'from': from_email,
+                'date_received': date_received,
+                'body': body
+            })
+
+        # メールの内容を文字列に変換
+        emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body'][:500]}" for email in emails_content])
+        
+        return "SYSTEM: 検索条件に一致するメールを受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
     except Exception as e:
-        return f"SYSTEM: メールの内容取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
-
+        print(f"e: {e}")
+        return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 def run_conversation(GPT_MODEL, messages):
     try:
@@ -587,7 +607,6 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
     delete_calendar_called = False
     get_gmail_list_called = False
     get_gmail_content_called = False
-    
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
@@ -662,7 +681,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                 elif function_call.name == "get_gmail_content" and not get_gmail_content_called:
                     get_gmail_content_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
