@@ -622,7 +622,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                 elif function_call.name == "get_gmail" and not get_gmail_called:
                     get_gmail_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail(gaccount_access_token, gaccount_refresh_token)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
