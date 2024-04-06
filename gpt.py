@@ -428,7 +428,7 @@ def get_mime_part(parts, mime_type='text/plain'):
             return get_mime_part(part['parts'], mime_type=mime_type)
     return None
 
-def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20):
+def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -440,81 +440,46 @@ def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20
         
         service = build('gmail', 'v1', credentials=credentials)
 
-        # maxResultsを20に設定して20件のメールを取得
+        # maxResultsを設定してメールを取得
         results = service.users().messages().list(userId='me', maxResults=max_results).execute()
         messages = results.get('messages', [])
         
         updated_access_token = credentials.token
 
-        if not messages:
-            return "SYSTEM: 直近のメッセージはありません。", updated_access_token, credentials.refresh_token
-
-        messages_details = []
+        emails_content = []
         for msg in messages:
-            msg_detail = service.users().messages().get(userId='me', id=msg['id'], format='metadata').execute()
-            headers = msg_detail.get('payload', {}).get('headers', [])
-            
-            # 必要な情報をヘッダーから取得
+            txt = service.users().messages().get(userId='me', id=msg['id'], format='full').execute()
+            payload = txt.get('payload', {})
+            headers = payload.get('headers', [])
+
             subject = next((i['value'] for i in headers if i['name'].lower() == 'subject'), "No Subject")
             from_email = next((i['value'] for i in headers if i['name'].lower() == 'from'), "Unknown Sender")
             date_received = next((i['value'] for i in headers if i['name'].lower() == 'date'), "No Date")
-            date_parsed = parser.parse(date_received).strftime('%Y-%m-%d %H:%M:%S')
-            
-            messages_details.append({
-                'id': msg['id'],
-                'from': from_email,
+
+            # メール本文の取得
+            body = ""
+            if 'parts' in payload:
+                for part in payload['parts']:
+                    if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
+                        body_data = part['body'].get('data', '')
+                        body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                        break  # 最初に見つかったテキストまたはHTMLパートの内容を使用
+            else:
+                body_data = payload.get('body', {}).get('data', '')
+                if body_data:
+                    body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+
+            emails_content.append({
                 'subject': subject,
-                'date_received': date_parsed
+                'from': from_email,
+                'date_received': date_received,
+                'body': body
             })
 
-        messages_str = "\n".join([f"Message ID: {m['id']}, From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
-        
-        return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
+        return "SYSTEM: メール一覧を受信しました。\n" + emails_content, updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
-        return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
-
-def get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id):
-    try:
-        credentials = create_credentials(
-            gaccount_access_token,
-            gaccount_refresh_token
-        )
-        
-        if credentials.expired:
-            credentials.refresh(Request())
-        
-        service = build('gmail', 'v1', credentials=credentials)
-
-        updated_access_token = credentials.token
-        
-        # 指定されたIDのメールを取得
-        message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
-        print(f"message_id: {message_id}, message: {message}")
-
-        # メールのパートから本文を取得
-        payload = message.get('payload', {})
-        parts = payload.get('parts', [])
-        body = ""
-        if parts:
-            for part in parts:
-                if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
-                    body_data = part['body'].get('data', '')
-                    body = base64.urlsafe_b64decode(body_data).decode('utf-8')
-                    if part['mimeType'] == 'text/html':
-                        soup = BeautifulSoup(body, 'html.parser')
-                        body = soup.get_text()
-                    break  # 最初に見つかったテキストまたはHTMLパートの内容を使用
-        else:
-            # パートがない場合は、payloadから直接本文を取得
-            body_data = payload.get('body', {}).get('data', '')
-            if body_data:
-                body = base64.urlsafe_b64decode(body_data).decode('utf-8')
-
-        return f"SYSTEM: メールの内容を取得しました。\n" + body, updated_access_token, credentials.refresh_token
-    except Exception as e:
-        print(f"e: {e}")
-        return f"SYSTEM: メールの内容取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+        return f"SYSTEM: メールの取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 
 def run_conversation(GPT_MODEL, messages):
@@ -587,8 +552,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
     add_calendar_called = False
     update_calendar_called = False
     delete_calendar_called = False
-    get_gmail_list_called = False
-    get_gmail_content_called = False
+    get_gmail_called = False
     
 
     while attempt < max_attempts:
@@ -655,16 +619,10 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                     bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
-                elif function_call.name == "get_gmail_list" and not get_gmail_list_called:
-                    get_gmail_list_called = True
+                elif function_call.name == "get_gmail" and not get_gmail_called:
+                    get_gmail_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
-                    attempt += 1
-                elif function_call.name == "get_gmail_content" and not get_gmail_content_called:
-                    get_gmail_content_called = True
-                    arguments = json.loads(function_call.arguments)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
