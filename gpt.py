@@ -428,7 +428,7 @@ def get_mime_part(parts, mime_type='text/plain'):
             return get_mime_part(part['parts'], mime_type=mime_type)
     return None
 
-def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
+def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=5):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -463,7 +463,7 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
                     if part['mimeType'] == 'text/plain' or part['mimeType'] == 'text/html':
                         body_data = part['body'].get('data', '')
                         body = base64.urlsafe_b64decode(body_data).decode('utf-8')
-                        break  # 最初に見つかったテキストまたはHTMLパートの内容を使用
+                        break
             else:
                 body_data = payload.get('body', {}).get('data', '')
                 if body_data:
@@ -476,11 +476,13 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=20):
                 'body': body
             })
 
-        return "SYSTEM: メール一覧を受信しました。\n" + emails_content, updated_access_token, credentials.refresh_token
+        # メールの内容を文字列に変換
+        emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body']}" for email in emails_content])
+        
+        return "SYSTEM: メール一覧を受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メールの取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
-
 
 def run_conversation(GPT_MODEL, messages):
     try:
