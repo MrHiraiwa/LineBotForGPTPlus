@@ -490,6 +490,7 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, message_id)
         
         # 指定されたIDのメールを取得
         message = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+        print(f"message_id: {message_id}, message: {message}")
 
         # メールのパートから本文を取得
         payload = message.get('payload', {})
