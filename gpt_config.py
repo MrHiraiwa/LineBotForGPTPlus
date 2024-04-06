@@ -207,7 +207,7 @@ googlemail = [
         # 関数の名称
         "name": "get_gmail_list",
         # 関数の機能説明
-        "description": "You can get Gmail list."
+        "description": "You can get Gmail list and Message ID of Gmail."
     },
     {
         # 関数の名称
