@@ -475,7 +475,7 @@ def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20
         print(f"e: {e}")
         return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_query, max_results=1):
+def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_query, max_results=3):
     try:
         credentials = create_credentials(
             gaccount_access_token,
