@@ -428,7 +428,8 @@ def get_mime_part(parts, mime_type='text/plain'):
             return get_mime_part(part['parts'], mime_type=mime_type)
     return None
 
-def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=5):
+
+def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20):
     try:
         credentials = create_credentials(
             gaccount_access_token,
@@ -440,8 +441,54 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=5):
         
         service = build('gmail', 'v1', credentials=credentials)
 
-        # maxResultsを設定してメールを取得
+        # maxResultsを20に設定して20件のメールを取得
         results = service.users().messages().list(userId='me', maxResults=max_results).execute()
+        messages = results.get('messages', [])
+        
+        updated_access_token = credentials.token
+
+        if not messages:
+            return "SYSTEM: 直近のメッセージはありません。", updated_access_token, credentials.refresh_token
+
+        messages_details = []
+        for msg in messages:
+            msg_detail = service.users().messages().get(userId='me', id=msg['id'], format='metadata').execute()
+            headers = msg_detail.get('payload', {}).get('headers', [])
+            
+            # 必要な情報をヘッダーから取得
+            subject = next((i['value'] for i in headers if i['name'].lower() == 'subject'), "No Subject")
+            from_email = next((i['value'] for i in headers if i['name'].lower() == 'from'), "Unknown Sender")
+            date_received = next((i['value'] for i in headers if i['name'].lower() == 'date'), "No Date")
+            date_parsed = parser.parse(date_received).strftime('%Y-%m-%d %H:%M:%S')
+            
+            messages_details.append({
+                'id': msg['id'],
+                'from': from_email,
+                'subject': subject,
+                'date_received': date_parsed
+            })
+
+        messages_str = "\n".join([f"Message ID: {m['id']}, From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
+        
+        return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
+    except Exception as e:
+        print(f"e: {e}")
+        return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
+def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_query, max_results=1):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+        
+        if credentials.expired:
+            credentials.refresh(Request())
+        
+        service = build('gmail', 'v1', credentials=credentials)
+
+        # メールを検索するためのクエリを使用
+        results = service.users().messages().list(userId='me', q=search_query, maxResults=max_results).execute()
         messages = results.get('messages', [])
         
         updated_access_token = credentials.token
@@ -479,10 +526,11 @@ def get_gmail(gaccount_access_token, gaccount_refresh_token, max_results=5):
         # メールの内容を文字列に変換
         emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body']}" for email in emails_content])
         
-        return "SYSTEM: メール一覧を受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
+        return "SYSTEM: 検索条件に一致するメールを受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
-        return f"SYSTEM: メールの取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+        return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
 
 def run_conversation(GPT_MODEL, messages):
     try:
