@@ -218,7 +218,7 @@ googlemail = [
             "type": "object",
             # 各引数
             "properties": {
-                "query": {
+                "search_query": {
                     "type": "string",
                     # 引数の説明
                     "description": "検索文字列(必須)"
