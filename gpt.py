@@ -549,6 +549,9 @@ def run_conversation(GPT_MODEL, messages):
 def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
     # ここでfunctionsリストを構成
     functions = []
+    #標準ツール
+    functions += cf.clock
+    #拡張ツール
     if "googlesearch" in FUNCTIONS:
         functions += cf.googlesearch  # extendの代わりに+=を使用
         functions = update_function_descriptions(functions, google_description, "get_googlesearch")
