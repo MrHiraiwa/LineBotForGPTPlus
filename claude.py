@@ -431,6 +431,54 @@ class Deletecalendar(BaseTool):
         except Exception as e:
             return f"イベント削除に失敗しました: {e}"
 
+class Getgmaillist(BaseTool):
+    def use_tool(self, gaccount_access_token, gaccount_refresh_token, max_results=20):
+        global gaccount_access_token, gaccount_refresh_token
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+        
+            if credentials.expired:
+                credentials.refresh(Request())
+        
+            service = build('gmail', 'v1', credentials=credentials)
+
+            # maxResultsを20に設定して20件のメールを取得
+            results = service.users().messages().list(userId='me', maxResults=max_results).execute()
+            messages = results.get('messages', [])
+        
+            updated_access_token = credentials.token
+
+            if not messages:
+                return "SYSTEM: 直近のメッセージはありません。", updated_access_token, credentials.refresh_token
+
+            messages_details = []
+            for msg in messages:
+                msg_detail = service.users().messages().get(userId='me', id=msg['id'], format='metadata').execute()
+                headers = msg_detail.get('payload', {}).get('headers', [])
+            
+                # 必要な情報をヘッダーから取得
+                subject = next((i['value'] for i in headers if i['name'].lower() == 'subject'), "No Subject")
+                from_email = next((i['value'] for i in headers if i['name'].lower() == 'from'), "Unknown Sender")
+                date_received = next((i['value'] for i in headers if i['name'].lower() == 'date'), "No Date")
+                date_parsed = parser.parse(date_received).strftime('%Y-%m-%d %H:%M:%S')
+            
+                messages_details.append({
+                    'id': msg['id'],
+                    'from': from_email,
+                    'subject': subject,
+                    'date_received': date_parsed
+                })
+
+            messages_str = "\n".join([f"From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
+        
+            return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
+        except Exception as e:
+            print(f"e: {e}")
+            return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
 class Getgmailcontent(BaseTool):
     def use_tool(self, gaccount_access_token, gaccount_refresh_token, search_query, max_results=5):
         global gaccount_access_token, gaccount_refresh_token
