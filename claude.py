@@ -432,7 +432,7 @@ class Deletecalendar(BaseTool):
             return f"イベント削除に失敗しました: {e}"
 
 class Getgmaillist(BaseTool):
-    def use_tool(self, gaccount_access_token, gaccount_refresh_token, max_results=20):
+    def use_tool(self, max_results=20):
         global gaccount_access_token, gaccount_refresh_token
         try:
             credentials = create_credentials(
@@ -480,7 +480,7 @@ class Getgmaillist(BaseTool):
             return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 class Getgmailcontent(BaseTool):
-    def use_tool(self, gaccount_access_token, gaccount_refresh_token, search_query, max_results=5):
+    def use_tool(self, search_query, max_results=5):
         global gaccount_access_token, gaccount_refresh_token
         try:
             credentials = create_credentials(
