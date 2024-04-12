@@ -670,17 +670,18 @@ def handle_message(event):
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
                 head_message = head_message + OCR_MESSAGE + "\n" + str_vision_results
                 user_message = OCR_USER_MESSAGE
+            elif message_type =='video':
+                videoitg_results =  video_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
+                str_videoitg_results = str(videoitg_results)
+                str_videoitg_results = VIDEO_BOTGUIDE_MESSAGE + "\n" + str_videoitg_results
+                VIDEO_MESSAGE = get_setting('VIDEO_MESSAGE').format(display_name=display_name)
+                head_message = head_message + VIDEO_MESSAGE + "\n" + str_videoitg_results
+                user_message = VIDEO_USER_MESSAGE
             elif message_type == 'location':
                 latitude =  event.message.latitude
                 longitude = event.message.longitude
                 result = get_addresses(latitude, longitude)
                 user_message = MAPS_MESSAGE + "\n" + result
-            elif message_type =='video':
-                videoitg_results = process_video_from_file(file_path)
-                str_video_results = VIDEO_BOTGUIDE_MESSAGE + "\n" + videoitg_results
-                VIDEO_MESSAGE = get_setting('VIDEO_MESSAGE').format(display_name=display_name)
-                head_message = head_message + VIDEO_MESSAGE + "\n" + str_video_results
-                user_message = VIDEO_USER_MESSAGE
                 
             doc = doc_ref.get(transaction=transaction)
             
