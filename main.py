@@ -33,8 +33,8 @@ from whisper import get_audio
 from voice import put_audio
 from voicevox import put_audio_voicevox
 from vision import vision_api
+from videoitg import video_api
 from maps import get_addresses
-from videoitg import process_video_from_file
 from payment import create_checkout_session
 from gpt import chatgpt_functions
 from claude import claude_functions
