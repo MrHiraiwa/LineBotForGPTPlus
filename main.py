@@ -670,7 +670,7 @@ def handle_message(event):
                 head_message = head_message + OCR_MESSAGE + "\n" + str_vision_results
                 user_message = OCR_USER_MESSAGE
             elif message_type =='video':
-                videoitg_results =  "動画解析は未実装のため利用できません。"
+                videoitg_results = get_audio(message_id)
                 print(f"videoitg_results: {videoitg_results}")
                 str_videoitg_results = str(videoitg_results)
                 str_videoitg_results = VIDEO_BOTGUIDE_MESSAGE + "\n" + str_videoitg_results
