@@ -34,11 +34,12 @@ from voice import put_audio
 from voicevox import put_audio_voicevox
 from vision import vision_api
 from maps import get_addresses
+from videoitg import 
 from payment import create_checkout_session
 from gpt import chatgpt_functions
 from claude import claude_functions
 from localllm import localllm_functions
-from embedding import embedding_from_storage
+
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
