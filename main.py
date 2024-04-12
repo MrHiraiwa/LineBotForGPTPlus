@@ -672,6 +672,7 @@ def handle_message(event):
                 user_message = OCR_USER_MESSAGE
             elif message_type =='video':
                 videoitg_results =  video_api(message_id, os.environ["CHANNEL_ACCESS_TOKEN"])
+                print(f"videoitg_results: {videoitg_results}")
                 str_videoitg_results = str(videoitg_results)
                 str_videoitg_results = VIDEO_BOTGUIDE_MESSAGE + "\n" + str_videoitg_results
                 VIDEO_MESSAGE = get_setting('VIDEO_MESSAGE').format(display_name=display_name)
