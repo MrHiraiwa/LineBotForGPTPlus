@@ -34,7 +34,7 @@ from voice import put_audio
 from voicevox import put_audio_voicevox
 from vision import vision_api
 from maps import get_addresses
-from videoitg import 
+from videoitg import process_video_from_file
 from payment import create_checkout_session
 from gpt import chatgpt_functions
 from claude import claude_functions
@@ -676,7 +676,8 @@ def handle_message(event):
                 result = get_addresses(latitude, longitude)
                 user_message = MAPS_MESSAGE + "\n" + result
             elif message_type =='video':
-                str_video_results = VIDEO_BOTGUIDE_MESSAGE + "\n" + "動作確認テストです。"
+                videoitg_results = process_video_from_file(file_path)
+                str_video_results = VIDEO_BOTGUIDE_MESSAGE + "\n" + videoitg_results
                 VIDEO_MESSAGE = get_setting('VIDEO_MESSAGE').format(display_name=display_name)
                 head_message = head_message + VIDEO_MESSAGE + "\n" + str_video_results
                 user_message = VIDEO_USER_MESSAGE
