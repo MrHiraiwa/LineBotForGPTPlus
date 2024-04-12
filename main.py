@@ -16,7 +16,7 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, AudioMessage, TextSendMessage, AudioSendMessage,
     QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction,
-    LocationMessage, ImageMessage, StickerMessage, ImageSendMessage,
+    LocationMessage, ImageMessage, StickerMessage, ImageSendMessage, VideoMessage,
 )
 
 import tiktoken
@@ -38,7 +38,7 @@ from payment import create_checkout_session
 from gpt import chatgpt_functions
 from claude import claude_functions
 from localllm import localllm_functions
-from embedding import embedding_from_storage
+
 
 openai_api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
@@ -73,6 +73,9 @@ REQUIRED_ENV_VARS = [
     "OCR_MESSAGE",
     "OCR_BOTGUIDE_MESSAGE",
     "OCR_USER_MESSAGE",
+    "VIDEO_MESSAGE",
+    "VIDEO_BOTGUIDE_MESSAGE",
+    "VIDEO_USER_MESSAGE",
     "MAPS_MESSAGE",
     "FORGET_KEYWORDS",
     "FORGET_GUIDE_MESSAGE",
@@ -162,6 +165,9 @@ DEFAULT_ENV_VARS = {
     'OCR_MESSAGE': ' 画像を解析し文字に変換しました。以下の解析結果を{display_name}に報告してください 。',
     'OCR_BOTGUIDE_MESSAGE': '以下のテキストは画像を解析し文字列に変換したものです。画像に何が写っているかを文章で説明してください。',
     'OCR_USER_MESSAGE': '画像を送信しました。',
+    'VIDEO_MESSAGE': ' 映像内の音声を解析し文字に変換しました。以下の解析結果を{display_name}に報告してください 。',
+    'VIDEO_BOTGUIDE_MESSAGE': '以下のテキストは映像内の音声を解析し文字列に変換したものです。音声の内容を文章で説明してください。',
+    'VIDEO_USER_MESSAGE': '映像を送信しました。',
     'MAPS_MESSAGE': '以下の住所周辺のおすすめのスポットを教えてください。',
     'FORGET_KEYWORDS': '忘れて,わすれて',
     'FORGET_GUIDE_MESSAGE': 'ユーザーからあなたの記憶の削除が命令されました。別れの挨拶をしてください。',
@@ -242,6 +248,7 @@ def reload_settings():
     global MAX_TOKEN_NUM, MAX_DAILY_USAGE, MAX_MONTHLY_USAGE, GROUP_MAX_DAILY_USAGE, FREE_LIMIT_DAY, MAX_DAILY_MESSAGE, MAX_MONTHLY_MESSAGE
     global NG_MESSAGE, NG_KEYWORDS
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
+    global VIDEO_MESSAGE, VIDEO_BOTGUIDE_MESSAGE, VIDEO_USER_MESSAGE
     global FORGET_KEYWORDS, FORGET_GUIDE_MESSAGE, FORGET_MESSAGE, ERROR_MESSAGE, FORGET_QUICK_REPLY
     global TEXT_OR_AUDIO_KEYWORDS, TEXT_OR_AUDIO_GUIDE_MESSAGE
     global CHANGE_TO_TEXT_QUICK_REPLY, CHANGE_TO_TEXT_MESSAGE, CHANGE_TO_AUDIO_QUICK_REPLY, CHANGE_TO_AUDIO_MESSAGE
@@ -292,6 +299,9 @@ def reload_settings():
     OCR_MESSAGE = get_setting('OCR_MESSAGE')
     OCR_BOTGUIDE_MESSAGE = get_setting('OCR_BOTGUIDE_MESSAGE')
     OCR_USER_MESSAGE = get_setting('OCR_USER_MESSAGE')
+    VIDEO_MESSAGE = get_setting('VIDEO_MESSAGE')
+    VIDEO_BOTGUIDE_MESSAGE = get_setting('VIDEO_BOTGUIDE_MESSAGE')
+    VIDEO_USER_MESSAGE = get_setting('VIDEO_USER_MESSAGE')
     MAPS_MESSAGE = get_setting('MAPS_MESSAGE')
     FORGET_KEYWORDS = get_setting('FORGET_KEYWORDS')
     if FORGET_KEYWORDS:
@@ -593,7 +603,7 @@ def callback():
         abort(400)
     return "OK"
 
-@handler.add(MessageEvent, message=(TextMessage, AudioMessage, LocationMessage, ImageMessage, StickerMessage))
+@handler.add(MessageEvent, message=(TextMessage, AudioMessage, LocationMessage, ImageMessage, StickerMessage, VideoMessage))
 def handle_message(event):
     reload_settings()
     try:
@@ -659,6 +669,14 @@ def handle_message(event):
                 OCR_MESSAGE = get_setting('OCR_MESSAGE').format(display_name=display_name)
                 head_message = head_message + OCR_MESSAGE + "\n" + str_vision_results
                 user_message = OCR_USER_MESSAGE
+            elif message_type =='video':
+                videoitg_results = get_audio(message_id)
+                print(f"videoitg_results: {videoitg_results}")
+                str_videoitg_results = str(videoitg_results)
+                str_videoitg_results = VIDEO_BOTGUIDE_MESSAGE + "\n" + str_videoitg_results
+                VIDEO_MESSAGE = get_setting('VIDEO_MESSAGE').format(display_name=display_name)
+                head_message = head_message + VIDEO_MESSAGE + "\n" + str_videoitg_results
+                user_message = VIDEO_USER_MESSAGE
             elif message_type == 'location':
                 latitude =  event.message.latitude
                 longitude = event.message.longitude
