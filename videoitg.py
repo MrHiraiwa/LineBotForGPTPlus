@@ -1,6 +1,11 @@
+from flask import Blueprint
 import requests
 import base64
 import os
+
+from linebot import LineBotApi
+
+video = Blueprint('video', __name__)
 
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')  # API key should be stored in environment variables
 
@@ -15,6 +20,7 @@ def analyze_video(video_bytes):
             "SHOT_CHANGE_DETECTION",
             "OBJECT_TRACKING"
         ],
+        # Additional configuration can be added here if necessary
     }
 
     response = requests.post(api_url, json=request_body)
@@ -22,18 +28,22 @@ def analyze_video(video_bytes):
 
 def video_results_to_string(video_results):
     result_string = ""
+    # Extract and format results
+    # Customize this function based on the specific features enabled and the structure of the API response
     annotations = video_results.get('annotationResults', [{}])[0]
     segment_labels = annotations.get('segmentLabelAnnotations', [])
     for label in segment_labels:
         result_string += f"Label: {label['entity']['description']}, Confidence: {label['confidence']}\n"
+        # Include additional details such as segments, frames, etc.
+
     return result_string
 
-def process_video_from_file(file_path):
-    with open(file_path, 'rb') as video_file:
-        video_bytes = video_file.read()
-    analysis_results = analyze_video(video_bytes)
-    return video_results_to_string(analysis_results)
+def video_api(message_id, CHANNEL_ACCESS_TOKEN):
+    line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+    message_content = line_bot_api.get_message_content(message_id)
+    
+    video = message_content.content
+    video_results = analyze_video(video)
+    video_results = video_results_to_string(video_results)
 
-# 例: 他のスクリプトからこの関数を呼び出す
-# results = process_video_from_file('path_to_your_video_file.mp4')
-# print(results)
+    return video_results
