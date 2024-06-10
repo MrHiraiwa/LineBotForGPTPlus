@@ -221,7 +221,7 @@ googlemail = [
         # 関数の名称
         "name": "get_gmail_content",
         # 関数の機能説明
-        "description": "You can read Gmail content  by a search query",
+        "description": "You can read Gmail content  by a search query.",
         "parameters": {
             "type": "object",
             # 各引数
@@ -230,6 +230,33 @@ googlemail = [
                     "type": "string",
                     # 引数の説明
                     "description": "検索文字列(必須)"
+                }
+            }
+        }
+    },
+    {
+        # 関数の名称
+        "name": "send_gmail_content",
+        # 関数の機能説明
+        "description": "You send Gmail content  by a email and a subject and a content.",
+        "parameters": {
+            "type": "object",
+            # 各引数
+            "properties": {
+                "to_email": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "送信先メールアドレス(必須)"
+                },
+                "subject": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "作成するメールの題名(必須)"
+                },
+                "body": {
+                    "type": "string",
+                    # 引数の説明
+                    "description": "作成するメールの内容(必須)"
                 }
             }
         }
