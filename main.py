@@ -1094,22 +1094,26 @@ def handle_message(event):
     finally:
         return 'OK'
     
-def response_filter(response,bot_name,display_name):
-    date_pattern = r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3,4}"
-    response = re.sub(date_pattern, "", response).strip()
-    name_pattern1 = r"^"+ bot_name + ":"
+def response_filter(response, bot_name, display_name):
+    date_pattern1 = r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [A-Z]{3,4}"
+    response = re.sub(date_pattern1, "", response).strip()
+    date_pattern2 = r"^\d{4}年.*JST"
+    response = re.sub(date_pattern2, "", response).strip()
+    date_pattern3 = r"^\d{4}年.*\d{2}:\d{2}"
+    response = re.sub(date_pattern3, "", response).strip()
+    name_pattern1 = r"^" + re.escape(bot_name) + r":"
     response = re.sub(name_pattern1, "", response).strip()
-    name_pattern2 = r"^"+ bot_name + "："
+    name_pattern2 = r"^" + re.escape(bot_name) + r"："
     response = re.sub(name_pattern2, "", response).strip()
-    name_pattern3 = r"^"+ display_name + ":"
+    name_pattern3 = r"^" + re.escape(display_name) + r":"
     response = re.sub(name_pattern3, "", response).strip()
-    name_pattern4 = r"^"+ display_name + "："
+    name_pattern4 = r"^" + re.escape(display_name) + r"："
     response = re.sub(name_pattern4, "", response).strip()
-    dot_pattern = r"^、"
-    response = re.sub(dot_pattern, "", response).strip()
-    dot_pattern = r"^ "
-    response = re.sub(dot_pattern, "", response).strip()
-    return response 
+    dot_pattern1 = r"^、"
+    response = re.sub(dot_pattern1, "", response).strip()
+    dot_pattern2 = r"^ "
+    response = re.sub(dot_pattern2, "", response).strip()
+    return response
 
 def line_reply(reply_token, bot_reply_list):
     messages = []
