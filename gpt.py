@@ -535,9 +535,40 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_quer
         print(f"e: {e}")
         return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-def send_gmail_content(gaccount_access_token, gaccount_refresh_token):
-    #ここに処理を実装
-    return "SYSTEM: 次の内容のメールを送信しました。\n" + email_content_str, updated_access_token, credentials.refresh_token
+def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, subject, body):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+        
+        if credentials.expired:
+            credentials.refresh(Request())
+        
+        service = build('gmail', 'v1', credentials=credentials)
+
+        # メールのメッセージを作成
+        message = email.message.EmailMessage()
+        message.set_content(body)
+        message['To'] = to_email
+        message['From'] = 'me'
+        message['Subject'] = subject
+
+        # メッセージをbase64でエンコード
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+        # Gmail APIを使用してメッセージを送信
+        send_message = {
+            'raw': encoded_message
+        }
+        send_result = service.users().messages().send(userId='me', body=send_message).execute()
+
+        updated_access_token = credentials.token
+
+        return f"SYSTEM: 次の内容のメールを送信しました。\nTo: {to_email}\nSubject: {subject}\nBody: {body}", updated_access_token, credentials.refresh_token
+    except Exception as e:
+        print(f"e: {e}")
+        return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 def run_conversation(GPT_MODEL, messages):
     try:
@@ -695,7 +726,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                 elif function_call.name == "send_gmail_content" and not send_gmail_content_called:
                     get_send_content_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["xxxxxx"])
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
