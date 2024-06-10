@@ -535,6 +535,10 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_quer
         print(f"e: {e}")
         return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
+def send_gmail_content(gaccount_access_token, gaccount_refresh_token):
+    #ここに処理を実装
+    return "SYSTEM: 次の内容のメールを送信しました。\n" + email_content_str, updated_access_token, credentials.refresh_token
+
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
@@ -610,6 +614,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
     delete_calendar_called = False
     get_gmail_list_called = False
     get_gmail_content_called = False
+    send_gmail_content_called = False
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
@@ -685,6 +690,12 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                     get_gmail_content_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "send_gmail_content" and not send_gmail_content_called:
+                    get_send_content_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["xxxxxx"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
