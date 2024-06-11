@@ -354,7 +354,7 @@ def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_t
         updated_access_token = credentials.token
     
         # 成功した場合、イベントの詳細を含むメッセージを返す
-        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, credentials.refresh_token
+        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}。追加した内容をユーザーに伝えてください。", updated_access_token, credentials.refresh_token
     
     except Exception as e:
         return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
@@ -413,7 +413,7 @@ def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
 
         updated_access_token = credentials.token
 
-        return f"イベント「{event_summary}」が削除されました", updated_access_token, credentials.refresh_token
+        return f"イベント「{event_summary}」が削除された旨をユーザーに伝えてください。", updated_access_token, credentials.refresh_token
     except Exception as e:
         return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
@@ -470,7 +470,7 @@ def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20
 
         messages_str = "\n".join([f"From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
         
-        return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
+        return f"SYSTEM: メール一覧を受信しました。一覧の内容をユーザーに伝えてください。\n{messages_str}", updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
@@ -530,7 +530,7 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_quer
         # メールの内容を文字列に変換
         emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body'][:500]}" for email in emails_content])
         
-        return "SYSTEM: 検索条件に一致するメールを受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
+        return "SYSTEM: 検索条件に一致するメールを受信しました。メールの内容をユーザーに伝えてください。\n" + emails_content_str, updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
@@ -565,7 +565,7 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
 
         updated_access_token = credentials.token
 
-        return f"SYSTEM: 次の内容のメールを送信しました。\nTo: {to_email}\nSubject: {subject}\nBody: {body}", updated_access_token, credentials.refresh_token
+        return f"SYSTEM: 次の内容のメールを送信しました。メール送信が完了した旨をユーザーに伝えてください。\nTo: {to_email}\nSubject: {subject}\nBody: {body}", updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
