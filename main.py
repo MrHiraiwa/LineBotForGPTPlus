@@ -1294,7 +1294,7 @@ def oauth_callback():
     try:
         flow = Flow.from_client_config(
             client_config=client_config,
-            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.readonly'])
+            scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send'])
         flow.redirect_uri = GACCOUNT_AUTH_URL + '/oauth_callback'
         flow.fetch_token(authorization_response=authorization_response)
 
