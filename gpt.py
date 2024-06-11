@@ -354,7 +354,7 @@ def add_calendar(gaccount_access_token, gaccount_refresh_token, summary, start_t
         updated_access_token = credentials.token
     
         # 成功した場合、イベントの詳細を含むメッセージを返す
-        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}", updated_access_token, credentials.refresh_token
+        return f"次のイベントが追加されました: summary={summary}, start_time={start_time},  end_time={end_time}, description={description}, location={location}。追加した内容をユーザーに伝えてください。", updated_access_token, credentials.refresh_token
     
     except Exception as e:
         return f"イベント追加に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
@@ -413,7 +413,7 @@ def delete_calendar(gaccount_access_token, gaccount_refresh_token, event_id):
 
         updated_access_token = credentials.token
 
-        return f"イベント「{event_summary}」が削除されました", updated_access_token, credentials.refresh_token
+        return f"イベント「{event_summary}」が削除された旨をユーザーに伝えてください。", updated_access_token, credentials.refresh_token
     except Exception as e:
         return f"イベント削除に失敗しました: {e}", gaccount_access_token, gaccount_refresh_token
 
@@ -470,7 +470,7 @@ def get_gmail_list(gaccount_access_token, gaccount_refresh_token, max_results=20
 
         messages_str = "\n".join([f"From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
         
-        return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
+        return f"SYSTEM: メール一覧を受信しました。一覧の内容をユーザーに伝えてください。\n{messages_str}", updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
@@ -530,10 +530,45 @@ def get_gmail_content(gaccount_access_token, gaccount_refresh_token, search_quer
         # メールの内容を文字列に変換
         emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body'][:500]}" for email in emails_content])
         
-        return "SYSTEM: 検索条件に一致するメールを受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
+        return "SYSTEM: 検索条件に一致するメールを受信しました。メールの内容をユーザーに伝えてください。\n" + emails_content_str, updated_access_token, credentials.refresh_token
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
+def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, subject, body):
+    try:
+        credentials = create_credentials(
+            gaccount_access_token,
+            gaccount_refresh_token
+        )
+        
+        if credentials.expired:
+            credentials.refresh(Request())
+        
+        service = build('gmail', 'v1', credentials=credentials)
+
+        # メールのメッセージを作成
+        message = email.message.EmailMessage()
+        message.set_content(body)
+        message['To'] = to_email
+        message['From'] = 'me'
+        message['Subject'] = subject
+
+        # メッセージをbase64でエンコード
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+        # Gmail APIを使用してメッセージを送信
+        send_message = {
+            'raw': encoded_message
+        }
+        send_result = service.users().messages().send(userId='me', body=send_message).execute()
+
+        updated_access_token = credentials.token
+
+        return f"SYSTEM: 次の内容のメールを送信しました。メール送信が完了した旨をユーザーに伝えてください。\nTo: {to_email}\nSubject: {subject}\nBody: {body}", updated_access_token, credentials.refresh_token
+    except Exception as e:
+        print(f"e: {e}")
+        return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
 def run_conversation(GPT_MODEL, messages):
     try:
@@ -610,6 +645,7 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
     delete_calendar_called = False
     get_gmail_list_called = False
     get_gmail_content_called = False
+    send_gmail_content_called = False
 
     while attempt < max_attempts:
         response = run_conversation_f(GPT_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
@@ -685,6 +721,12 @@ def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_i
                     get_gmail_content_called = True
                     arguments = json.loads(function_call.arguments)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
+                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    attempt += 1
+                elif function_call.name == "send_gmail_content" and not send_gmail_content_called:
+                    get_send_content_called = True
+                    arguments = json.loads(function_call.arguments)
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:

@@ -12,7 +12,7 @@
 - Web検索+: Google Custom Search APIを用いてWeb検索が行えます。
 - 地図検索: Geocoding APIとGoogle Custom Search APIを用いて地図検索が行なえます。
 - カレンダー連携: Googleカレンダーと連携してスケジュールの追加や削除が行えます。
-- Gmail連携: Gmailと連携してメールの確認が行えます
+- Gmail連携: Gmailと連携してメールの送受信や確認が行えます。
 - 画像認識: Cloud Visionを用いて画像認識が行なえます。
 - 画像生成: OpenAI DALL-E 3を用いて画像生成が行なえます。
 - 音声認識: OpenAI Whisperを用いて音声認識が行えます。
