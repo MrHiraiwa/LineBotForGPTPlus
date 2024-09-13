@@ -1016,7 +1016,7 @@ def handle_message(event):
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
