@@ -427,7 +427,7 @@ class Deletecalendar(BaseTool):
             gaccount_access_token = credentials.token
             gaccount_refresh_token = credentials.refresh_token
 
-            return f"イベント「{event_summary}」が削除されました"
+            return f"イベント「{event_summary}」が削除された旨をユーザーに伝えてください。"
         except Exception as e:
             return f"イベント削除に失敗しました: {e}"
 
@@ -474,7 +474,7 @@ class Getgmaillist(BaseTool):
 
             messages_str = "\n".join([f"From: {m['from']}, Subject: {m['subject']}, Date: {m['date_received']}" for m in messages_details])
         
-            return f"SYSTEM: メール一覧を受信しました。\n{messages_str}", updated_access_token, credentials.refresh_token
+            return f"SYSTEM: メール一覧を受信しました。一覧の内容をユーザーに伝えてください。\n{messages_str}", updated_access_token, credentials.refresh_token
         except Exception as e:
             print(f"e: {e}")
             return f"SYSTEM: メール一覧の取得にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
@@ -536,10 +536,48 @@ class Getgmailcontent(BaseTool):
             # メールの内容を文字列に変換
             emails_content_str = "\n".join([f"Subject: {email['subject']}, From: {email['from']}, Date: {email['date_received']}, Body: {email['body'][:500]}" for email in emails_content])
         
-            return "SYSTEM: 検索条件に一致するメールを受信しました。\n" + emails_content_str, updated_access_token, credentials.refresh_token
+            return "SYSTEM: 検索条件に一致するメールを受信しました。メールの内容をユーザーに伝えてください。\n" + emails_content_str, updated_access_token, credentials.refresh_token
         except Exception as e:
             print(f"e: {e}")
             return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
+def sendgmailcontent(BaseTool):
+    def use_tool(self, to_email, subject, body):
+        global gaccount_access_token, gaccount_refresh_token
+        try:
+            credentials = create_credentials(
+                gaccount_access_token,
+                gaccount_refresh_token
+            )
+        
+            if credentials.expired:
+                credentials.refresh(Request())
+        
+            service = build('gmail', 'v1', credentials=credentials)
+
+            # メールのメッセージを作成
+            message = email.message.EmailMessage()
+            message.set_content(body)
+            message['To'] = to_email
+            message['From'] = 'me'
+            message['Subject'] = subject
+
+            # メッセージをbase64でエンコード
+            encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+            # Gmail APIを使用してメッセージを送信
+            send_message = {
+                'raw': encoded_message
+            }
+            send_result = service.users().messages().send(userId='me', body=send_message).execute()
+
+            updated_access_token = credentials.token
+
+            return f"SYSTEM: 次の内容のメールを送信しました。メール送信が完了した旨をユーザーに伝えてください。\nTo: {to_email}\nSubject: {subject}\nBody: {body}", updated_access_token, credentials.refresh_token
+        except Exception as e:
+            print(f"e: {e}")
+            return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+
 
 def run_conversation(CLAUDE_MODEL, SYSTEM_PROMPT, messages):
     try:
@@ -634,6 +672,14 @@ def run_conversation_f(CLAUDE_MODEL, FUNCTIONS, messages, GOOGLE_DESCRIPTION, CU
         getgmailcontent_tool_parameters = [
             {"name": "search_query", "type": "str", "description": "検索文字列(必須)"}
         ]
+        
+        sendgmailcontent_tool_name = "perform_sendgmailcontent"
+        sendgmailcontent_tool_description = "You send Gmail content  by a email and a subject and a content."
+        sendgmailcontent_tool_parameters = [
+            {"name": "to_email", "type": "str", "description": "送信先メールアドレス(必須)"},
+            {"name": "subject", "type": "str", "description": "作成するメールの題名(必須)"},
+            {"name": "search_query", "type": "str", "description": "作成するメールの内容(必須)"}
+        ]
 
         clock_tool = Clock(clock_tool_name, clock_tool_description, clock_tool_parameters)
         googlesearch_tool = Googlesearch(googlesearch_tool_name, googlesearch_tool_description, googlesearch_tool_parameters)
@@ -647,6 +693,7 @@ def run_conversation_f(CLAUDE_MODEL, FUNCTIONS, messages, GOOGLE_DESCRIPTION, CU
         deletecalendar_tool = Deletecalendar(deletecalendar_tool_name, deletecalendar_tool_description, deletecalendar_tool_parameters)
         getgmaillist_tool = Getgmaillist(getgmaillist_tool_name, getgmaillist_tool_description, getgmaillist_tool_parameters)
         getgmailcontent_tool = Getgmailcontent(getgmailcontent_tool_name, getgmailcontent_tool_description, getgmailcontent_tool_parameters)
+        sendgmailcontent_tool = Sendgmailcontent(sendgmailcontent_tool_name, sendgmailcontent_tool_description, sendgmailcontent_tool_parameters)
         
 
         functions = []
@@ -670,6 +717,7 @@ def run_conversation_f(CLAUDE_MODEL, FUNCTIONS, messages, GOOGLE_DESCRIPTION, CU
         if "googlemail" in FUNCTIONS:
             functions.append(getgmaillist_tool)
             functions.append(getgmailcontent_tool)
+            functions.append(sendgmailcontent_tool)
         
         all_tool_user = ToolUser(functions, CLAUDE_MODEL)
         response = all_tool_user.use_tools(messages, execution_mode='automatic')
