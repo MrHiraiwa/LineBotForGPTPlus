@@ -677,7 +677,7 @@ def run_conversation_f(CLAUDE_MODEL, FUNCTIONS, messages, GOOGLE_DESCRIPTION, CU
         sendgmailcontent_tool_description = "You send Gmail content  by a email and a subject and a content."
         sendgmailcontent_tool_parameters = [
             {"name": "to_email", "type": "str", "description": "送信先メールアドレス(必須)"},
-            {"name": "subject", "type": "str", "description": "作成するメールの題名(必須),
+            {"name": "subject", "type": "str", "description": "作成するメールの題名(必須)"},
             {"name": "search_query", "type": "str", "description": "作成するメールの内容(必須)"}
         ]
 
