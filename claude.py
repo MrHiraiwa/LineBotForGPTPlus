@@ -541,7 +541,7 @@ class Getgmailcontent(BaseTool):
             print(f"e: {e}")
             return f"SYSTEM: メールの検索にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-def sendgmailcontent(BaseTool):
+class sendgmailcontent(BaseTool):
     def use_tool(self, to_email, subject, body):
         global gaccount_access_token, gaccount_refresh_token
         try:
