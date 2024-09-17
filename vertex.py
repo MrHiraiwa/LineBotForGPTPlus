@@ -669,7 +669,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
     # ここでfunctionsリストを構成
     tools = []
     #標準ツール
-    functions.append(clock_tool)
+    tools.append(clock_tool)
     #拡張ツール
     if "googlesearch" in FUNCTIONS:
         tools.append(googlesearch_tool)
