@@ -585,7 +585,7 @@ clock_tool = FunctionDeclaration(
 
 googlesearch_tool = FunctionDeclaration(
     name="get_googlesearch",
-    description="useful for when you need to know what time it is.",
+    description="",
     parameters={
         "type": "object",
         "properties": {
@@ -597,7 +597,7 @@ googlesearch_tool = FunctionDeclaration(
     },
 )
 
-customsearch_tool = FunctionDeclaration(
+customsearch1_tool = FunctionDeclaration(
     name="get_customsearch1",
     description="",
     parameters={
