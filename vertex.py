@@ -712,7 +712,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         #functions.append(getgmailcontent_tool)
         #functions.append(sendgmailcontent_tool)
     
-    tools = Tool(
+    declear_tools = Tool(
         function_declarations=functions
     )
 
@@ -721,7 +721,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
-            tools=tools,
+            tools=declear_tools,
         )
         return response  # レスポンス全体を返す
     except Exception as e:
