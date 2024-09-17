@@ -572,9 +572,8 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
 
 def run_conversation(PUT_GEMINI_MODEL, messages):
     try:
-        response = gpt_client.chat.completions.create(
-            model=PUT_GEMINI_MODEL,
-            messages=messages,
+        gemini_client = genai.GenerativeModel(PUT_GEMINI_MODEL)
+        response = gemini_pro.generate_content(messages)
         )
         return response  # レスポンス全体を返す
     except Exception as e:
@@ -605,19 +604,10 @@ def run_conversation_f(GEMINI_MODEL, FUNCTIONS, messages, google_description, cu
         functions += cf.googlemail
 
     try:
-        response = gpt_client.chat.completions.create(
-            model=GEMINI_MODEL,
-            messages=messages,
-            functions=functions,
-            function_call="auto",
-        )
-        # print(f"functions: {functions}")
-        # downdate_function_descriptions(functions, google_description, "get_googlesearch")
-        # downdate_function_descriptions(functions, custom_description, "get_customsearch1")
+        gemini_client = genai.GenerativeModel(PUT_GEMINI_MODEL)
+        response = gemini_pro.generate_content(messages)
         return response  # レスポンス全体を返す
     except Exception as e:
-        # downdate_function_descriptions(functions, google_description, "get_googlesearch")
-        # downdate_function_descriptions(functions, custom_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
