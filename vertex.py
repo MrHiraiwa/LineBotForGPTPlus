@@ -587,7 +587,7 @@ def run_conversation(PUT_VERTEX_MODEL, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
-    get_time_tool = FunctionDeclaration(
+    get_time_func = FunctionDeclaration(
         name="get_time",
         description="useful for when you need to know what time it is.",
         parameters={
@@ -600,8 +600,11 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
             }
         },
     )
+    get_time_tool = Tool(
+        function_declarations=[get_time_func],
+    )
 
-    googlesearch_tool = FunctionDeclaration(
+    googlesearch_func = FunctionDeclaration(
         name="get_googlesearch",
         description=GOOGLE_DESCRIPTION,
         parameters={
@@ -617,8 +620,11 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
             ]
         },
     )
+    googlesearch_tool = Tool(
+        function_declarations=[googlesearch_func],
+    )
 
-    customsearch1_tool = FunctionDeclaration(
+    customsearch1_func = FunctionDeclaration(
         name="get_customsearch1",
         description=CUSTOM_DESCRIPTION,
         parameters={
@@ -634,8 +640,11 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
             ]
         },
     )
+    customsearch1_tool = Tool(
+        function_declarations=[customsearch1_func],
+    )
 
-    generateimage_tool = FunctionDeclaration(
+    generateimage_func = FunctionDeclaration(
         name="generate_image",
         description="If you specify a long sentence, you can generate an image that matches the sentence.",
         parameters={
@@ -651,8 +660,11 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
             ]
         },
     )
+    generateimage_tool = Tool(
+        function_declarations=[generateimage_func],
+    )
 
-    wikipediasearch_tool = FunctionDeclaration(
+    wikipediasearch_func = FunctionDeclaration(
         name="search_wikipedia",
         description="useful for when you need to Read dictionary page by specifying the word.",
         parameters={
@@ -668,8 +680,11 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
             ]
         },
     )
+    wikipediasearch_tool = Tool(
+        function_declarations=[wikipediasearch_func],
+    )
 
-    scraping_tool = FunctionDeclaration(
+    scraping_func = FunctionDeclaration(
         name="scraping",
         description="useful for when you need to read a web page by specifying the URL.",
         parameters={
@@ -684,6 +699,9 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
                 "link"
             ]
         },
+    )
+    scraping_tool = Tool(
+        function_declarations=[scraping_func],
     )
     # ここでfunctionsリストを構成
     functions = []
@@ -712,16 +730,14 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         #functions.append(getgmailcontent_tool)
         #functions.append(sendgmailcontent_tool)
     
-    declear_tools = Tool(
-        function_declarations=functions
-    )
+
 
     try:
         model = GenerativeModel("VERTEX_MODEL")
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
-            tools=declear_tools,
+            tools=functions,
         )
         return response  # レスポンス全体を返す
     except Exception as e:
