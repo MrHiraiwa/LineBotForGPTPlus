@@ -611,7 +611,10 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
                     "type": "string",
                     "description": "検索ワード"
                 }
-            }
+            },
+            "required": [
+                "words"
+            ]
         },
     )
 
@@ -625,7 +628,10 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
                     "type": "string",
                     "description": "検索ワード"
                 }
-            }
+            },
+            "required": [
+                "words"
+            ]
         },
     )
 
@@ -639,7 +645,10 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
                     "type": "string",
                     "description": "画像生成の文章"
                 }
-            }
+            },
+            "required": [
+                "prompt"
+            ]
         },
     )
 
@@ -653,7 +662,10 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
                     "type": "string",
                     "description": "検索ワード"
                 }
-            }
+            },
+            "required": [
+                "prompt"
+            ]
         },
     )
 
@@ -667,7 +679,10 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
                     "type": "string",
                     "description": "読みたいページのURL"
                 }
-            }
+            },
+            "required": [
+                "link"
+            ]
         },
     )
     # ここでfunctionsリストを構成
