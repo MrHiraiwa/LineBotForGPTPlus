@@ -143,6 +143,7 @@ REQUIRED_ENV_VARS = [
     "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL",
     "VERTEX_MODEL",
+    "PUT_VERTEX_MODEL",
     "BLOCKED_ACCOUNT_MESSAGE",
     "BLOCKED_NEW_ACCOUNTS",
     "BLOCKED_NEW_ACCOUNTS_MESSAGE"
@@ -237,6 +238,7 @@ DEFAULT_ENV_VARS = {
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
     'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1',
     'VERTEX_MODEL': 'gemini-pro',
+    'PUT_VERTEX_MODEL': 'gemini-pro',
     'BLOCKED_ACCOUNT_MESSAGE': 'システム管理者によりアカウントがブロックされました。',
     'BLOCKED_NEW_ACCOUNTS': 'False',
     'BLOCKED_NEW_ACCOUNTS_MESSAGE': '現在、新規利用者の登録を停止しています。'
@@ -271,6 +273,7 @@ def reload_settings():
     global CORE_AI_TYPE
     global CLAUDE_MODEL
     global LOCALLLM_BASE_URL
+    global VERTEX_MODEL, PUT_VERTEX_MODEL
     global BLOCKED_ACCOUNT_MESSAGE, BLOCKED_NEW_ACCOUNTS, BLOCKED_NEW_ACCOUNTS_MESSAGE
     
     BOT_NAME = get_setting('BOT_NAME')
