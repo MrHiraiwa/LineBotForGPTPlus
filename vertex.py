@@ -694,7 +694,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         #tools.append(sendgmailcontent_tool)
 
     try:
-        model = GenerativeModel("PUT_VERTEX_MODEL")
+        model = GenerativeModel("VERTEX_MODEL")
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
