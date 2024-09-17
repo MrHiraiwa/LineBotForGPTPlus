@@ -680,16 +680,16 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
     if "generateimage" in FUNCTIONS:
         tools.append(generateimage_tool)
     if "googlecalendar" in FUNCTIONS:
-            #tools.append(getcalendar_tool)
-            #tools.append(addcalendar_tool)
-            #tools.append(updatecalendar_tool)
-            #tools.append(deletecalendar_tool)
-            print("test")
+        #tools.append(getcalendar_tool)
+        #tools.append(addcalendar_tool)
+        #tools.append(updatecalendar_tool)
+        #tools.append(deletecalendar_tool)
+        print("test")
     if "googlemail" in FUNCTIONS:
-            #tools.append(getgmaillist_tool)
-            #tools.append(getgmailcontent_tool)
-            #tools.append(sendgmailcontent_tool)
-            print("test")
+        #tools.append(getgmaillist_tool)
+        #tools.append(getgmailcontent_tool)
+        #tools.append(sendgmailcontent_tool)
+        print("test")
 
     try:
         model = GenerativeModel("PUT_VERTEX_MODEL")
