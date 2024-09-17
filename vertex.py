@@ -585,7 +585,7 @@ clock_tool = FunctionDeclaration(
 
 googlesearch_tool = FunctionDeclaration(
     name="get_googlesearch",
-    description="",
+    description=GOOGLE_DESCRIPTION,
     parameters={
         "type": "object",
         "properties": {
@@ -599,7 +599,7 @@ googlesearch_tool = FunctionDeclaration(
 
 customsearch1_tool = FunctionDeclaration(
     name="get_customsearch1",
-    description="",
+    description=CUSTOM_DESCRIPTION,
     parameters={
         "type": "object",
         "properties": {
