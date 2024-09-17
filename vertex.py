@@ -576,12 +576,12 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
 
 
 
-clock = FunctionDeclaration(
+clock_tool = FunctionDeclaration(
     name="clock",
     description="useful for when you need to know what time it is.",
 )
 
-googlesearch = FunctionDeclaration(
+googlesearch_tool = FunctionDeclaration(
     name="get_googlesearch",
     description="useful for when you need to know what time it is.",
     parameters={
@@ -595,7 +595,7 @@ googlesearch = FunctionDeclaration(
     },
 )
 
-customsearch = FunctionDeclaration(
+customsearch_tool = FunctionDeclaration(
     name="get_customsearch1",
     description="",
     parameters={
@@ -609,7 +609,7 @@ customsearch = FunctionDeclaration(
     },
 )
 
-generateimage = FunctionDeclaration(
+generateimage_tool = FunctionDeclaration(
     name="generate_image",
     description="If you specify a long sentence, you can generate an image that matches the sentence.",
     parameters={
@@ -623,7 +623,7 @@ generateimage = FunctionDeclaration(
     },
 )
 
-wikipedia = FunctionDeclaration(
+wikipedia_tool = FunctionDeclaration(
     name="search_wikipedia",
     description="useful for when you need to Read dictionary page by specifying the word.",
     parameters={
@@ -637,7 +637,7 @@ wikipedia = FunctionDeclaration(
     },
 )
 
-scraping = FunctionDeclaration(
+scraping_tool = FunctionDeclaration(
     name="scraping",
     description="useful for when you need to read a web page by specifying the URL.",
     parameters={
@@ -665,33 +665,36 @@ def run_conversation(PUT_VERTEX_MODEL, messages):
 
 def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
     # ここでfunctionsリストを構成
-    functions = []
+    tools = []
     #標準ツール
-    functions += cf.clock
+    functions.append(clock_tool)
     #拡張ツール
     if "googlesearch" in FUNCTIONS:
-        functions += cf.googlesearch  # extendの代わりに+=を使用
-        functions = update_function_descriptions(functions, google_description, "get_googlesearch")
+        tools.append(googlesearch_tool)
     if "customsearch" in FUNCTIONS:
-        functions += cf.customsearch
-        functions = update_function_descriptions(functions, custom_description, "get_customsearch1")
+        tools.append(customsearch1_tool)
     if "wikipedia" in FUNCTIONS:
-        functions += cf.wikipedia
+        tools.append(wikipediasearch_tool)
     if "scraping" in FUNCTIONS:
-        functions += cf.scraping
+        tools.append(scraping_tool)
     if "generateimage" in FUNCTIONS:
-        functions += cf.generateimage
+        tools.append(generateimage_tool)
     if "googlecalendar" in FUNCTIONS:
-        functions += cf.googlecalendar
+            #tools.append(getcalendar_tool)
+            #tools.append(addcalendar_tool)
+            #tools.append(updatecalendar_tool)
+            #tools.append(deletecalendar_tool)
     if "googlemail" in FUNCTIONS:
-        functions += cf.googlemail
+            #tools.append(getgmaillist_tool)
+            #tools.append(getgmailcontent_tool)
+            #tools.append(sendgmailcontent_tool)
 
     try:
         model = GenerativeModel("PUT_VERTEX_MODEL")
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
-            tools=[tool],
+            tools=tools,
         )
         return response  # レスポンス全体を返す
     except Exception as e:
