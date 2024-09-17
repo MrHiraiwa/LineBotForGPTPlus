@@ -636,7 +636,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         },
     )
 
-    wikipedia_tool = FunctionDeclaration(
+    wikipediasearch_tool = FunctionDeclaration(
         name="search_wikipedia",
         description="useful for when you need to Read dictionary page by specifying the word.",
         parameters={
