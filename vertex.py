@@ -574,85 +574,6 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
         print(f"e: {e}")
         return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-
-
-clock_tool = FunctionDeclaration(
-    name="clock",
-    description="useful for when you need to know what time it is.",
-    parameters={
-    },
-)
-
-googlesearch_tool = FunctionDeclaration(
-    name="get_googlesearch",
-    description=GOOGLE_DESCRIPTION,
-    parameters={
-        "type": "object",
-        "properties": {
-            "location": {
-                "type": "string",
-                "description": "検索ワード"
-            }
-        }
-    },
-)
-
-customsearch1_tool = FunctionDeclaration(
-    name="get_customsearch1",
-    description=CUSTOM_DESCRIPTION,
-    parameters={
-        "type": "object",
-        "properties": {
-            "location": {
-                "type": "string",
-                "description": "検索ワード"
-            }
-        }
-    },
-)
-
-generateimage_tool = FunctionDeclaration(
-    name="generate_image",
-    description="If you specify a long sentence, you can generate an image that matches the sentence.",
-    parameters={
-        "type": "object",
-        "properties": {
-            "location": {
-                "type": "string",
-                "description": "画像生成の文章"
-            }
-        }
-    },
-)
-
-wikipedia_tool = FunctionDeclaration(
-    name="search_wikipedia",
-    description="useful for when you need to Read dictionary page by specifying the word.",
-    parameters={
-        "type": "object",
-        "properties": {
-            "location": {
-                "type": "string",
-                "description": "検索ワード"
-            }
-        }
-    },
-)
-
-scraping_tool = FunctionDeclaration(
-    name="scraping",
-    description="useful for when you need to read a web page by specifying the URL.",
-    parameters={
-        "type": "object",
-        "properties": {
-            "location": {
-                "type": "string",
-                "description": "読みたいページのURL"
-            }
-        }
-    },
-)
-
 def run_conversation(PUT_VERTEX_MODEL, messages):
     try:
         model = GenerativeModel("PUT_VERTEX_MODEL")
@@ -665,7 +586,83 @@ def run_conversation(PUT_VERTEX_MODEL, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
+def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
+    clock_tool = FunctionDeclaration(
+        name="clock",
+        description="useful for when you need to know what time it is.",
+        parameters={
+        },
+    )
+
+    googlesearch_tool = FunctionDeclaration(
+        name="get_googlesearch",
+        description=GOOGLE_DESCRIPTION,
+        parameters={
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "検索ワード"
+                }
+            }
+        },
+    )
+
+    customsearch1_tool = FunctionDeclaration(
+        name="get_customsearch1",
+        description=CUSTOM_DESCRIPTION,
+        parameters={
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "検索ワード"
+                }
+            }
+        },
+    )
+
+    generateimage_tool = FunctionDeclaration(
+        name="generate_image",
+        description="If you specify a long sentence, you can generate an image that matches the sentence.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "画像生成の文章"
+                }
+            }
+        },
+    )
+
+    wikipedia_tool = FunctionDeclaration(
+        name="search_wikipedia",
+        description="useful for when you need to Read dictionary page by specifying the word.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "検索ワード"
+                }
+            }
+        },
+    )
+
+    scraping_tool = FunctionDeclaration(
+        name="scraping",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            }
+        },
+    )
     # ここでfunctionsリストを構成
     tools = []
     #標準ツール
@@ -732,7 +729,7 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
     send_gmail_content_called = False
 
     while attempt < max_attempts:
-        response = run_conversation_f(VERTEX_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
+        response = run_conversation_f(VERTEX_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:
