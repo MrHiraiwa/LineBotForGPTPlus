@@ -774,7 +774,7 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
         response = run_conversation_f(VERTEX_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
         print(f"response: {response}")
         if response:
-            function_call = response.candidates[0].content.parts[0].function_call
+            function_call = response.candidates[0].function_call
             if function_call:
                 if function_call.name == "get_time" and not get_time_called:
                     get_time_called = True
