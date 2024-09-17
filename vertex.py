@@ -578,7 +578,9 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
 
 clock_tool = FunctionDeclaration(
     name="clock",
-    description="useful for when you need to know what time it is."
+    description="useful for when you need to know what time it is.",
+    parameters={
+    },
 )
 
 googlesearch_tool = FunctionDeclaration(
