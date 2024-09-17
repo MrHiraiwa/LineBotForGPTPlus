@@ -591,6 +591,13 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         name="clock",
         description="useful for when you need to know what time it is.",
         parameters={
+            "type": "object",
+            "properties": {
+                "dummy": {
+                    "type": "string",
+                    "description": "設定不要"
+                }
+            }
         },
     )
 
@@ -600,7 +607,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         parameters={
             "type": "object",
             "properties": {
-                "location": {
+                "words": {
                     "type": "string",
                     "description": "検索ワード"
                 }
@@ -614,7 +621,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         parameters={
             "type": "object",
             "properties": {
-                "location": {
+                "words": {
                     "type": "string",
                     "description": "検索ワード"
                 }
@@ -628,7 +635,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         parameters={
             "type": "object",
             "properties": {
-                "location": {
+                "prompt": {
                     "type": "string",
                     "description": "画像生成の文章"
                 }
@@ -642,7 +649,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         parameters={
             "type": "object",
             "properties": {
-                "location": {
+                "prompt": {
                     "type": "string",
                     "description": "検索ワード"
                 }
@@ -656,7 +663,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         parameters={
             "type": "object",
             "properties": {
-                "location": {
+                "link": {
                     "type": "string",
                     "description": "読みたいページのURL"
                 }
