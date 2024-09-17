@@ -731,7 +731,7 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
     while attempt < max_attempts:
         response = run_conversation_f(VERTEX_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
         if response:
-            function_call = response.choices[0].message.function_call
+            function_call = response.candidates[0].content.parts[0].function_call
             if function_call:
                 if function_call.name == "clock" and not clock_called:
                     clock_called = True
@@ -740,73 +740,73 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
                     attempt += 1
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.args)
                     bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "search_wikipedia" and not search_wikipedia_called:
                     search_wikipedia_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = search_wikipedia(arguments["prompt"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "scraping" and not scraping_called:
                     scraping_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = scraping(arguments["link"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_googlesearch" and not get_googlesearch_called:
                     get_googlesearch_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = get_googlesearch(arguments["words"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_customsearch1" and not get_customsearch1_called:
                     get_customsearch1_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = get_customsearch1(arguments["words"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_calendar" and not get_calendar_called:
                     get_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "add_calendar" and not add_calendar_called:
                     add_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "update_calendar" and not update_calendar_called:
                     update_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "delete_calendar" and not delete_calendar_called:
                     delete_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_gmail_list" and not get_gmail_list_called:
                     get_gmail_list_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "get_gmail_content" and not get_gmail_content_called:
                     get_gmail_content_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "send_gmail_content" and not send_gmail_content_called:
                     get_send_content_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
