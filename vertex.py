@@ -57,7 +57,7 @@ def update_function_descriptions(functions, extra_description, function_name_to_
 #        if func["name"] == function_name_to_update:
 #            func["description"] = ""
 
-def clock():
+def get_time():
     jst = pytz.timezone('Asia/Tokyo')
     nowDate = datetime.now(jst) 
     nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
@@ -587,17 +587,12 @@ def run_conversation(PUT_VERTEX_MODEL, messages):
         return None  # エラー時には None を返す
 
 def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
-    clock_tool = FunctionDeclaration(
-        name="clock",
+    get_time_tool = FunctionDeclaration(
+        name="get_time",
         description="useful for when you need to know what time it is.",
         parameters={
             "type": "object",
-            "properties": {
-                "dummy": {
-                    "type": "string",
-                    "description": "設定不要"
-                }
-            }
+            "properties": {}
         },
     )
 
@@ -673,7 +668,7 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
     # ここでfunctionsリストを構成
     tools = []
     #標準ツール
-    tools.append(clock_tool)
+    tools.append(get_time_tool)
     #拡張ツール
     if "googlesearch" in FUNCTIONS:
         tools.append(googlesearch_tool)
@@ -721,7 +716,7 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
     attempt = 0
     i_messages_for_api = messages_for_api.copy()
 
-    clock_called = False
+    get_time_called = False
     generate_image_called = False
     search_wikipedia_called = False
     scraping_called = False
@@ -741,9 +736,9 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
         if response:
             function_call = response.candidates[0].content.parts[0].function_call
             if function_call:
-                if function_call.name == "clock" and not clock_called:
-                    clock_called = True
-                    bot_reply = clock()
+                if function_call.name == "get_time" and not get_time_called:
+                    get_time_called = True
+                    bot_reply = get_time()
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "generate_image" and not generate_image_called:
