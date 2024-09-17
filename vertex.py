@@ -591,6 +591,13 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         name="get_time",
         description="useful for when you need to know what time it is.",
         parameters={
+            "type": "object",
+            "properties": {
+                "dummy": {
+                    "type": "string",
+                    "description": "設定不要"
+                }
+            }
         },
     )
 
