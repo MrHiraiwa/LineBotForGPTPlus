@@ -1,7 +1,6 @@
 import os
 import vertexai
 from vertexai.preview.generative_models import (
-    Content,
     FunctionDeclaration,
     GenerativeModel,
     Part,
