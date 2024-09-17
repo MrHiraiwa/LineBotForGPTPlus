@@ -686,31 +686,35 @@ def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, cu
         },
     )
     # ここでfunctionsリストを構成
-    tools = []
+    functions = []
     #標準ツール
-    tools.append(get_time_tool)
+    functions.append(get_time_tool)
     #拡張ツール
     if "googlesearch" in FUNCTIONS:
-        tools.append(googlesearch_tool)
+        functions.append(googlesearch_tool)
     if "customsearch" in FUNCTIONS:
-        tools.append(customsearch1_tool)
+        functions.append(customsearch1_tool)
     if "wikipedia" in FUNCTIONS:
-        tools.append(wikipediasearch_tool)
+        functions.append(wikipediasearch_tool)
     if "scraping" in FUNCTIONS:
-        tools.append(scraping_tool)
+        functions.append(scraping_tool)
     if "generateimage" in FUNCTIONS:
-        tools.append(generateimage_tool)
+        functions.append(generateimage_tool)
     if "googlecalendar" in FUNCTIONS:
         print("test")
-        #tools.append(getcalendar_tool)
-        #tools.append(addcalendar_tool)
-        #tools.append(updatecalendar_tool)
-        #tools.append(deletecalendar_tool)
+        #functions.append(getcalendar_tool)
+        #functions.append(addcalendar_tool)
+        #functions.append(updatecalendar_tool)
+        #functions.append(deletecalendar_tool)
     if "googlemail" in FUNCTIONS:
         print("test")
-        #tools.append(getgmaillist_tool)
-        #tools.append(getgmailcontent_tool)
-        #tools.append(sendgmailcontent_tool)
+        #functions.append(getgmaillist_tool)
+        #functions.append(getgmailcontent_tool)
+        #functions.append(sendgmailcontent_tool)
+    
+    tools = Tool(
+        function_declarations=functions
+    )
 
     try:
         model = GenerativeModel("VERTEX_MODEL")
