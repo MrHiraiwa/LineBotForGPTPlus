@@ -821,6 +821,6 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
             else:
                 return response.choices[0].message.content, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
-            return ERROR_MESSAGE + " Fail to connect OpenAI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
+            return ERROR_MESSAGE + " Fail to connect Vertex AI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
     
     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
