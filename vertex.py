@@ -1,5 +1,12 @@
 import os
-import google.generativeai as genai
+import vertexai
+from vertexai.preview.generative_models import (
+    Content,
+    FunctionDeclaration,
+    GenerativeModel,
+    Part,
+    Tool,
+)
 from datetime import datetime, time, timedelta
 import pytz
 import requests
@@ -7,7 +14,7 @@ from bs4 import BeautifulSoup
 from google.cloud import storage
 import io
 import uuid
-import gpt_config as cf
+import vertex_config as cf
 import json
 import wikipedia
 from PIL import Image
@@ -23,8 +30,6 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
 google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
-gemini_api_key = os.getenv('GEMINI_API_KEY')
-genai.configure(api_key=gemini_api_key)
 
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -570,17 +575,23 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
         print(f"e: {e}")
         return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-def run_conversation(PUT_GEMINI_MODEL, messages):
+Tools = Tool(
+    function_declarations=[get_current_weather_func],
+)
+
+def run_conversation(PUT_VERTEX_MODEL, messages):
     try:
-        gemini_client = genai.GenerativeModel(PUT_GEMINI_MODEL)
-        response = gemini_pro.generate_content(messages)
+        model = GenerativeModel("PUT_VERTEX_MODEL")
+        response = model.generate_content(
+            messages,
+            generation_config={"temperature": 0}
         )
         return response  # レスポンス全体を返す
     except Exception as e:
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(GEMINI_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
+def run_conversation_f(VERTEX_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
     # ここでfunctionsリストを構成
     functions = []
     #標準ツール
@@ -604,14 +615,18 @@ def run_conversation_f(GEMINI_MODEL, FUNCTIONS, messages, google_description, cu
         functions += cf.googlemail
 
     try:
-        gemini_client = genai.GenerativeModel(PUT_GEMINI_MODEL)
-        response = gemini_pro.generate_content(messages)
+        model = GenerativeModel("PUT_VERTEX_MODEL")
+        response = model.generate_content(
+            messages,
+            generation_config={"temperature": 0},
+            tools=[tool],
+        )
         return response  # レスポンス全体を返す
     except Exception as e:
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def gemini_functions(GEMINI_MODEL, PUT_GEMINI_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
+def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -638,7 +653,7 @@ def gemini_functions(GEMINI_MODEL, PUT_GEMINI_MODEL, FUNCTIONS, messages_for_api
     send_gmail_content_called = False
 
     while attempt < max_attempts:
-        response = run_conversation_f(GEMINI_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
+        response = run_conversation_f(VERTEX_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
         if response:
             function_call = response.choices[0].message.function_call
             if function_call:
@@ -720,7 +735,7 @@ def gemini_functions(GEMINI_MODEL, PUT_GEMINI_MODEL, FUNCTIONS, messages_for_api
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
-                    response = run_conversation(PUT_GEMINI_MODEL, i_messages_for_api)
+                    response = run_conversation(PUT_VERTEX_MODEL, i_messages_for_api)
                     if response:
                         bot_reply = response.choices[0].message.content
                     else:
