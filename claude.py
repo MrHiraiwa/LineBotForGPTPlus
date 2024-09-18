@@ -40,6 +40,8 @@ public_img_url_s = ""
 gaccount_access_token = ""
 gaccount_refresh_token = ""
 
+CORE_IMAGE_TYPE = ""
+VERTEX_IMAGE_MODEL = ""
 
 class Clock(BaseTool):
     def use_tool(self):
@@ -223,14 +225,17 @@ class Generateimage(BaseTool):
         public_img_url_s = ""
     
         try:
-            response = client.images.generate(
-                model="dall-e-3",
-                prompt=prompt,
-                size="1024x1024",
-                quality="standard",
-                n=1,
-            )
-            image_result = response.data[0].url
+            if CORE_IMAGE_TYPE == "Vertex":
+            
+            else:
+                response = client.images.generate(
+                    model="dall-e-3",
+                    prompt=prompt,
+                    size="1024x1024",
+                    quality="standard",
+                    n=1,
+                )
+                image_result = response.data[0].url
             if bucket_exists(bucket_name):
                 set_bucket_lifecycle(bucket_name, file_age)
             else:
@@ -737,6 +742,7 @@ def claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT ,messages_for_api, U
     global i_prompt, user_id, message_id, bucket_name, file_age
     global public_img_url, public_img_url_s
     global gaccount_access_token, gaccount_refresh_token
+    global CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL
     gaccount_access_token = i_gaccount_access_token
     gaccount_refresh_token = i_gaccount_refresh_token
     public_img_url = None
