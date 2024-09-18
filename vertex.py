@@ -699,7 +699,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     )
 
     wikipediasearch_func = FunctionDeclaration(
-        name="search_wikipedia",
+        name="wikipedia_search",
         description="useful for when you need to Read dictionary page by specifying the word.",
         parameters={
             "type": "object",
@@ -746,8 +746,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         functions.append(googlesearch_tool)
     if "customsearch" in FUNCTIONS:
         functions.append(customsearch1_tool)
-    #if "wikipedia" in FUNCTIONS:
-    #    functions.append(wikipediasearch_tool)
+    if "wikipedia" in FUNCTIONS:
+        functions.append(wikipediasearch_tool)
     if "scraping" in FUNCTIONS:
         functions.append(scraping_tool)
     if "generateimage" in FUNCTIONS:
@@ -820,7 +820,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "search_wikipedia" and not search_wikipedia_called:
+                elif function_call.name == "wikipedia_search" and not search_wikipedia_called:
                     search_wikipedia_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply = search_wikipedia(arguments["prompt"])
