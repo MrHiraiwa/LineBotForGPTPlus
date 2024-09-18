@@ -924,7 +924,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         functions.append(getgmaillist_tool)
         functions.append(getgmailcontent_tool)
         functions.append(sendgmailcontent_tool)
-
+    print(f"Current functions: {functions}")
     try:
         model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
         response = model.generate_content(
