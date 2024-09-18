@@ -15,6 +15,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 import dateutil.parser as parser
+from vertexai.preview.vision_models import ImageGenerationModel
 
 import base64
 import email
