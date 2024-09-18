@@ -737,6 +737,7 @@ def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USE
                         bot_reply = "An error occurred while processing the question"
                     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
             else:
+                response = run_conversation(PUT_GPT_MODEL, i_messages_for_api)
                 return response.choices[0].message.content, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
             return ERROR_MESSAGE + " Fail to connect OpenAI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
