@@ -7,6 +7,7 @@ from vertexai.preview.generative_models import (
     Content,
     Tool,
 )
+from vertexai.preview.vision_models import ImageGenerationModel
 from datetime import datetime, time, timedelta
 import pytz
 import requests
