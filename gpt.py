@@ -15,6 +15,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 import dateutil.parser as parser
+from vertexai.preview.vision_models import ImageGenerationModel
 
 import base64
 import email
@@ -213,7 +214,7 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 
-def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
+def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
     blob_path = f'{user_id}/{message_id}.png'
     preview_blob_path = f'{user_id}/{message_id}_s.png'
@@ -221,16 +222,29 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
     prompt = paint_prompt + "\n" + i_prompt
     public_img_url = ""
     public_img_url_s = ""
+    image_result = None
     
     try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-        image_result = response.data[0].url
+        if CORE_IMAGE_TYPE == "Vertex":
+            image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
+            response = model.generate_images(
+                prompt=prompt,
+                number_of_images=1,
+                guidance_scale=float("1024"),
+                aspect_ratio="1:1",
+                language="ja",
+                seed=None,
+            )
+            image_result = response[0]
+        else:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size="1024x1024",
+                quality="standard",
+                n=1,
+            )
+            image_result = response.data[0].url
         if bucket_exists(bucket_name):
             set_bucket_lifecycle(bucket_name, file_age)
         else:
@@ -660,7 +674,7 @@ def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USE
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
                     arguments = json.loads(function_call.arguments)
-                    bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
+                    bot_reply, public_img_url, public_img_url_s = generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 elif function_call.name == "search_wikipedia" and not search_wikipedia_called:

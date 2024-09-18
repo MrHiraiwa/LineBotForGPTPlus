@@ -13,6 +13,7 @@ from PIL import Image
 from openai import OpenAI
 import re
 import time
+from vertexai.preview.vision_models import ImageGenerationModel
 
 from anthropic_tools.base_tool import BaseTool
 from anthropic_tools.tool_user import ToolUser
@@ -40,6 +41,8 @@ public_img_url_s = ""
 gaccount_access_token = ""
 gaccount_refresh_token = ""
 
+CORE_IMAGE_TYPE = ""
+VERTEX_IMAGE_MODEL = ""
 
 class Clock(BaseTool):
     def use_tool(self):
@@ -221,16 +224,29 @@ class Generateimage(BaseTool):
         prompt = " ".join(sentence) + "\n" + i_prompt
         public_img_url = ""
         public_img_url_s = ""
+        image_result = None
     
         try:
-            response = client.images.generate(
-                model="dall-e-3",
-                prompt=prompt,
-                size="1024x1024",
-                quality="standard",
-                n=1,
-            )
-            image_result = response.data[0].url
+            if CORE_IMAGE_TYPE == "Vertex":
+                image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
+                response = model.generate_images(
+                    prompt=prompt,
+                    number_of_images=1,
+                    guidance_scale=float("1024"),
+                    aspect_ratio="1:1",
+                    language="ja",
+                    seed=None,
+                )
+                image_result = response[0]
+            else:
+                response = client.images.generate(
+                    model="dall-e-3",
+                    prompt=prompt,
+                    size="1024x1024",
+                    quality="standard",
+                    n=1,
+                )
+                image_result = response.data[0].url
             if bucket_exists(bucket_name):
                 set_bucket_lifecycle(bucket_name, file_age)
             else:
@@ -733,12 +749,15 @@ def run_conversation_f(CLAUDE_MODEL, FUNCTIONS, messages, GOOGLE_DESCRIPTION, CU
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, i_gaccount_access_token="", i_gaccount_refresh_token="", CORE_IMAGE_TYPE="", VERTEX_IMAGE_MODEL="" , max_attempts=5):
+def claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT ,messages_for_api, USER_ID, MESSAGE_ID, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, i_gaccount_access_token="", i_gaccount_refresh_token="", i_CORE_IMAGE_TYPE="", i_VERTEX_IMAGE_MODEL="" , max_attempts=5):
     global i_prompt, user_id, message_id, bucket_name, file_age
     global public_img_url, public_img_url_s
     global gaccount_access_token, gaccount_refresh_token
+    global CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL
     gaccount_access_token = i_gaccount_access_token
     gaccount_refresh_token = i_gaccount_refresh_token
+    CORE_IMAGE_TYPE = i_CORE_IMAGE_TYPE
+    VERTEX_IMAGE_MODEL = i_VERTEX_IMAGE_MODEL
     public_img_url = None
     public_img_url_s = None
     i_prompt = PAINT_PROMPT
