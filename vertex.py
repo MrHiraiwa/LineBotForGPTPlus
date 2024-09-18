@@ -885,12 +885,7 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
                     get_send_content_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
-                    i_vertex_messages_for_api.append({
-                        "content": {
-                            "role": "model",
-                            "parts": [{"text": bot_reply}]
-                        }
-                    })
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 else:
                     response = run_conversation(PUT_VERTEX_MODEL, system_instruction, i_vertex_messages_for_api)
