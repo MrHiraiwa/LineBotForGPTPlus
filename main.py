@@ -140,6 +140,7 @@ REQUIRED_ENV_VARS = [
     "GACCOUNT_QUICK_REPLY",
     "GACCOUNT_AUTH_URL",
     "CORE_AI_TYPE",
+    "CORE_IMAGE_TYPE",
     "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL",
     "VERTEX_MODEL",
@@ -234,6 +235,7 @@ DEFAULT_ENV_VARS = {
     'GACCOUNT_QUICK_REPLY': '👤Gアカウント登録',
     'GACCOUNT_AUTH_URL': 'https://example.com',
     'CORE_AI_TYPE': 'GPT',
+    'CORE_IMAGE_TYPE': 'Dall-e',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
     'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1',
     'VERTEX_MODEL': 'gemini-1.5-pro-001',
@@ -268,7 +270,7 @@ def reload_settings():
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
     global GACCOUNT_KEYWORDS, GACCOUNT_GUIDE_MESSAGE, GACCOUNT_FAIL_MESSAGE, GACCOUNT_QUICK_REPLY, GACCOUNT_AUTH_URL
     global DATABASE_NAME
-    global CORE_AI_TYPE
+    global CORE_AI_TYPE CORE_IMAGE_TYPE
     global CLAUDE_MODEL
     global LOCALLLM_BASE_URL
     global VERTEX_MODEL
@@ -404,6 +406,7 @@ def reload_settings():
     GACCOUNT_QUICK_REPLY = get_setting('GACCOUNT_QUICK_REPLY')
     GACCOUNT_AUTH_URL = get_setting('GACCOUNT_AUTH_URL')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
+    CORE_IMAGE_TYPE = get_setting('CORE_IMAGE_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
     VERTEX_MODEL = get_setting('VERTEX_MODEL')
@@ -1021,7 +1024,7 @@ def handle_message(event):
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
@@ -1029,7 +1032,7 @@ def handle_message(event):
                     temp_messages_final = []
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
@@ -1045,7 +1048,7 @@ def handle_message(event):
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = vertex_functions(VERTEX_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = vertex_functions(VERTEX_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
