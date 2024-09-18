@@ -13,6 +13,7 @@ from PIL import Image
 from openai import OpenAI
 import re
 import time
+from vertexai.preview.vision_models import ImageGenerationModel
 
 from anthropic_tools.base_tool import BaseTool
 from anthropic_tools.tool_user import ToolUser
