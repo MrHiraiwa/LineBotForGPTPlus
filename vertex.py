@@ -610,7 +610,7 @@ def append_message(vertex_messages, role, text):
 
 def run_conversation(PUT_VERTEX_MODEL, system_instruction, messages):
     try:
-        model = GenerativeModel("PUT_VERTEX_MODEL",system_instruction=[system_instruction],)
+        model = GenerativeModel("PUT_VERTEX_MODEL",system_instruction=system_instruction,)
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0}
