@@ -935,17 +935,19 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
             # responseが適切な形式であるかを確認し、partsからfunction_callを取得
             if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
                 function_call = None
-        
+
                 # partsの中をループしてfunction_callを探す
                 for part in response.candidates[0].content.parts:
-                    if 'function_call' in part:
-                        function_call = part['function_call']
+                    # partがオブジェクトとしてfunction_callを持っているかを確認
+                    if hasattr(part, 'function_call'):
+                        function_call = part.function_call
                         break  # function_callが見つかったらループを抜ける
-        
+
                 # function_callが見つからなかった場合の処理
                 if not function_call:
                     print("No function_call found in any parts.")
                     return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+                    
             else:
                 print("Invalid response structure or no content parts available.")
                 return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
