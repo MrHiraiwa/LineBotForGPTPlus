@@ -608,9 +608,9 @@ def append_message(vertex_messages, role, text):
     # メッセージリストに追加
     vertex_messages.append(content)
 
-def run_conversation(PUT_VERTEX_MODEL, system_instruction, messages):
+def run_conversation(VERTEX_MODEL, system_instruction, messages):
     try:
-        model = GenerativeModel(PUT_VERTEX_MODEL,system_instruction=system_instruction,)
+        model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0}
@@ -778,7 +778,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
+def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
