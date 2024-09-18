@@ -805,6 +805,7 @@ def vertex_functions(VERTEX_MODEL, PUT_VERTEX_MODEL, FUNCTIONS, messages_for_api
     i_vertex_messages_for_api = convert_to_vertex_format(i_messages_for_api)
 
     while attempt < max_attempts:
+        print(f"VERTEX_MODEL: {VERTEX_MODEL}, system_instruction: {system_instruction}, i_vertex_messages_for_api {i_vertex_messages_for_api}")
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
         print(f"response: {response}")
         if response:
