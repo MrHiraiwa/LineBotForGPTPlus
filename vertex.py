@@ -798,7 +798,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         function_declarations=[updatecalendar_func],
     )
 
-    updatecalendar_func = FunctionDeclaration(
+    deletecalendar_func = FunctionDeclaration(
         name="calendar_delete",
         description="useful for when you need to read a web page by specifying the URL.",
         parameters={
