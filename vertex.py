@@ -217,7 +217,7 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 
-def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
+def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
     blob_path = f'{user_id}/{message_id}.png'
     preview_blob_path = f'{user_id}/{message_id}_s.png'
@@ -227,14 +227,17 @@ def generate_image(paint_prompt, i_prompt, user_id, message_id, bucket_name, fil
     public_img_url_s = ""
     
     try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-        image_result = response.data[0].url
+        if CORE_IMAGE_TYPE == "Vertex":
+            
+        else:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size="1024x1024",
+                quality="standard",
+                n=1,
+            )
+            image_result = response.data[0].url
         if bucket_exists(bucket_name):
             set_bucket_lifecycle(bucket_name, file_age)
         else:
@@ -995,7 +998,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
                     arguments = json.loads(function_call.args)
-                    bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
+                    bot_reply, public_img_url, public_img_url_s = generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "wikipedia_search" and not search_wikipedia_called:
