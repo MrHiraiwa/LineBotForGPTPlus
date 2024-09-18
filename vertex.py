@@ -746,8 +746,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         functions.append(googlesearch_tool)
     if "customsearch" in FUNCTIONS:
         functions.append(customsearch1_tool)
-    if "wikipedia" in FUNCTIONS:
-        functions.append(wikipediasearch_tool)
+    #if "wikipedia" in FUNCTIONS:
+    #    functions.append(wikipediasearch_tool)
     #if "scraping" in FUNCTIONS:
     #    functions.append(scraping_tool)
     #if "generateimage" in FUNCTIONS:
