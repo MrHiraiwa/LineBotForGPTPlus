@@ -1,5 +1,12 @@
 import os
-from openai import OpenAI
+import vertexai
+from vertexai.preview.generative_models import (
+    FunctionDeclaration,
+    GenerativeModel,
+    Part,
+    Content,
+    Tool,
+)
 from datetime import datetime, time, timedelta
 import pytz
 import requests
@@ -7,7 +14,6 @@ from bs4 import BeautifulSoup
 from google.cloud import storage
 import io
 import uuid
-import gpt_config as cf
 import json
 import wikipedia
 from PIL import Image
@@ -23,8 +29,6 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
 google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
-openai_api_key = os.getenv('OPENAI_API_KEY')
-gpt_client = OpenAI(api_key=openai_api_key)
 
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -53,7 +57,7 @@ def update_function_descriptions(functions, extra_description, function_name_to_
 #        if func["name"] == function_name_to_update:
 #            func["description"] = ""
 
-def clock():
+def get_time():
     jst = pytz.timezone('Asia/Tokyo')
     nowDate = datetime.now(jst) 
     nowDateStr = nowDate.strftime('%Y/%m/%d %H:%M:%S %Z')
@@ -569,59 +573,212 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
     except Exception as e:
         print(f"e: {e}")
         return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
+        
+def extract_system_instruction(messages_for_api):
+    for message in messages_for_api:
+        if message["role"] == "system":
+            return message["content"]
+    return ""  # もしsystemメッセージがない場合は空文字を返す
 
-def run_conversation(PUT_GPT_MODEL, messages):
+from vertexai.generative_models import Part, Content
+
+def convert_to_vertex_format(messages_for_api):
+    vertex_messages = []
+    for message in messages_for_api:
+        role = message["role"]
+        if role == "assistant":  # assistantをmodelに変換
+            role = "model"
+        elif role == "system":  # system roleは無視
+            continue  # スキップして次のメッセージに進む
+
+        content = message["content"]  # contentを取得
+        
+        # Vertex AIのフォーマットに変換
+        part = Part.from_text(content)  # Partとしてテキストを作成
+        vertex_message = Content(role=role, parts=[part])  # Contentとしてメッセージを構成
+        vertex_messages.append(vertex_message)
+
+    return vertex_messages
+
+def append_message(vertex_messages, role, text):
+    # Partを作成し、それをContentにラップしてメッセージを追加
+    part = Part.from_text(text)
+    content = Content(role=role, parts=[part])
+    
+    # メッセージリストに追加
+    vertex_messages.append(content)
+
+def run_conversation(VERTEX_MODEL, system_instruction, messages):
     try:
-        response = gpt_client.chat.completions.create(
-            model=PUT_GPT_MODEL,
-            messages=messages,
+        model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
+        response = model.generate_content(
+            messages,
+            generation_config={"temperature": 0}
         )
         return response  # レスポンス全体を返す
     except Exception as e:
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custom_description, attempt):
+def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
+    get_time_func = FunctionDeclaration(
+        name="get_time",
+        description="useful for when you need to know what time it is.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "dummy": {
+                    "type": "string",
+                    "description": "設定不要"
+                }
+            }
+        },
+    )
+    get_time_tool = Tool(
+        function_declarations=[get_time_func],
+    )
+
+    googlesearch_func = FunctionDeclaration(
+        name="get_googlesearch",
+        description=GOOGLE_DESCRIPTION,
+        parameters={
+            "type": "object",
+            "properties": {
+                "words": {
+                    "type": "string",
+                    "description": "検索ワード"
+                }
+            },
+            "required": [
+                "words"
+            ]
+        },
+    )
+    googlesearch_tool = Tool(
+        function_declarations=[googlesearch_func],
+    )
+
+    customsearch1_func = FunctionDeclaration(
+        name="get_customsearch1",
+        description=CUSTOM_DESCRIPTION,
+        parameters={
+            "type": "object",
+            "properties": {
+                "words": {
+                    "type": "string",
+                    "description": "検索ワード"
+                }
+            },
+            "required": [
+                "words"
+            ]
+        },
+    )
+    customsearch1_tool = Tool(
+        function_declarations=[customsearch1_func],
+    )
+
+    generateimage_func = FunctionDeclaration(
+        name="generate_image",
+        description="If you specify a long sentence, you can generate an image that matches the sentence.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "type": "string",
+                    "description": "画像生成の文章"
+                }
+            },
+            "required": [
+                "prompt"
+            ]
+        },
+    )
+    generateimage_tool = Tool(
+        function_declarations=[generateimage_func],
+    )
+
+    wikipediasearch_func = FunctionDeclaration(
+        name="search_wikipedia",
+        description="useful for when you need to Read dictionary page by specifying the word.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "type": "string",
+                    "description": "検索ワード"
+                }
+            },
+            "required": [
+                "prompt"
+            ]
+        },
+    )
+    wikipediasearch_tool = Tool(
+        function_declarations=[wikipediasearch_func],
+    )
+
+    scraping_func = FunctionDeclaration(
+        name="scraping",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    scraping_tool = Tool(
+        function_declarations=[scraping_func],
+    )
     # ここでfunctionsリストを構成
     functions = []
     #標準ツール
-    functions += cf.clock
+    functions.append(get_time_tool)
     #拡張ツール
     if "googlesearch" in FUNCTIONS:
-        functions += cf.googlesearch  # extendの代わりに+=を使用
-        functions = update_function_descriptions(functions, google_description, "get_googlesearch")
+        functions.append(googlesearch_tool)
     if "customsearch" in FUNCTIONS:
-        functions += cf.customsearch
-        functions = update_function_descriptions(functions, custom_description, "get_customsearch1")
+        functions.append(customsearch1_tool)
     if "wikipedia" in FUNCTIONS:
-        functions += cf.wikipedia
+        functions.append(wikipediasearch_tool)
     if "scraping" in FUNCTIONS:
-        functions += cf.scraping
+        functions.append(scraping_tool)
     if "generateimage" in FUNCTIONS:
-        functions += cf.generateimage
+        functions.append(generateimage_tool)
     if "googlecalendar" in FUNCTIONS:
-        functions += cf.googlecalendar
+        print("test")
+        #functions.append(getcalendar_tool)
+        #functions.append(addcalendar_tool)
+        #functions.append(updatecalendar_tool)
+        #functions.append(deletecalendar_tool)
     if "googlemail" in FUNCTIONS:
-        functions += cf.googlemail
+        print("test")
+        #functions.append(getgmaillist_tool)
+        #functions.append(getgmailcontent_tool)
+        #functions.append(sendgmailcontent_tool)
+    
+
 
     try:
-        response = gpt_client.chat.completions.create(
-            model=GPT_MODEL,
-            messages=messages,
-            functions=functions,
-            function_call="auto",
+        model = GenerativeModel(VERTEX_MODEL,system_instruction=[system_instruction],)
+        response = model.generate_content(
+            messages,
+            generation_config={"temperature": 0},
+            tools= [get_time_tool],
         )
-        # print(f"functions: {functions}")
-        # downdate_function_descriptions(functions, google_description, "get_googlesearch")
-        # downdate_function_descriptions(functions, custom_description, "get_customsearch1")
         return response  # レスポンス全体を返す
     except Exception as e:
-        # downdate_function_descriptions(functions, google_description, "get_googlesearch")
-        # downdate_function_descriptions(functions, custom_description, "get_customsearch1")
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
+def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -633,7 +790,7 @@ def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USE
     attempt = 0
     i_messages_for_api = messages_for_api.copy()
 
-    clock_called = False
+    get_time_called = False
     generate_image_called = False
     search_wikipedia_called = False
     scraping_called = False
@@ -646,100 +803,104 @@ def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USE
     get_gmail_list_called = False
     get_gmail_content_called = False
     send_gmail_content_called = False
+    
+    system_instruction = extract_system_instruction(i_messages_for_api)
+    i_vertex_messages_for_api = convert_to_vertex_format(i_messages_for_api)
 
     while attempt < max_attempts:
-        response = run_conversation_f(GPT_MODEL, FUNCTIONS, i_messages_for_api, google_description, custom_description, attempt)
+        print(f"VERTEX_MODEL: {VERTEX_MODEL}, system_instruction: {system_instruction}, i_vertex_messages_for_api {i_vertex_messages_for_api}")
+        response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+        print(f"response: {response}")
         if response:
-            function_call = response.choices[0].message.function_call
+            function_call = response.candidates[0].content.parts[0].function_call.name
             if function_call:
-                if function_call.name == "clock" and not clock_called:
-                    clock_called = True
-                    bot_reply = clock()
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                if function_call.name == "get_time" and not get_time_called:
+                    get_time_called = True
+                    bot_reply = get_time()
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.args)
                     bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "search_wikipedia" and not search_wikipedia_called:
                     search_wikipedia_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = search_wikipedia(arguments["prompt"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "scraping" and not scraping_called:
                     scraping_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = scraping(arguments["link"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "get_googlesearch" and not get_googlesearch_called:
                     get_googlesearch_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = get_googlesearch(arguments["words"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "get_customsearch1" and not get_customsearch1_called:
                     get_customsearch1_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply = get_customsearch1(arguments["words"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "get_calendar" and not get_calendar_called:
                     get_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "add_calendar" and not add_calendar_called:
                     add_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "update_calendar" and not update_calendar_called:
                     update_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "delete_calendar" and not delete_calendar_called:
                     delete_calendar_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "get_gmail_list" and not get_gmail_list_called:
                     get_gmail_list_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "get_gmail_content" and not get_gmail_content_called:
                     get_gmail_content_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 elif function_call.name == "send_gmail_content" and not send_gmail_content_called:
                     get_send_content_called = True
-                    arguments = json.loads(function_call.arguments)
+                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
-                    i_messages_for_api.append({"role": "assistant", "content": bot_reply})
+                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
                 else:
-                    response = run_conversation(PUT_GPT_MODEL, i_messages_for_api)
+                    response = run_conversation(PUT_VERTEX_MODEL, system_instruction, i_vertex_messages_for_api)
                     if response:
-                        bot_reply = response.choices[0].message.content
+                        bot_reply = response.text
                     else:
                         bot_reply = "An error occurred while processing the question"
                     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
             else:
-                response = run_conversation(PUT_GPT_MODEL, i_messages_for_api)
-                return response.choices[0].message.content, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
+                return response.text, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
-            return ERROR_MESSAGE + " Fail to connect OpenAI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
+            return ERROR_MESSAGE + " Fail to connect Vertex AI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
     
     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
