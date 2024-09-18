@@ -742,8 +742,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     #標準ツール
     functions.append(get_time_tool)
     #拡張ツール
-    #if "googlesearch" in FUNCTIONS:
-    #    functions.append(googlesearch_tool)
+    if "googlesearch" in FUNCTIONS:
+        functions.append(googlesearch_tool)
     #if "customsearch" in FUNCTIONS:
     #    functions.append(customsearch1_tool)
     #if "wikipedia" in FUNCTIONS:
