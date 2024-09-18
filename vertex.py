@@ -4,6 +4,7 @@ from vertexai.preview.generative_models import (
     FunctionDeclaration,
     GenerativeModel,
     Part,
+    Content,
     Tool,
 )
 from datetime import datetime, time, timedelta
@@ -578,7 +579,9 @@ def extract_system_instruction(messages_for_api):
         if message["role"] == "system":
             return message["content"]
     return ""  # もしsystemメッセージがない場合は空文字を返す
-    
+
+from vertexai.generative_models import Part, Content
+
 def convert_to_vertex_format(messages_for_api):
     vertex_messages = []
     for message in messages_for_api:
@@ -588,26 +591,19 @@ def convert_to_vertex_format(messages_for_api):
         content = message["content"]
 
         # Vertex AIのフォーマットに変換
-        vertex_message = {
-            "content": {
-                "role": role,
-                "parts": [
-                    {"text": content}
-                ]
-            }
-        }
+        part = Part.from_text(content)  # Partとしてテキストを作成
+        vertex_message = Content(role=role, parts=[part])  # Contentとしてメッセージを構成
         vertex_messages.append(vertex_message)
 
     return vertex_messages
-    
-def append_message(vertex_messages, role, text):
-    vertex_messages.append({
-        "content": {
-            "role": role,
-            "parts": [{"text": text}]
-        }
-    })
 
+def append_message(vertex_messages, role, text):
+    # Partを作成し、それをContentにラップしてメッセージを追加
+    part = Part.from_text(text)
+    content = Content(role=role, parts=[part])
+    
+    # メッセージリストに追加
+    vertex_messages.append(content)
 
 def run_conversation(PUT_VERTEX_MODEL, system_instruction, messages):
     try:
