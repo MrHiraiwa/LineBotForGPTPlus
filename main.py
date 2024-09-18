@@ -1044,7 +1044,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
 
-                if CORE_AI_TYPE == 'VERTEX':
+                if CORE_AI_TYPE == 'Vertex':
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
