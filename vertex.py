@@ -662,10 +662,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索ワード"
                 }
-            },
-            "required": [
-                "words"
-            ]
+            }
         },
     )
     googlesearch_tool = Tool(
@@ -682,10 +679,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索ワード"
                 }
-            },
-            "required": [
-                "words"
-            ]
+            }
         },
     )
     customsearch1_tool = Tool(
@@ -702,10 +696,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "画像生成の文章"
                 }
-            },
-            "required": [
-                "prompt"
-            ]
+            }
         },
     )
     generateimage_tool = Tool(
@@ -722,10 +713,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索ワード"
                 }
-            },
-            "required": [
-                "prompt"
-            ]
+            }
         },
     )
     wikipediasearch_tool = Tool(
@@ -742,10 +730,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "読みたいページのURL"
                 }
-            },
-            "required": [
-                "link"
-            ]
+            }
         },
     )
     scraping_tool = Tool(
@@ -795,10 +780,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "スケジュールの内容を実施する場所(必須)"
                 }   
-            },
-            "required": [
-                "summary", "start_time", "end_time", "description", "location"
-            ]
+            }
         },
     )
     addcalendar_tool = Tool(
@@ -835,10 +817,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "更新後のスケジュールの内容を実施する場所(必須)"
                 }
-            },
-            "required": [
-                "event_id","summary","start_time","end_time","description","location"
-            ]
+            }
         },
     )
     updatecalendar_tool = Tool(
@@ -855,10 +834,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "削除対象のスケジュールのイベントID(必須)"
                 }
-            },
-            "required": [
-                "event_id"
-            ]
+            }
         },
     )
     deletecalendar_tool = Tool(
@@ -892,10 +868,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索文字列(必須)"
                 }
-            },
-            "required": [
-                "search_query"
-            ]
+            }
         },
     )
     getgmailcontent_tool = Tool(
@@ -920,10 +893,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "作成するメールの内容(必須)"
                 }
-            },
-            "required": [
-                "to_email", "subject", "body"
-            ]
+            }
         },
     )
     sendgmailcontent_tool = Tool(
