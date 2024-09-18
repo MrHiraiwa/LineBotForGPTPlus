@@ -648,9 +648,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    get_time_tool = Tool(
-        function_declarations=[get_time_func],
-    )
 
     googlesearch_func = FunctionDeclaration(
         name="get_googlesearch",
@@ -664,9 +661,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                 }
             }
         },
-    )
-    googlesearch_tool = Tool(
-        function_declarations=[googlesearch_func],
     )
 
     customsearch1_func = FunctionDeclaration(
@@ -682,9 +676,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    customsearch1_tool = Tool(
-        function_declarations=[customsearch1_func],
-    )
 
     generateimage_func = FunctionDeclaration(
         name="generate_image",
@@ -698,9 +689,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                 }
             }
         },
-    )
-    generateimage_tool = Tool(
-        function_declarations=[generateimage_func],
     )
 
     wikipediasearch_func = FunctionDeclaration(
@@ -716,9 +704,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    wikipediasearch_tool = Tool(
-        function_declarations=[wikipediasearch_func],
-    )
 
     scraping_func = FunctionDeclaration(
         name="scraping",
@@ -733,9 +718,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    scraping_tool = Tool(
-        function_declarations=[scraping_func],
-    )
 
     getcalendar_func = FunctionDeclaration(
         name="calendar_get",
@@ -749,9 +731,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                 }
             }
         },
-    )
-    getcalendar_tool = Tool(
-        function_declarations=[getcalendar_func],
     )
     
     addcalendar_func = FunctionDeclaration(
@@ -782,9 +761,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                 }   
             }
         },
-    )
-    addcalendar_tool = Tool(
-        function_declarations=[addcalendar_func],
     )
 
     updatecalendar_func = FunctionDeclaration(
@@ -820,9 +796,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    updatecalendar_tool = Tool(
-        function_declarations=[updatecalendar_func],
-    )
 
     deletecalendar_func = FunctionDeclaration(
         name="calendar_delete",
@@ -836,9 +809,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                 }
             }
         },
-    )
-    deletecalendar_tool = Tool(
-        function_declarations=[deletecalendar_func],
     )
 
     getgmaillist_func = FunctionDeclaration(
@@ -854,9 +824,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    getgmaillist_tool = Tool(
-        function_declarations=[getgmaillist_func],
-    )
 
     getgmailcontent_func = FunctionDeclaration(
         name="gmailcontent_get",
@@ -871,10 +838,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    getgmailcontent_tool = Tool(
-        function_declarations=[getgmailcontent_func],
-    )
-
     sendgmailcontent_func = FunctionDeclaration(
         name="gmailcontent_send",
         description="You send Gmail content  by a email and a subject and a content.",
@@ -896,41 +859,39 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    sendgmailcontent_tool = Tool(
-        function_declarations=[sendgmailcontent_func],
-    )
     
     # ここでfunctionsリストを構成
     functions = []
-    #標準ツール
-    functions.append(get_time_tool)
-    #拡張ツール
+    # FUNCTIONに基づいてツールを構築
+    functions = [get_time_func]  # 基本のget_timeは常に追加
     if "googlesearch" in FUNCTIONS:
-        functions.append(googlesearch_tool)
+        functions.append(googlesearch_func)
     if "customsearch" in FUNCTIONS:
-        functions.append(customsearch1_tool)
+        functions.append(customsearch1_func)
     if "wikipedia" in FUNCTIONS:
-        functions.append(wikipediasearch_tool)
+        functions.append(wikipediasearch_func)
     if "scraping" in FUNCTIONS:
-        functions.append(scraping_tool)
+        functions.append(scraping_func)
     if "generateimage" in FUNCTIONS:
-        functions.append(generateimage_tool)
+        functions.append(generateimage_func)
     if "googlecalendar" in FUNCTIONS:
-        functions.append(getcalendar_tool)
-        functions.append(addcalendar_tool)
-        functions.append(updatecalendar_tool)
-        functions.append(deletecalendar_tool)
+        functions.append(getcalendar_func)
+        functions.append(addcalendar_func)
+        functions.append(updatecalendar_func)
+        functions.append(deletecalendar_func)
     if "googlemail" in FUNCTIONS:
-        functions.append(getgmaillist_tool)
-        functions.append(getgmailcontent_tool)
-        functions.append(sendgmailcontent_tool)
-    print(f"Current functions: {functions}")
+        functions.append(getgmaillist_func)
+        functions.append(getgmailcontent_func)
+        functions.append(sendgmailcontent_func)
+
+    # ツールをまとめる
+    tool = Tool(function_declarations=functions)
     try:
-        model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
+        model = GenerativeModel(VERTEX_MODEL, system_instruction=system_instruction)
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
-            tools= functions,
+            tools= tool,
         )
         return response  # レスポンス全体を返す
     except Exception as e:
