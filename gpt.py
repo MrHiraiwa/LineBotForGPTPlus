@@ -621,7 +621,7 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5, CORE_IMAGE_TYPE=""):
+def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE="", max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
