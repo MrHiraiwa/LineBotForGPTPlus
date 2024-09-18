@@ -740,18 +740,15 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
 
     getcalendar_func = FunctionDeclaration(
         name="calendar_get",
-        description="useful for when you need to read a web page by specifying the URL.",
+        description="You can retrieve upcoming schedules and the event ID of the schedule.",
         parameters={
             "type": "object",
             "properties": {
-                "link": {
+                "dummy": {
                     "type": "string",
-                    "description": "読みたいページのURL"
+                    "description": "設定不要"
                 }
-            },
-            "required": [
-                "link"
-            ]
+            }
         },
     )
     getcalendar_tool = Tool(
@@ -760,17 +757,33 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     
     addcalendar_func = FunctionDeclaration(
         name="calendar_add",
-        description="useful for when you need to read a web page by specifying the URL.",
+        description="You can add schedules.",
         parameters={
             "type": "object",
             "properties": {
-                "link": {
+                "summary": {
                     "type": "string",
-                    "description": "読みたいページのURL"
-                }
+                    "description": "スケジュールのサマリー(必須)"
+                },
+                "start_time": {
+                    "type": "string",
+                    "description": "スケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },
+                "end_time": {
+                    "type": "string",
+                    "description": "スケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },   
+                "description": {
+                    "type": "string",
+                    "description": "スケジュールした内容の詳細な説明(必須)"
+                },   
+                "location": {
+                    "type": "string",
+                    "description": "スケジュールの内容を実施する場所(必須)"
+                }   
             },
             "required": [
-                "link"
+                "summary", "start_time", "end_time", "description", "location"
             ]
         },
     )
@@ -780,17 +793,37 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
 
     updatecalendar_func = FunctionDeclaration(
         name="calendar_update",
-        description="useful for when you need to read a web page by specifying the URL.",
+        description="You can update schedules by the event ID of the schedule.",
         parameters={
             "type": "object",
             "properties": {
-                "link": {
+                "event_id": {
                     "type": "string",
-                    "description": "読みたいページのURL"
+                    "description": "スケジュールのイベントID(必須)"
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "更新後のスケジュールのサマリー(必須)"
+                },
+                "start_time": {
+                    "type": "string",
+                    "description": "更新後のスケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },
+                "end_time": {
+                    "type": "string",
+                    "description": "更新後のスケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "更新後のスケジュールした内容の詳細な説明(必須)"
+                },
+                "location": {
+                    "type": "string",
+                    "description": "更新後のスケジュールの内容を実施する場所(必須)"
                 }
             },
             "required": [
-                "link"
+                "event_id","summary","start_time","end_time","description","location"
             ]
         },
     )
@@ -800,17 +833,17 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
 
     deletecalendar_func = FunctionDeclaration(
         name="calendar_delete",
-        description="useful for when you need to read a web page by specifying the URL.",
+        description="You can delete schedules by the event ID of the schedule.",
         parameters={
             "type": "object",
             "properties": {
-                "link": {
+                "event_id": {
                     "type": "string",
-                    "description": "読みたいページのURL"
+                    "description": "削除対象のスケジュールのイベントID(必須)"
                 }
             },
             "required": [
-                "link"
+                "event_id"
             ]
         },
     )
@@ -820,18 +853,15 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
 
     getgmaillist_func = FunctionDeclaration(
         name="gmaillist_get",
-        description="useful for when you need to read a web page by specifying the URL.",
+        description="You can get Gmail latest list.",
         parameters={
             "type": "object",
             "properties": {
-                "link": {
+                "dummy": {
                     "type": "string",
-                    "description": "読みたいページのURL"
+                    "description": "設定不要"
                 }
-            },
-            "required": [
-                "link"
-            ]
+            }
         },
     )
     getgmaillist_tool = Tool(
@@ -840,17 +870,17 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
 
     getgmailcontent_func = FunctionDeclaration(
         name="gmailcontent_get",
-        description="useful for when you need to read a web page by specifying the URL.",
+        description="You can read Gmail content  by a search query.",
         parameters={
             "type": "object",
             "properties": {
-                "link": {
+                "search_query": {
                     "type": "string",
-                    "description": "読みたいページのURL"
+                    "description": "検索文字列(必須)"
                 }
             },
             "required": [
-                "link"
+                "search_query"
             ]
         },
     )
@@ -860,17 +890,25 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
 
     sendgmailcontent_func = FunctionDeclaration(
         name="gmailcontent_send",
-        description="useful for when you need to read a web page by specifying the URL.",
+        description="You send Gmail content  by a email and a subject and a content.",
         parameters={
             "type": "object",
             "properties": {
-                "link": {
+                "to_email": {
                     "type": "string",
-                    "description": "読みたいページのURL"
+                    "description": "送信先メールアドレス(必須)"
+                },
+                "subject": {
+                    "type": "string",
+                    "description": "作成するメールの題名(必須)"
+                },
+                "body": {
+                    "type": "string",
+                    "description": "作成するメールの内容(必須)"
                 }
             },
             "required": [
-                "link"
+                "to_email", "subject", "body"
             ]
         },
     )
@@ -901,7 +939,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     if "googlemail" in FUNCTIONS:
         functions.append(getgmaillist_tool)
         functions.append(getgmailcontent_tool)
-       functions.append(sendgmailcontent_tool)
+        functions.append(sendgmailcontent_tool)
 
     try:
         model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
