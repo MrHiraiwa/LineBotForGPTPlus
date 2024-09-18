@@ -938,6 +938,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
 
                 # partsの中をループしてfunction_callを探す
                 for part in response.candidates[0].content.parts:
+                    print(f"Part: {part}")
                     # partがオブジェクトとしてfunction_callを持っているかを確認
                     if hasattr(part, 'function_call'):
                         function_call = part.function_call
