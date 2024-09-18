@@ -750,8 +750,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     #    functions.append(wikipediasearch_tool)
     if "scraping" in FUNCTIONS:
         functions.append(scraping_tool)
-    #if "generateimage" in FUNCTIONS:
-    #    functions.append(generateimage_tool)
+    if "generateimage" in FUNCTIONS:
+        functions.append(generateimage_tool)
     #if "googlecalendar" in FUNCTIONS:
     #    functions.append(getcalendar_tool)
     #    functions.append(addcalendar_tool)
