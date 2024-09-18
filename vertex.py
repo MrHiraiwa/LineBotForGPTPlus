@@ -578,11 +578,13 @@ def extract_system_instruction(messages_for_api):
         if message["role"] == "system":
             return message["content"]
     return ""  # もしsystemメッセージがない場合は空文字を返す
-
+    
 def convert_to_vertex_format(messages_for_api):
     vertex_messages = []
     for message in messages_for_api:
         role = message["role"]
+        if role == "assistant":  # assistantをmodelに変換
+            role = "model"
         content = message["content"]
 
         # Vertex AIのフォーマットに変換
