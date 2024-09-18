@@ -771,6 +771,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
+            tools= [get_time_tool],
         )
         return response  # レスポンス全体を返す
     except Exception as e:
