@@ -932,7 +932,15 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
         
         if response:
-            function_call = response.candidates[0].content.parts[0].function_call
+            # responseが適切な形式であるかを確認し、partsからfunction_callを取得
+            if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                # 複数のpartsがある場合、最初の部分を使用する
+                first_part = response.candidates[0].content.parts[0]
+                function_call = first_part.function_call if hasattr(first_part, 'function_call') else None
+            else:
+                print("Invalid response structure or no content parts available.")
+                return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+
             if isinstance(function_call, dict) and "name" in function_call:
                 # 各関数の名前に基づいて処理を行う
                 if function_call["name"] == "get_time" and not get_time_called:
@@ -1033,6 +1041,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                         bot_reply = "An error occurred while processing the question"
                     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
             else:
+                print(f"Invalid function_call structure: {function_call}")
                 return response.text, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
             return ERROR_MESSAGE + " Fail to connect Vertex AI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
