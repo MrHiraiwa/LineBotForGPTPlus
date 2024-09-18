@@ -226,10 +226,20 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
     prompt = paint_prompt + "\n" + i_prompt
     public_img_url = ""
     public_img_url_s = ""
+    image_result = None
     
     try:
         if CORE_IMAGE_TYPE == "Vertex":
-            
+            image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
+            response = model.generate_images(
+                prompt=prompt,
+                number_of_images=1,
+                guidance_scale=float("1024"),
+                aspect_ratio="1:1",
+                language="ja",
+                seed=None,
+            )
+            image_result = response[0]
         else:
             response = client.images.generate(
                 model="dall-e-3",
