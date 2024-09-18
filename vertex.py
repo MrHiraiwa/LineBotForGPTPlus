@@ -935,25 +935,25 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     #標準ツール
     functions.append(get_time_tool)
     #拡張ツール
-    #if "googlesearch" in FUNCTIONS:
-    #    functions.append(googlesearch_tool)
-    #if "customsearch" in FUNCTIONS:
-    #    functions.append(customsearch1_tool)
-    #if "wikipedia" in FUNCTIONS:
-    #    functions.append(wikipediasearch_tool)
-    #if "scraping" in FUNCTIONS:
-    #    functions.append(scraping_tool)
-    #if "generateimage" in FUNCTIONS:
-    #    functions.append(generateimage_tool)
-    #if "googlecalendar" in FUNCTIONS:
-    #    functions.append(getcalendar_tool)
-    #    functions.append(addcalendar_tool)
-    #    functions.append(updatecalendar_tool)
-    #    functions.append(deletecalendar_tool)
-    #if "googlemail" in FUNCTIONS:
-    #    functions.append(getgmaillist_tool)
-    #    functions.append(getgmailcontent_tool)
-    #    functions.append(sendgmailcontent_tool)
+    if "googlesearch" in FUNCTIONS:
+        functions.append(googlesearch_tool)
+    if "customsearch" in FUNCTIONS:
+        functions.append(customsearch1_tool)
+    if "wikipedia" in FUNCTIONS:
+        functions.append(wikipediasearch_tool)
+    if "scraping" in FUNCTIONS:
+        functions.append(scraping_tool)
+    if "generateimage" in FUNCTIONS:
+        functions.append(generateimage_tool)
+    if "googlecalendar" in FUNCTIONS:
+        functions.append(getcalendar_tool)
+        functions.append(addcalendar_tool)
+        functions.append(updatecalendar_tool)
+        functions.append(deletecalendar_tool)
+    if "googlemail" in FUNCTIONS:
+        functions.append(getgmaillist_tool)
+        functions.append(getgmailcontent_tool)
+        functions.append(sendgmailcontent_tool)
 
     try:
         model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
