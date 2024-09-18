@@ -737,6 +737,87 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     scraping_tool = Tool(
         function_declarations=[scraping_func],
     )
+
+    getcalendar_func = FunctionDeclaration(
+        name="calendar_get",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    getcalendar_tool = Tool(
+        function_declarations=[getcalendar_func],
+    )
+    
+    addcalendar_func = FunctionDeclaration(
+        name="calendar_add",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    addcalendar_tool = Tool(
+        function_declarations=[addcalendar_func],
+    )
+
+    updatecalendar_func = FunctionDeclaration(
+        name="calendar_update",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    updatecalendar_tool = Tool(
+        function_declarations=[updatecalendar_func],
+    )
+
+    updatecalendar_func = FunctionDeclaration(
+        name="calendar_delete",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    deletecalendar_tool = Tool(
+        function_declarations=[deletecalendar_func],
+    )
+    
     # ここでfunctionsリストを構成
     functions = []
     #標準ツール
@@ -752,11 +833,11 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         functions.append(scraping_tool)
     if "generateimage" in FUNCTIONS:
         functions.append(generateimage_tool)
-    #if "googlecalendar" in FUNCTIONS:
-    #    functions.append(getcalendar_tool)
-    #    functions.append(addcalendar_tool)
-    #    functions.append(updatecalendar_tool)
-    #    functions.append(deletecalendar_tool)
+    if "googlecalendar" in FUNCTIONS:
+        functions.append(getcalendar_tool)
+        functions.append(addcalendar_tool)
+        functions.append(updatecalendar_tool)
+        functions.append(deletecalendar_tool)
     #if "googlemail" in FUNCTIONS:
     #    functions.append(getgmaillist_tool)
     #    functions.append(getgmailcontent_tool)
@@ -844,43 +925,43 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     bot_reply = get_customsearch1(arguments["words"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "get_calendar" and not get_calendar_called:
+                elif function_call.name == "calendar_get" and not get_calendar_called:
                     get_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "add_calendar" and not add_calendar_called:
+                elif function_call.name == "calendar_add" and not add_calendar_called:
                     add_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "update_calendar" and not update_calendar_called:
+                elif function_call.name == "calendar_update" and not update_calendar_called:
                     update_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "delete_calendar" and not delete_calendar_called:
+                elif function_call.name == "calendar_delete" and not delete_calendar_called:
                     delete_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "get_gmail_list" and not get_gmail_list_called:
+                elif function_call.name == "gmail_list_get" and not get_gmail_list_called:
                     get_gmail_list_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "get_gmail_content" and not get_gmail_content_called:
+                elif function_call.name == "gmail_content_get" and not get_gmail_content_called:
                     get_gmail_content_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "send_gmail_content" and not send_gmail_content_called:
+                elif function_call.name == "gmail_content_send" and not send_gmail_content_called:
                     get_send_content_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
