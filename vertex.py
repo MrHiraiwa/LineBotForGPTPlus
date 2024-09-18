@@ -817,6 +817,66 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     deletecalendar_tool = Tool(
         function_declarations=[deletecalendar_func],
     )
+
+    getgmaillist_func = FunctionDeclaration(
+        name="gmaillist_get",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    getgmaillist_tool = Tool(
+        function_declarations=[getgmaillist_func],
+    )
+
+    getgmailcontent_func = FunctionDeclaration(
+        name="gmailcontent_get",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    getgmailcontent_tool = Tool(
+        function_declarations=[getgmailcontent_func],
+    )
+
+    sendgmailcontent_func = FunctionDeclaration(
+        name="gmailcontent_send",
+        description="useful for when you need to read a web page by specifying the URL.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string",
+                    "description": "読みたいページのURL"
+                }
+            },
+            "required": [
+                "link"
+            ]
+        },
+    )
+    sendgmailcontent_tool = Tool(
+        function_declarations=[sendgmailcontent_func],
+    )
     
     # ここでfunctionsリストを構成
     functions = []
@@ -838,11 +898,10 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
         functions.append(addcalendar_tool)
         functions.append(updatecalendar_tool)
         functions.append(deletecalendar_tool)
-    #if "googlemail" in FUNCTIONS:
-    #    functions.append(getgmaillist_tool)
-    #    functions.append(getgmailcontent_tool)
-    #   functions.append(sendgmailcontent_tool)
-    print(f"functions: {functions}")
+    if "googlemail" in FUNCTIONS:
+        functions.append(getgmaillist_tool)
+        functions.append(getgmailcontent_tool)
+       functions.append(sendgmailcontent_tool)
 
     try:
         model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
