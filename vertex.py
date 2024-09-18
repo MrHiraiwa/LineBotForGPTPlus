@@ -588,8 +588,11 @@ def convert_to_vertex_format(messages_for_api):
         role = message["role"]
         if role == "assistant":  # assistantをmodelに変換
             role = "model"
-        content = message["content"]
+        elif role == "system":  # system roleは無視
+            continue  # スキップして次のメッセージに進む
 
+        content = message["content"]  # contentを取得
+        
         # Vertex AIのフォーマットに変換
         part = Part.from_text(content)  # Partとしてテキストを作成
         vertex_message = Content(role=role, parts=[part])  # Contentとしてメッセージを構成
