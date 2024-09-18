@@ -621,14 +621,6 @@ def run_conversation(PUT_VERTEX_MODEL, system_instruction, messages):
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-
-model = GenerativeModel(
-    "gemini-1.0-pro-002",
-    system_instruction=[
-        system_instruction  # 抽出したsystemのcontentをここに設定
-    ],
-)
-
 def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION):
     get_time_func = FunctionDeclaration(
         name="get_time",
