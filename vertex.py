@@ -699,7 +699,7 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     )
 
     wikipediasearch_func = FunctionDeclaration(
-        name="search_wikipedia",
+        name="wikipedia_search",
         description="useful for when you need to Read dictionary page by specifying the word.",
         parameters={
             "type": "object",
@@ -737,6 +737,185 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     scraping_tool = Tool(
         function_declarations=[scraping_func],
     )
+
+    getcalendar_func = FunctionDeclaration(
+        name="calendar_get",
+        description="You can retrieve upcoming schedules and the event ID of the schedule.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "dummy": {
+                    "type": "string",
+                    "description": "設定不要"
+                }
+            }
+        },
+    )
+    getcalendar_tool = Tool(
+        function_declarations=[getcalendar_func],
+    )
+    
+    addcalendar_func = FunctionDeclaration(
+        name="calendar_add",
+        description="You can add schedules.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "summary": {
+                    "type": "string",
+                    "description": "スケジュールのサマリー(必須)"
+                },
+                "start_time": {
+                    "type": "string",
+                    "description": "スケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },
+                "end_time": {
+                    "type": "string",
+                    "description": "スケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },   
+                "description": {
+                    "type": "string",
+                    "description": "スケジュールした内容の詳細な説明(必須)"
+                },   
+                "location": {
+                    "type": "string",
+                    "description": "スケジュールの内容を実施する場所(必須)"
+                }   
+            },
+            "required": [
+                "summary", "start_time", "end_time", "description", "location"
+            ]
+        },
+    )
+    addcalendar_tool = Tool(
+        function_declarations=[addcalendar_func],
+    )
+
+    updatecalendar_func = FunctionDeclaration(
+        name="calendar_update",
+        description="You can update schedules by the event ID of the schedule.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "event_id": {
+                    "type": "string",
+                    "description": "スケジュールのイベントID(必須)"
+                },
+                "summary": {
+                    "type": "string",
+                    "description": "更新後のスケジュールのサマリー(必須)"
+                },
+                "start_time": {
+                    "type": "string",
+                    "description": "更新後のスケジュールの開始時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },
+                "end_time": {
+                    "type": "string",
+                    "description": "更新後のスケジュールの終了時間をRFC3339フォーマットの日本時間で指定(必須)"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "更新後のスケジュールした内容の詳細な説明(必須)"
+                },
+                "location": {
+                    "type": "string",
+                    "description": "更新後のスケジュールの内容を実施する場所(必須)"
+                }
+            },
+            "required": [
+                "event_id","summary","start_time","end_time","description","location"
+            ]
+        },
+    )
+    updatecalendar_tool = Tool(
+        function_declarations=[updatecalendar_func],
+    )
+
+    deletecalendar_func = FunctionDeclaration(
+        name="calendar_delete",
+        description="You can delete schedules by the event ID of the schedule.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "event_id": {
+                    "type": "string",
+                    "description": "削除対象のスケジュールのイベントID(必須)"
+                }
+            },
+            "required": [
+                "event_id"
+            ]
+        },
+    )
+    deletecalendar_tool = Tool(
+        function_declarations=[deletecalendar_func],
+    )
+
+    getgmaillist_func = FunctionDeclaration(
+        name="gmaillist_get",
+        description="You can get Gmail latest list.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "dummy": {
+                    "type": "string",
+                    "description": "設定不要"
+                }
+            }
+        },
+    )
+    getgmaillist_tool = Tool(
+        function_declarations=[getgmaillist_func],
+    )
+
+    getgmailcontent_func = FunctionDeclaration(
+        name="gmailcontent_get",
+        description="You can read Gmail content  by a search query.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "search_query": {
+                    "type": "string",
+                    "description": "検索文字列(必須)"
+                }
+            },
+            "required": [
+                "search_query"
+            ]
+        },
+    )
+    getgmailcontent_tool = Tool(
+        function_declarations=[getgmailcontent_func],
+    )
+
+    sendgmailcontent_func = FunctionDeclaration(
+        name="gmailcontent_send",
+        description="You send Gmail content  by a email and a subject and a content.",
+        parameters={
+            "type": "object",
+            "properties": {
+                "to_email": {
+                    "type": "string",
+                    "description": "送信先メールアドレス(必須)"
+                },
+                "subject": {
+                    "type": "string",
+                    "description": "作成するメールの題名(必須)"
+                },
+                "body": {
+                    "type": "string",
+                    "description": "作成するメールの内容(必須)"
+                }
+            },
+            "required": [
+                "to_email", "subject", "body"
+            ]
+        },
+    )
+    sendgmailcontent_tool = Tool(
+        function_declarations=[sendgmailcontent_func],
+    )
+    
     # ここでfunctionsリストを構成
     functions = []
     #標準ツール
@@ -753,32 +932,28 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
     if "generateimage" in FUNCTIONS:
         functions.append(generateimage_tool)
     if "googlecalendar" in FUNCTIONS:
-        print("test")
-        #functions.append(getcalendar_tool)
-        #functions.append(addcalendar_tool)
-        #functions.append(updatecalendar_tool)
-        #functions.append(deletecalendar_tool)
+        functions.append(getcalendar_tool)
+        functions.append(addcalendar_tool)
+        functions.append(updatecalendar_tool)
+        functions.append(deletecalendar_tool)
     if "googlemail" in FUNCTIONS:
-        print("test")
-        #functions.append(getgmaillist_tool)
-        #functions.append(getgmailcontent_tool)
-        #functions.append(sendgmailcontent_tool)
-    
-
+        functions.append(getgmaillist_tool)
+        functions.append(getgmailcontent_tool)
+        functions.append(sendgmailcontent_tool)
 
     try:
-        model = GenerativeModel(VERTEX_MODEL,system_instruction=[system_instruction],)
+        model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
-            tools= [get_time_tool],
+            tools= functions,
         )
         return response  # レスポンス全体を返す
     except Exception as e:
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, max_attempts=5):
+def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE="", VERTEX_IMAGE_MODEL="", max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -808,9 +983,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
     i_vertex_messages_for_api = convert_to_vertex_format(i_messages_for_api)
 
     while attempt < max_attempts:
-        print(f"VERTEX_MODEL: {VERTEX_MODEL}, system_instruction: {system_instruction}, i_vertex_messages_for_api {i_vertex_messages_for_api}")
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
-        print(f"response: {response}")
         if response:
             function_call = response.candidates[0].content.parts[0].function_call.name
             if function_call:
@@ -825,7 +998,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     bot_reply, public_img_url, public_img_url_s = generate_image(paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "search_wikipedia" and not search_wikipedia_called:
+                elif function_call.name == "wikipedia_search" and not search_wikipedia_called:
                     search_wikipedia_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply = search_wikipedia(arguments["prompt"])
@@ -849,43 +1022,43 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     bot_reply = get_customsearch1(arguments["words"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "get_calendar" and not get_calendar_called:
+                elif function_call.name == "calendar_get" and not get_calendar_called:
                     get_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "add_calendar" and not add_calendar_called:
+                elif function_call.name == "calendar_add" and not add_calendar_called:
                     add_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "update_calendar" and not update_calendar_called:
+                elif function_call.name == "calendar_update" and not update_calendar_called:
                     update_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "delete_calendar" and not delete_calendar_called:
+                elif function_call.name == "calendar_delete" and not delete_calendar_called:
                     delete_calendar_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "get_gmail_list" and not get_gmail_list_called:
+                elif function_call.name == "gmail_list_get" and not get_gmail_list_called:
                     get_gmail_list_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "get_gmail_content" and not get_gmail_content_called:
+                elif function_call.name == "gmail_content_get" and not get_gmail_content_called:
                     get_gmail_content_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply) 
                     attempt += 1
-                elif function_call.name == "send_gmail_content" and not send_gmail_content_called:
+                elif function_call.name == "gmail_content_send" and not send_gmail_content_called:
                     get_send_content_called = True
                     arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
