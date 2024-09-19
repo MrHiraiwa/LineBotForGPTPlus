@@ -945,6 +945,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
 
 
                 if function_call:
+                    print(f"Function call name: {function_call.name}")
                     # args の中に 'fields' がある場合に対処
                     if hasattr(function_call.args, 'fields'):
                         args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
