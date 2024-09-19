@@ -940,7 +940,9 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
 
                 # partsの中をループしてfunction_callを探す
                 for idx, part in enumerate(response.candidates[0].content.parts):
+                    # partの中身と属性を確認するために詳細を表示
                     print(f"Part {idx}: {part}")  # 各partの中身を表示
+                    print(f"Attributes of part {idx}: {dir(part)}")  # partの属性を表示
 
                     # function_callが含まれているかを確認
                     if hasattr(part, 'function_call'):
