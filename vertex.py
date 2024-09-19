@@ -945,7 +945,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                 for idx, part in enumerate(response.candidates[0].content.parts):
                     print(f"Part {idx}: {part}")  # 各partの中身を表示
                     print(f"Attributes of part {idx}: {dir(part)}")  # partの属性を表示
-            
+
                     # function_callが含まれているかを確認
                     if part.function_call:  # part内にfunction_callが存在するかチェック
                         function_call = part.function_call
@@ -964,7 +964,12 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     elif hasattr(function_call.args, 'items'):
                         # MapComposite形式の場合の処理
                         try:
-                            args_dict = {k: v.string_value for k, v in function_call.args.items()}
+                            args_dict = {}
+                            for k, v in function_call.args.items():
+                                if hasattr(v, 'string_value'):
+                                    args_dict[k] = v.string_value  # string_valueが存在する場合
+                                else:
+                                    args_dict[k] = v  # そのまま値を使用
                             print(f"Parsed args from MapComposite: {args_dict}")
                         except Exception as e:
                             print(f"Failed to parse args from MapComposite: {e}")
@@ -977,9 +982,10 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                             print(f"Parsed args: {args_dict}")
                         except AttributeError as e:
                             print(f"Error accessing function_call.args: {e}")
-                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token       
+                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
                 else:
                     print("No valid function call found.")
+
         
                 # 各関数の名前に基づいて処理を行う
                 if function_call.name == "get_time" and not get_time_called:
