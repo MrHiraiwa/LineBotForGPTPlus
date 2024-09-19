@@ -936,13 +936,16 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
             if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
                 function_call = None
 
-                # partsの中をループしてfunction_callを探す
-                for part in response.candidates[0].content.parts:
-                    print(f"Part: {part}")
-                    # partがオブジェクトとしてfunction_callを持っているかを確認
-                    if hasattr(part, 'function_call'):
-                        function_call = part.function_call
-                        break  # function_callが見つかったらループを抜ける
+                for candidate in response.candidates:
+                    print(f"Candidate: {candidate}")
+                    if candidate.content and candidate.content.parts:
+                        for part in candidate.content.parts:
+                            print(f"Part: {part}")
+                            if hasattr(part, 'function_call'):
+                                print("Function call found!")
+                                function_call = part.function_call
+                                break
+
 
                 # function_callが見つからなかった場合の処理
                 if not function_call:
