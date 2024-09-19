@@ -971,9 +971,13 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                             return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
 
                     else:
-                        print("Unknown args structure.")
-                        return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-     
+                        try:
+                            # argsがMapCompositeの可能性がある場合、itemsで展開する
+                            args_dict = {key: value.string_value for key, value in function_call.args.items()}
+                            print(f"Parsed args: {args_dict}")
+                        except AttributeError as e:
+                            print(f"Error accessing function_call.args: {e}")
+                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token       
                 else:
                     print("No valid function call found.")
         
