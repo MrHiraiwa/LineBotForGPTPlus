@@ -932,6 +932,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
 
         if response:
+            print(f"Response: {response}")
 
             if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
                 function_call = None
@@ -946,6 +947,8 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
 
                 if function_call:
                     print(f"Function call name: {function_call.name}")
+                    print(f"Type of function_call: {type(function_call)}")
+                    print(f"Attributes of function_call: {dir(function_call)}")
                     # args の中に 'fields' がある場合に対処
                     if hasattr(function_call.args, 'fields'):
                         args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
