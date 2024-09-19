@@ -963,12 +963,13 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                             else:
                                 print("function_call.args does not have 'items'.")
                                 return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-                else:
-                    print(f"Function call is falsy: {function_call}")
 
                         except Exception as e:
                             print(f"Failed to parse args: {e}")
                             return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+
+                else:
+                    print(f"Function call is falsy: {function_call}")
         
                 # 各関数の名前に基づいて処理を行う
                 if function_call.name == "get_time" and not get_time_called:
