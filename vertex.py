@@ -941,7 +941,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                 for part in response.candidates[0].content.parts:
                     if hasattr(part, 'function_call'):
                         function_call = part.function_call
-                        print("Function call found!")
+                        print(f"1. function_call: {function_call}")
                         break  # function_callが見つかったらループを抜ける
 
 
