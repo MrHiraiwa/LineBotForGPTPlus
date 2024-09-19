@@ -941,38 +941,42 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                 for part in response.candidates[0].content.parts:
                     if hasattr(part, 'function_call'):
                         function_call = part.function_call
-                        print(f"1. function_call: {function_call}")
+                        print("Function call found!")
                         break  # function_callが見つかったらループを抜ける
-
 
                 if function_call is not None:
                     print(f"Function call name: {function_call.name}")
                     print(f"Type of function_call: {type(function_call)}")
                     print(f"Attributes of function_call: {dir(function_call)}")
-                    # args の中に 'fields' がある場合に対処
-                    if hasattr(function_call.args, 'fields'):
-                        args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
-                        print(f"Parsed args: {args_dict}")  # デバッグ出力
-                    else:
-                        # MapComposite形式を辞書に変換する
+
+                    # function_call.argsが文字列なのか、辞書形式なのか確認
+                    if isinstance(function_call.args, str):
+                        print(f"Raw function_call.args (string): {function_call.args}")
+                        # もしargsがJSON形式の文字列の場合、辞書に変換する
                         try:
-                            # まずはfunction_call.argsそのものを出力して確認
-                            print(f"Raw function_call.args: {function_call.args}")
-
-                            # もしitems()が機能しない場合、代替案として以下を試す
-                            if hasattr(function_call.args, 'values'):
-                                args_dict = {k: v.string_value for k, v in function_call.args.items()}
-                                print(f"Parsed args from MapComposite: {args_dict}")  # デバッグ出力
-                            else:
-                                print("function_call.args does not have 'items'.")
-                                return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-
-                        except Exception as e:
-                            print(f"Failed to parse args: {e}")
+                            args_dict = json.loads(function_call.args)
+                            print(f"Parsed args from JSON string: {args_dict}")
+                        except json.JSONDecodeError as e:
+                            print(f"Failed to decode JSON from args: {e}")
                             return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
 
-                else:
-                    print(f"Function call is falsy: {function_call}")
+                    elif hasattr(function_call.args, 'fields'):
+                        # fieldsを持つ場合の処理
+                        args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
+                        print(f"Parsed args from fields: {args_dict}")
+
+                    elif hasattr(function_call.args, 'items'):
+                        # MapComposite形式の場合の処理
+                        try:
+                            args_dict = {k: v.string_value for k, v in function_call.args.items()}
+                            print(f"Parsed args from MapComposite: {args_dict}")
+                        except Exception as e:
+                            print(f"Failed to parse args from MapComposite: {e}")
+                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+
+                    else:
+                        print("Unknown args structure.")
+                        return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
         
                 # 各関数の名前に基づいて処理を行う
                 if function_call.name == "get_time" and not get_time_called:
