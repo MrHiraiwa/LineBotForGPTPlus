@@ -31,6 +31,8 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
 google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
+openai_api_key = os.getenv('OPENAI_API_KEY')
+gpt_client = OpenAI(api_key=openai_api_key)
 
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
