@@ -937,34 +937,23 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
             if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
                 function_call = None
 
-                # partsの中をループしてfunction_callを探す
+                # partsの中をループして各パーツを表示
                 for part in response.candidates[0].content.parts:
-                    if hasattr(part, 'function_call') and part.function_call is not None:
+                    print(f"Part: {part}")  # 各partの中身を表示
+
+                    if hasattr(part, 'function_call'):
                         function_call = part.function_call
-                        # 確認のためにfunction_callが空でないかチェック
-                        if function_call:
-                            print(f"Function call found: {function_call}")
-                            if hasattr(function_call, 'name'):
-                                print(f"Function call name: {function_call.name}")
-                            else:
-                                print("Function call has no name attribute.")
-                            if hasattr(function_call, 'args'):
-                                print(f"Function call args: {function_call.args}")
-                            else:
-                                print("Function call has no args attribute.")
-                        else:
-                            print("Function call is empty or has no name/args.")
+                        print(f"1. function_call: {function_call}")
                         break  # function_callが見つかったらループを抜ける
 
-                if function_call is not None and hasattr(function_call, 'name'):
+                if function_call is not None:
                     print(f"Function call raw: {function_call}")
                     print(f"Function call as dict: {function_call.__dict__}")
-                    print(f"Function call name: {function_call.name}")
+                    print(f"Function call name: {function_call.name if hasattr(function_call, 'name') else 'No name'}")
                     print(f"Function call args: {function_call.args}")
                     print(f"Type of function_call: {type(function_call)}")
                     print(f"Attributes of function_call: {dir(function_call)}")
-                    print(f"Function call args: {function_call.args}")
-
+                    
                     # function_call.argsが文字列なのか、辞書形式なのか確認
                     if isinstance(function_call.args, str):
                         print(f"Raw function_call.args (string): {function_call.args}")
