@@ -963,6 +963,8 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                             else:
                                 print("function_call.args does not have 'items'.")
                                 return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+                else:
+                    print(f"Function call is falsy: {function_call}")
 
                         except Exception as e:
                             print(f"Failed to parse args: {e}")
