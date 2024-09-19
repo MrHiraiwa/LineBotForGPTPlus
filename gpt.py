@@ -584,7 +584,7 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
         print(f"e: {e}")
         return f"SYSTEM: メール送信にエラーが発生しました。{e}", gaccount_access_token, gaccount_refresh_token
 
-def run_conversation(PUT_GPT_MODEL, messages):
+def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
             model=PUT_GPT_MODEL,
@@ -635,7 +635,7 @@ def run_conversation_f(GPT_MODEL, FUNCTIONS, messages, google_description, custo
         print(f"An error occurred: {e}")
         return None  # エラー時には None を返す
 
-def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE="", VERTEX_IMAGE_MODEL="", max_attempts=5):
+def chatgpt_functions(GPT_MODEL, FUNCTIONS, messages_for_api, USER_ID, message_id, ERROR_MESSAGE, PAINT_PROMPT, BUCKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE="", VERTEX_IMAGE_MODEL="", max_attempts=5):
     public_img_url = None
     public_img_url_s = None
     user_id = USER_ID
@@ -744,14 +744,13 @@ def chatgpt_functions(GPT_MODEL, PUT_GPT_MODEL, FUNCTIONS, messages_for_api, USE
                     i_messages_for_api.append({"role": "assistant", "content": bot_reply})
                     attempt += 1
                 else:
-                    response = run_conversation(PUT_GPT_MODEL, i_messages_for_api)
+                    response = run_conversation(GPT_MODEL, i_messages_for_api)
                     if response:
                         bot_reply = response.choices[0].message.content
                     else:
                         bot_reply = "An error occurred while processing the question"
                     return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
             else:
-                response = run_conversation(PUT_GPT_MODEL, i_messages_for_api)
                 return response.choices[0].message.content, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
             return ERROR_MESSAGE + " Fail to connect OpenAI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 

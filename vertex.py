@@ -1,4 +1,5 @@
 import os
+from openai import OpenAI
 import vertexai
 from vertexai.preview.generative_models import (
     FunctionDeclaration,
@@ -30,6 +31,8 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 google_cse_id = os.getenv("GOOGLE_CSE_ID")
 google_cse_id1 = os.getenv("GOOGLE_CSE_ID1")
 
+openai_api_key = os.getenv('OPENAI_API_KEY')
+gpt_client = OpenAI(api_key=openai_api_key)
 
 google_client_id = os.getenv("GOOGLE_CLIENT_ID")
 google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -648,9 +651,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    get_time_tool = Tool(
-        function_declarations=[get_time_func],
-    )
 
     googlesearch_func = FunctionDeclaration(
         name="get_googlesearch",
@@ -662,14 +662,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索ワード"
                 }
-            },
-            "required": [
-                "words"
-            ]
+            }
         },
-    )
-    googlesearch_tool = Tool(
-        function_declarations=[googlesearch_func],
     )
 
     customsearch1_func = FunctionDeclaration(
@@ -682,14 +676,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索ワード"
                 }
-            },
-            "required": [
-                "words"
-            ]
+            }
         },
-    )
-    customsearch1_tool = Tool(
-        function_declarations=[customsearch1_func],
     )
 
     generateimage_func = FunctionDeclaration(
@@ -702,14 +690,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "画像生成の文章"
                 }
-            },
-            "required": [
-                "prompt"
-            ]
+            }
         },
-    )
-    generateimage_tool = Tool(
-        function_declarations=[generateimage_func],
     )
 
     wikipediasearch_func = FunctionDeclaration(
@@ -722,14 +704,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索ワード"
                 }
-            },
-            "required": [
-                "prompt"
-            ]
+            }
         },
-    )
-    wikipediasearch_tool = Tool(
-        function_declarations=[wikipediasearch_func],
     )
 
     scraping_func = FunctionDeclaration(
@@ -742,14 +718,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "読みたいページのURL"
                 }
-            },
-            "required": [
-                "link"
-            ]
+            }
         },
-    )
-    scraping_tool = Tool(
-        function_declarations=[scraping_func],
     )
 
     getcalendar_func = FunctionDeclaration(
@@ -764,9 +734,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                 }
             }
         },
-    )
-    getcalendar_tool = Tool(
-        function_declarations=[getcalendar_func],
     )
     
     addcalendar_func = FunctionDeclaration(
@@ -795,14 +762,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "スケジュールの内容を実施する場所(必須)"
                 }   
-            },
-            "required": [
-                "summary", "start_time", "end_time", "description", "location"
-            ]
+            }
         },
-    )
-    addcalendar_tool = Tool(
-        function_declarations=[addcalendar_func],
     )
 
     updatecalendar_func = FunctionDeclaration(
@@ -835,14 +796,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "更新後のスケジュールの内容を実施する場所(必須)"
                 }
-            },
-            "required": [
-                "event_id","summary","start_time","end_time","description","location"
-            ]
+            }
         },
-    )
-    updatecalendar_tool = Tool(
-        function_declarations=[updatecalendar_func],
     )
 
     deletecalendar_func = FunctionDeclaration(
@@ -855,14 +810,8 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "削除対象のスケジュールのイベントID(必須)"
                 }
-            },
-            "required": [
-                "event_id"
-            ]
+            }
         },
-    )
-    deletecalendar_tool = Tool(
-        function_declarations=[deletecalendar_func],
     )
 
     getgmaillist_func = FunctionDeclaration(
@@ -878,9 +827,6 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
             }
         },
     )
-    getgmaillist_tool = Tool(
-        function_declarations=[getgmaillist_func],
-    )
 
     getgmailcontent_func = FunctionDeclaration(
         name="gmailcontent_get",
@@ -892,16 +838,9 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "検索文字列(必須)"
                 }
-            },
-            "required": [
-                "search_query"
-            ]
+            }
         },
     )
-    getgmailcontent_tool = Tool(
-        function_declarations=[getgmailcontent_func],
-    )
-
     sendgmailcontent_func = FunctionDeclaration(
         name="gmailcontent_send",
         description="You send Gmail content  by a email and a subject and a content.",
@@ -920,47 +859,42 @@ def run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, messages, go
                     "type": "string",
                     "description": "作成するメールの内容(必須)"
                 }
-            },
-            "required": [
-                "to_email", "subject", "body"
-            ]
+            }
         },
-    )
-    sendgmailcontent_tool = Tool(
-        function_declarations=[sendgmailcontent_func],
     )
     
     # ここでfunctionsリストを構成
     functions = []
-    #標準ツール
-    functions.append(get_time_tool)
-    #拡張ツール
-    #if "googlesearch" in FUNCTIONS:
-    #    functions.append(googlesearch_tool)
-    #if "customsearch" in FUNCTIONS:
-    #    functions.append(customsearch1_tool)
-    #if "wikipedia" in FUNCTIONS:
-    #    functions.append(wikipediasearch_tool)
-    #if "scraping" in FUNCTIONS:
-    #    functions.append(scraping_tool)
-    #if "generateimage" in FUNCTIONS:
-    #    functions.append(generateimage_tool)
-    #if "googlecalendar" in FUNCTIONS:
-    #    functions.append(getcalendar_tool)
-    #    functions.append(addcalendar_tool)
-    #    functions.append(updatecalendar_tool)
-    #    functions.append(deletecalendar_tool)
-    #if "googlemail" in FUNCTIONS:
-    #    functions.append(getgmaillist_tool)
-    #    functions.append(getgmailcontent_tool)
-    #    functions.append(sendgmailcontent_tool)
+    # FUNCTIONに基づいてツールを構築
+    functions = [get_time_func]  # 基本のget_timeは常に追加
+    if "googlesearch" in FUNCTIONS:
+        functions.append(googlesearch_func)
+    if "customsearch" in FUNCTIONS:
+        functions.append(customsearch1_func)
+    if "wikipedia" in FUNCTIONS:
+        functions.append(wikipediasearch_func)
+    if "scraping" in FUNCTIONS:
+        functions.append(scraping_func)
+    if "generateimage" in FUNCTIONS:
+        functions.append(generateimage_func)
+    if "googlecalendar" in FUNCTIONS:
+        functions.append(getcalendar_func)
+        functions.append(addcalendar_func)
+        functions.append(updatecalendar_func)
+        functions.append(deletecalendar_func)
+    if "googlemail" in FUNCTIONS:
+        functions.append(getgmaillist_func)
+        functions.append(getgmailcontent_func)
+        functions.append(sendgmailcontent_func)
 
+    # ツールをまとめる
+    tool = Tool(function_declarations=functions)
     try:
-        model = GenerativeModel(VERTEX_MODEL,system_instruction=system_instruction,)
+        model = GenerativeModel(VERTEX_MODEL, system_instruction=system_instruction)
         response = model.generate_content(
             messages,
             generation_config={"temperature": 0},
-            tools= functions,
+            tools= [tool],
         )
         return response  # レスポンス全体を返す
     except Exception as e:
@@ -979,6 +913,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
     attempt = 0
     i_messages_for_api = messages_for_api.copy()
 
+    # 各関数のフラグを初期化
     get_time_called = False
     generate_image_called = False
     search_wikipedia_called = False
@@ -998,96 +933,139 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
 
     while attempt < max_attempts:
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
+
         if response:
-            function_call = response.candidates[0].content.parts[0].function_call.name
-            if function_call:
-                if function_call.name == "get_time" and not get_time_called:
+
+            if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                function_call = None
+
+                # partsの中をループしてfunction_callを探す
+                for idx, part in enumerate(response.candidates[0].content.parts):
+
+                    # function_callが含まれているかを確認
+                    if part.function_call:  # part内にfunction_callが存在するかチェック
+                        function_call = part.function_call
+                        break  # function_callが見つかったらループを抜ける
+
+                if function_call is not None:
+
+                    # args の中に 'fields' がある場合に対処
+                    if hasattr(function_call.args, 'fields'):
+                        args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
+
+                    elif hasattr(function_call.args, 'items'):
+                        # MapComposite形式の場合の処理
+                        try:
+                            args_dict = {}
+                            for k, v in function_call.args.items():
+                                if hasattr(v, 'string_value'):
+                                    args_dict[k] = v.string_value  # string_valueが存在する場合
+                                else:
+                                    args_dict[k] = v  # そのまま値を使用
+                        except Exception as e:
+                            print(f"Failed to parse args from MapComposite: {e}")
+                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+
+                    else:
+                        try:
+                            # argsがMapCompositeの可能性がある場合、itemsで展開する
+                            args_dict = {key: value.string_value for key, value in function_call.args.items()}
+                        except AttributeError as e:
+                            print(f"Error accessing function_call.args: {e}")
+                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+                    
+                # 各関数の名前に基づいて処理を行う
+                if function_call and function_call.name == "get_time" and not get_time_called:
                     get_time_called = True
                     bot_reply = get_time()
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "generate_image" and not generate_image_called:
+
+                elif function_call and function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
-                    arguments = json.loads(function_call.args)
-                    bot_reply, public_img_url, public_img_url_s = generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply, public_img_url, public_img_url_s = generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, args_dict["prompt"], user_id, message_id, bucket_name, file_age)
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "wikipedia_search" and not search_wikipedia_called:
+
+                elif function_call and function_call.name == "wikipedia_search" and not search_wikipedia_called:
                     search_wikipedia_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply = search_wikipedia(arguments["prompt"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply = search_wikipedia(args_dict["prompt"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "scraping" and not scraping_called:
+
+                elif function_call and function_call.name == "scraping" and not scraping_called:
                     scraping_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply = scraping(arguments["link"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply = scraping(args_dict["link"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "get_googlesearch" and not get_googlesearch_called:
+
+                elif function_call and function_call.name == "get_googlesearch" and not get_googlesearch_called:
                     get_googlesearch_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply = get_googlesearch(arguments["words"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply = get_googlesearch(args_dict["words"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "get_customsearch1" and not get_customsearch1_called:
+
+                elif function_call and function_call.name == "get_customsearch1" and not get_customsearch1_called:
                     get_customsearch1_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply = get_customsearch1(arguments["words"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply = get_customsearch1(args_dict["words"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "calendar_get" and not get_calendar_called:
+
+                elif function_call and function_call.name == "calendar_get" and not get_calendar_called:
                     get_calendar_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token  = get_calendar(gaccount_access_token, gaccount_refresh_token)
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_calendar(gaccount_access_token, gaccount_refresh_token)
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "calendar_add" and not add_calendar_called:
+
+                elif function_call and function_call.name == "calendar_add" and not add_calendar_called:
                     add_calendar_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, args_dict["summary"], args_dict["start_time"], args_dict["end_time"], args_dict["description"], args_dict["location"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "calendar_update" and not update_calendar_called:
+
+                elif function_call and function_call.name == "calendar_update" and not update_calendar_called:
                     update_calendar_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, args_dict["event_id"], args_dict["summary"], args_dict["start_time"], args_dict["end_time"], args_dict["description"], args_dict["location"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "calendar_delete" and not delete_calendar_called:
+
+                elif function_call and function_call.name == "calendar_delete" and not delete_calendar_called:
                     delete_calendar_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, args_dict["event_id"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "gmail_list_get" and not get_gmail_list_called:
+
+                elif function_call and function_call.name == "gmail_list_get" and not get_gmail_list_called:
                     get_gmail_list_called = True
-                    arguments = json.loads(function_call.arg)
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "gmail_content_get" and not get_gmail_content_called:
+
+                elif function_call and function_call.name == "gmail_content_get" and not get_gmail_content_called:
                     get_gmail_content_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, args_dict["search_query"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
-                elif function_call.name == "gmail_content_send" and not send_gmail_content_called:
-                    get_send_content_called = True
-                    arguments = json.loads(function_call.arg)
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
-                    append_message(i_vertex_messages_for_api, "model", bot_reply) 
+
+                elif function_call and function_call.name == "gmail_content_send" and not send_gmail_content_called:
+                    send_gmail_content_called = True
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, args_dict["to_email"], args_dict["subject"], args_dict["body"])
+                    append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
                 else:
-                    response = run_conversation(PUT_VERTEX_MODEL, system_instruction, i_vertex_messages_for_api)
+                    # それ以外の場合は通常の会話を実行
+                    response = run_conversation(VERTEX_MODEL, system_instruction, i_vertex_messages_for_api)
                     if response:
                         bot_reply = response.text
                     else:
                         bot_reply = "An error occurred while processing the question"
-                    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
+                    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
             else:
+                print(f"Invalid function_call structure: {function_call}")
                 return response.text, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
         else:
             return ERROR_MESSAGE + " Fail to connect Vertex AI.", public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
     
-    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token 
+    return bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+
+
