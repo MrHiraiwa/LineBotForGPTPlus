@@ -932,32 +932,27 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
 
         if response:
-            # responseが適切な形式であるかを確認し、partsからfunction_callを取得
+
             if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
                 function_call = None
 
-                for candidate in response.candidates:
-                    print(f"Candidate: {candidate}")
-                    if candidate.content and candidate.content.parts:
-                        for part in candidate.content.parts:
-                            print(f"Part: {part}")
-                            if hasattr(part, 'function_call'):
-                                print("Function call found!")
-                                function_call = part.function_call
-                                break
+                # partsの中をループしてfunction_callを探す
+                for part in response.candidates[0].content.parts:
+                    if hasattr(part, 'function_call'):
+                        function_call = part.function_call
+                        print("Function call found!")
+                        break  # function_callが見つかったらループを抜ける
 
+                # function_callが見つかった場合の処理
+                if function_call:
+                    # args の中に 'fields' がある場合に対処
+                    if 'fields' in function_call.args:
+                        args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
+                        print(f"Parsed args: {args_dict}")  # デバッグ出力
+                    else:
+                        print(f"Unexpected args format: {function_call.args}")
+                        return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
 
-                # function_callが見つからなかった場合の処理
-                if not function_call:
-                    print("No function_call found in any parts.")
-                    return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-                    
-            else:
-                print("Invalid response structure or no content parts available.")
-                return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-
-            # function_callが正しい形式で取得できたかを確認
-            if isinstance(function_call, dict) and "name" in function_call:
                 # 各関数の名前に基づいて処理を行う
                 if function_call["name"] == "get_time" and not get_time_called:
                     get_time_called = True
