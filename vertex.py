@@ -944,7 +944,6 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                         break  # function_callが見つかったらループを抜ける
 
 
-
                 if function_call:
                     # args の中に 'fields' がある場合に対処
                     if hasattr(function_call.args, 'fields'):
@@ -953,8 +952,17 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     else:
                         # MapComposite形式を辞書に変換する
                         try:
-                            args_dict = {k: v.string_value for k, v in function_call.args.items()}
-                            print(f"Parsed args from MapComposite: {args_dict}")  # デバッグ出力
+                            # まずはfunction_call.argsそのものを出力して確認
+                            print(f"Raw function_call.args: {function_call.args}")
+
+                            # もしitems()が機能しない場合、代替案として以下を試す
+                            if hasattr(function_call.args, 'values'):
+                                args_dict = {k: v.string_value for k, v in function_call.args.items()}
+                                print(f"Parsed args from MapComposite: {args_dict}")  # デバッグ出力
+                            else:
+                                print("function_call.args does not have 'items'.")
+                                return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+
                         except Exception as e:
                             print(f"Failed to parse args: {e}")
                             return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
