@@ -931,42 +931,29 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
     while attempt < max_attempts:
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
 
+
         if response:
             print(f"Response: {response}")
 
             if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
                 function_call = None
 
-                # partsの中をループして各パーツを表示
-                for part in response.candidates[0].content.parts:
-                    print(f"Part: {part}")  # 各partの中身を表示
+                # partsの中をループしてfunction_callを探す
+                for idx, part in enumerate(response.candidates[0].content.parts):
+                    print(f"Part {idx}: {part}")  # 各partの中身を表示
 
+                    # function_callが含まれているかを確認
                     if hasattr(part, 'function_call'):
                         function_call = part.function_call
-                        print(f"1. function_call: {function_call}")
+                        print(f"Function call found in part {idx}: {function_call}")
                         break  # function_callが見つかったらループを抜ける
 
                 if function_call is not None:
-                    print(f"Function call raw: {function_call}")
-                    print(f"Function call as dict: {function_call.__dict__}")
-                    print(f"Function call name: {function_call.name if hasattr(function_call, 'name') else 'No name'}")
-                    print(f"Function call args: {function_call.args}")
-                    print(f"Type of function_call: {type(function_call)}")
-                    print(f"Attributes of function_call: {dir(function_call)}")
-                    
-                    # function_call.argsが文字列なのか、辞書形式なのか確認
-                    if isinstance(function_call.args, str):
-                        print(f"Raw function_call.args (string): {function_call.args}")
-                        # もしargsがJSON形式の文字列の場合、辞書に変換する
-                        try:
-                            args_dict = json.loads(function_call.args)
-                            print(f"Parsed args from JSON string: {args_dict}")
-                        except json.JSONDecodeError as e:
-                            print(f"Failed to decode JSON from args: {e}")
-                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
+                    print(f"Function call name: {function_call.name}")
+                    print(f"Function call args: {function_call.args}") 
 
-                    elif hasattr(function_call.args, 'fields'):
-                        # fieldsを持つ場合の処理
+                    # args の中に 'fields' がある場合に対処
+                    if hasattr(function_call.args, 'fields'):
                         args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
                         print(f"Parsed args from fields: {args_dict}")
 
