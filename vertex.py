@@ -945,7 +945,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                         break  # function_callが見つかったらループを抜ける
 
 
-                if function_call:
+                if function_call is not None:
                     print(f"Function call name: {function_call.name}")
                     print(f"Type of function_call: {type(function_call)}")
                     print(f"Attributes of function_call: {dir(function_call)}")
