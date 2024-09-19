@@ -935,30 +935,23 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
         response = run_conversation_f(VERTEX_MODEL, system_instruction, FUNCTIONS, i_vertex_messages_for_api, google_description, custom_description, attempt, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION)
 
         if response:
-            print(f"Response: {response}")
 
             if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
                 function_call = None
 
                 # partsの中をループしてfunction_callを探す
                 for idx, part in enumerate(response.candidates[0].content.parts):
-                    print(f"Part {idx}: {part}")  # 各partの中身を表示
-                    print(f"Attributes of part {idx}: {dir(part)}")  # partの属性を表示
 
                     # function_callが含まれているかを確認
                     if part.function_call:  # part内にfunction_callが存在するかチェック
                         function_call = part.function_call
-                        print(f"Function call found in part {idx}: {function_call}")
                         break  # function_callが見つかったらループを抜ける
 
                 if function_call is not None:
-                    print(f"Function call name: {getattr(function_call, 'name', 'None')}")
-                    print(f"Function call args: {getattr(function_call, 'args', 'None')}")
 
                     # args の中に 'fields' がある場合に対処
                     if hasattr(function_call.args, 'fields'):
                         args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
-                        print(f"Parsed args from fields: {args_dict}")
 
                     elif hasattr(function_call.args, 'items'):
                         # MapComposite形式の場合の処理
@@ -969,7 +962,6 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                                     args_dict[k] = v.string_value  # string_valueが存在する場合
                                 else:
                                     args_dict[k] = v  # そのまま値を使用
-                            print(f"Parsed args from MapComposite: {args_dict}")
                         except Exception as e:
                             print(f"Failed to parse args from MapComposite: {e}")
                             return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
@@ -978,12 +970,9 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                         try:
                             # argsがMapCompositeの可能性がある場合、itemsで展開する
                             args_dict = {key: value.string_value for key, value in function_call.args.items()}
-                            print(f"Parsed args: {args_dict}")
                         except AttributeError as e:
                             print(f"Error accessing function_call.args: {e}")
                             return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-                else:
-                    print("No valid function call found.")
                     
                 # 各関数の名前に基づいて処理を行う
                 if function_call and function_call.name == "get_time" and not get_time_called:
