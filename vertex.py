@@ -943,21 +943,18 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
 
                 # partsの中をループしてfunction_callを探す
                 for idx, part in enumerate(response.candidates[0].content.parts):
-                    # partの中身と属性を確認するために詳細を表示
                     print(f"Part {idx}: {part}")  # 各partの中身を表示
                     print(f"Attributes of part {idx}: {dir(part)}")  # partの属性を表示
             
                     # function_callが含まれているかを確認
-                    if hasattr(part, 'function_call'):
+                    if part.function_call:  # part内にfunction_callが存在するかチェック
                         function_call = part.function_call
-                        print(f"Function call raw data in part {idx}: {function_call}")
-                        print(f"Function call name: {getattr(function_call, 'name', 'None')}")
-                        print(f"Function call args: {getattr(function_call, 'args', 'None')}")
+                        print(f"Function call found in part {idx}: {function_call}")
                         break  # function_callが見つかったらループを抜ける
 
                 if function_call is not None:
-                    print(f"Function call name: {function_call.name}")
-                    print(f"Function call args: {function_call.args}")
+                    print(f"Function call name: {getattr(function_call, 'name', 'None')}")
+                    print(f"Function call args: {getattr(function_call, 'args', 'None')}")
 
                     # args の中に 'fields' がある場合に対処
                     if hasattr(function_call.args, 'fields'):
@@ -978,7 +975,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                         return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
      
                 else:
-                    print("No valid function call found.")        
+                    print("No valid function call found.")
         
                 # 各関数の名前に基づいて処理を行う
                 if function_call.name == "get_time" and not get_time_called:
