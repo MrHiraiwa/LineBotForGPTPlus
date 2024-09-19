@@ -1056,7 +1056,7 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     attempt += 1
                 else:
                     # それ以外の場合は通常の会話を実行
-                    response = run_conversation(PUT_VERTEX_MODEL, system_instruction, i_vertex_messages_for_api)
+                    response = run_conversation(VERTEX_MODEL, system_instruction, i_vertex_messages_for_api)
                     if response:
                         bot_reply = response.text
                     else:
