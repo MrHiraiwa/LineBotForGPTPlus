@@ -942,13 +942,21 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                     if hasattr(part, 'function_call') and part.function_call is not None:
                         function_call = part.function_call
                         # 確認のためにfunction_callが空でないかチェック
-                        if function_call.name and function_call.args:
-                            print("Function call found!")
+                        if function_call:
+                            print(f"Function call found: {function_call}")
+                            if hasattr(function_call, 'name'):
+                                print(f"Function call name: {function_call.name}")
+                            else:
+                                print("Function call has no name attribute.")
+                            if hasattr(function_call, 'args'):
+                                print(f"Function call args: {function_call.args}")
+                            else:
+                                print("Function call has no args attribute.")
                         else:
                             print("Function call is empty or has no name/args.")
                         break  # function_callが見つかったらループを抜ける
 
-                if function_call is not None and function_call.name:  # ここで再確認
+                if function_call is not None and hasattr(function_call, 'name'):
                     print(f"Function call raw: {function_call}")
                     print(f"Function call as dict: {function_call.__dict__}")
                     print(f"Function call name: {function_call.name}")
