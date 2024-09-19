@@ -949,20 +949,13 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                         args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
                         print(f"Parsed args: {args_dict}")  # デバッグ出力
                     else:
-                        print(f"Unexpected args format: {function_call.args}")
-                        return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-
-                
-                # function_callが見つかった場合の処理
-                if function_call:
-                    # args の中に 'fields' がある場合に対処
-                    if 'fields' in function_call.args:
-                        args_dict = {field.key: field.value.string_value for field in function_call.args.fields}
-                        print(f"Parsed args: {args_dict}")  # デバッグ出力
-                    else:
-                        print(f"Unexpected args format: {function_call.args}")
-                        return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
-
+                        # MapComposite形式を辞書に変換する
+                        try:
+                            args_dict = {k: v.string_value for k, v in function_call.args.items()}
+                            print(f"Parsed args from MapComposite: {args_dict}")  # デバッグ出力
+                        except Exception as e:
+                            print(f"Failed to parse args: {e}")
+                            return ERROR_MESSAGE, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token
         
                 # 各関数の名前に基づいて処理を行う
                 if function_call.name == "get_time" and not get_time_called:
