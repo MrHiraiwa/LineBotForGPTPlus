@@ -943,6 +943,8 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
                         print("Function call found!")
                         break  # function_callが見つかったらループを抜ける
 
+
+
                 if function_call:
                     # args の中に 'fields' がある場合に対処
                     if hasattr(function_call.args, 'fields'):
@@ -966,85 +968,73 @@ def vertex_functions(VERTEX_MODEL, FUNCTIONS, messages_for_api, USER_ID, message
 
                 elif function_call.name == "generate_image" and not generate_image_called:
                     generate_image_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply, public_img_url, public_img_url_s = generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, arguments["prompt"], user_id, message_id, bucket_name, file_age)
+                    bot_reply, public_img_url, public_img_url_s = generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, args_dict["prompt"], user_id, message_id, bucket_name, file_age)
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "wikipedia_search" and not search_wikipedia_called:
                     search_wikipedia_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply = search_wikipedia(arguments["prompt"])
+                    bot_reply = search_wikipedia(args_dict["prompt"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "scraping" and not scraping_called:
                     scraping_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply = scraping(arguments["link"])
+                    bot_reply = scraping(args_dict["link"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "get_googlesearch" and not get_googlesearch_called:
                     get_googlesearch_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply = get_googlesearch(arguments["words"])
+                    bot_reply = get_googlesearch(args_dict["words"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "get_customsearch1" and not get_customsearch1_called:
                     get_customsearch1_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply = get_customsearch1(arguments["words"])
+                    bot_reply = get_customsearch1(args_dict["words"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "calendar_get" and not get_calendar_called:
                     get_calendar_called = True
-                    arguments = json.loads(function_call["args"])
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_calendar(gaccount_access_token, gaccount_refresh_token)
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "calendar_add" and not add_calendar_called:
                     add_calendar_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = add_calendar(gaccount_access_token, gaccount_refresh_token, args_dict["summary"], args_dict["start_time"], args_dict["end_time"], args_dict["description"], args_dict["location"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "calendar_update" and not update_calendar_called:
                     update_calendar_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"], arguments["summary"], arguments["start_time"], arguments["end_time"], arguments["description"], arguments["location"])
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = update_calendar(gaccount_access_token, gaccount_refresh_token, args_dict["event_id"], args_dict["summary"], args_dict["start_time"], args_dict["end_time"], args_dict["description"], args_dict["location"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "calendar_delete" and not delete_calendar_called:
                     delete_calendar_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, arguments["event_id"])
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = delete_calendar(gaccount_access_token, gaccount_refresh_token, args_dict["event_id"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "gmail_list_get" and not get_gmail_list_called:
                     get_gmail_list_called = True
-                    arguments = json.loads(function_call["args"])
                     bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_list(gaccount_access_token, gaccount_refresh_token)
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "gmail_content_get" and not get_gmail_content_called:
                     get_gmail_content_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["search_query"])
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = get_gmail_content(gaccount_access_token, gaccount_refresh_token, args_dict["search_query"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
 
                 elif function_call.name == "gmail_content_send" and not send_gmail_content_called:
                     send_gmail_content_called = True
-                    arguments = json.loads(function_call["args"])
-                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, arguments["to_email"], arguments["subject"], arguments["body"])
+                    bot_reply, gaccount_access_token, gaccount_refresh_token = send_gmail_content(gaccount_access_token, gaccount_refresh_token, args_dict["to_email"], args_dict["subject"], args_dict["body"])
                     append_message(i_vertex_messages_for_api, "model", bot_reply)
                     attempt += 1
                 else:
