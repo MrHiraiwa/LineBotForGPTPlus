@@ -1,4 +1,5 @@
 import os
+from openai import OpenAI
 import vertexai
 from vertexai.preview.generative_models import (
     FunctionDeclaration,
