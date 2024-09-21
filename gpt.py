@@ -266,7 +266,7 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
         return f"SYSTEM:{i_prompt}のキーワードで画像を生成し、表示しました。画像が生成された旨をメッセージで伝えてください。", public_img_url, public_img_url_s
     except Exception as e:
         print(f"generate_image error: {e}" )
-        return f"SYSTEM: 画像生成にエラーが発生しました。{e}", public_img_url, public_img_url_s
+        return f"SYSTEM: 画像生成にエラーが発生しました。エラーの理由は以下になります。\n{e}", public_img_url, public_img_url_s
 
 def create_credentials(gaccount_access_token, gaccount_refresh_token):
     return Credentials(
