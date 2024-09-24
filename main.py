@@ -153,7 +153,7 @@ DEFAULT_ENV_VARS = {
     'BOT_NAME': '秘書,secretary,秘书,เลขานุการ,sekretaris',
     'SYSTEM_PROMPT': 'あなたは有能な秘書です。あなたはインターネット検索ができます。あなたは絵が生成できます。',
     'PAINT_PROMPT': '',
-    'GPT_MODEL': 'gpt-4o-2024-08-06',
+    'GPT_MODEL': 'gpt-4o-mini',
     'FUNCTIONS': 'googlesearch,customsearch,wikipedia,scraping,generateimage,googlecalendar,googlemail,stripepayment',
     'MAX_TOKEN_NUM': '2000',
     'MAX_DAILY_USAGE': '1000',
