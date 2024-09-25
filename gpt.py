@@ -587,7 +587,7 @@ def send_gmail_content(gaccount_access_token, gaccount_refresh_token, to_email, 
 def run_conversation(GPT_MODEL, messages):
     try:
         response = gpt_client.chat.completions.create(
-            model=PUT_GPT_MODEL,
+            model=GPT_MODEL,
             messages=messages,
         )
         return response  # レスポンス全体を返す
