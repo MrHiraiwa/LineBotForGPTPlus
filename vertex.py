@@ -221,6 +221,16 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
         print(f"Failed to upload file: {e}")
         raise
 
+def save_image_locally(image_result):
+    # ユニークなファイル名を生成
+    filename = f"{uuid.uuid4()}.png"
+    
+    # 画像をローカルに保存
+    image_result.save(filename)  # saveメソッドを使用して画像を保存
+    
+    # 保存した画像のファイルパスを返す
+    return filename
+
 def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
     blob_path = f'{user_id}/{message_id}.png'
@@ -234,7 +244,7 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
     try:
         if CORE_IMAGE_TYPE == "Vertex":
             image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
-            response = model.generate_images(
+            response = image_model.generate_images(
                 prompt=prompt,
                 number_of_images=1,
                 guidance_scale=float("1024"),
@@ -242,7 +252,7 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
                 language="ja",
                 seed=None,
             )
-            image_result = response[0]
+            image_result = save_image_locally(response[0])
         else:
             response = client.images.generate(
                 model="dall-e-3",
