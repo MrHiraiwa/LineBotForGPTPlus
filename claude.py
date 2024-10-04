@@ -236,6 +236,7 @@ class Generateimage(BaseTool):
         public_img_url = ""
         public_img_url_s = ""
         image_result = None
+        png_image = None
     
         try:
             if CORE_IMAGE_TYPE == "Vertex":
@@ -258,14 +259,13 @@ class Generateimage(BaseTool):
                     n=1,
                 )
                 image_result = response.data[0].url
+                png_image = download_image(image_result)
             if bucket_exists(bucket_name):
                 set_bucket_lifecycle(bucket_name, file_age)
             else:
                 print(f"Bucket {bucket_name} does not exist.")
                 return "SYSTEM:バケットが存在しません。"
 
-            # PNG画像をダウンロード
-            png_image = download_image(image_result)
             preview_image = create_preview_image(png_image)
         
             png_image.seek(0)  # ストリームをリセット
