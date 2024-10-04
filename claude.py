@@ -202,23 +202,26 @@ def create_preview_image(original_image_stream):
     preview_image.seek(0)
     return preview_image
 
-def upload_blob(bucket_name, source_file_path, destination_blob_name, content_type='image/png'): 
-    """Uploads a file to the bucket from a file path."""
+def upload_blob(bucket_name, source_stream_or_path, destination_blob_name, content_type='image/png'): 
+    """Uploads a file to the bucket from either a file path or a byte stream."""
     try:
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(destination_blob_name)
 
-        # Open the file in binary mode before uploading
-        with open(source_file_path, 'rb') as file_obj:
-            blob.upload_from_file(file_obj, content_type=content_type)
+        if isinstance(source_stream_or_path, (str, bytes, os.PathLike)):
+            # ファイルパスが渡された場合、ファイルを開く
+            with open(source_stream_or_path, 'rb') as file_obj:
+                blob.upload_from_file(file_obj, content_type=content_type)
+        else:
+            # BytesIOが渡された場合、そのままアップロード
+            blob.upload_from_file(source_stream_or_path, content_type=content_type)
     
         public_url = f"https://storage.googleapis.com/{bucket_name}/{destination_blob_name}"
         return public_url
     except Exception as e:
         print(f"Failed to upload file: {e}")
         raise
-
 
 def save_image_locally(image_result):
     # ユニークなファイル名を生成
