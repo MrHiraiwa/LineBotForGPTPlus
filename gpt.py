@@ -185,10 +185,12 @@ def bucket_exists(bucket_name):
 
     return bucket.exists()
 
-def download_image(image_url):
-    """ PNG画像をダウンロードする """
+def download_image(image_url, filename):
+    """ PNG画像をダウンロードしてファイルに保存する """
     response = requests.get(image_url)
-    return io.BytesIO(response.content)
+    with open(filename, 'wb') as file:
+        file.write(response.content)
+    return filename
 
 def create_preview_image(original_image_stream):
     """ 画像のサイズを縮小してプレビュー用画像を生成する """
@@ -257,7 +259,8 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
                 n=1,
             )
             image_result = response.data[0].url
-            png_image = download_image(image_result)
+            png_image = f"{uuid.uuid4()}.png"  # Generate a unique file name
+            download_image(image_result, png_image)  # Save image to file
             
         if bucket_exists(bucket_name):
             set_bucket_lifecycle(bucket_name, file_age)
@@ -267,9 +270,6 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
 
         # PNG画像をダウンロード
         preview_image = create_preview_image(png_image)
-        
-        png_image.seek(0)  # ストリームをリセット
-        preview_image.seek(0)  # ストリームをリセット
 
         # 画像をアップロード
         public_img_url = upload_blob(bucket_name, png_image, blob_path)
