@@ -218,12 +218,17 @@ def upload_blob(bucket_name, source_stream, destination_blob_name, content_type=
 def save_image_locally(image_result):
     # ユニークなファイル名を生成
     filename = f"{uuid.uuid4()}.png"
-    
-    # 画像をローカルに保存
-    image_result.save(filename)  # saveメソッドを使用して画像を保存
-    
-    # 保存した画像のファイルパスを返す
-    return filename
+
+    # バイトストリームに画像を保存
+    image_buffer = io.BytesIO()
+    image_result.save(image_buffer, format="PNG")  # GeneratedImage をバイトストリームに変換
+    image_buffer.seek(0)  # ストリームの先頭に移動
+
+    # ローカルファイルにも保存したい場合
+    with open(filename, "wb") as f:
+        f.write(image_buffer.getvalue())
+
+    return image_buffer
 
 class Generateimage(BaseTool):
     def use_tool(self, sentence):
