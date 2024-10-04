@@ -240,6 +240,7 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
     public_img_url = ""
     public_img_url_s = ""
     image_result = None
+    png_image = None
     
     try:
         if CORE_IMAGE_TYPE == "Vertex":
@@ -262,6 +263,7 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
                 n=1,
             )
             image_result = response.data[0].url
+            png_image = download_image(image_result)
         if bucket_exists(bucket_name):
             set_bucket_lifecycle(bucket_name, file_age)
         else:
@@ -269,7 +271,6 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
             return "SYSTEM:バケットが存在しません。", public_img_url, public_img_url_s
 
         # PNG画像をダウンロード
-        png_image = download_image(image_result)
         preview_image = create_preview_image(png_image)
         
         png_image.seek(0)  # ストリームをリセット
