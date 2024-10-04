@@ -192,10 +192,12 @@ def bucket_exists(bucket_name):
 
     return bucket.exists()
 
-def download_image(image_url):
-    """ PNG画像をダウンロードする """
+def download_image(image_url, filename):
+    """ PNG画像をダウンロードしてファイルに保存する """
     response = requests.get(image_url)
-    return io.BytesIO(response.content)
+    with open(filename, 'wb') as file:
+        file.write(response.content)
+    return filename
 
 def create_preview_image(original_image_stream):
     """ 画像のサイズを縮小してプレビュー用画像を生成する """
