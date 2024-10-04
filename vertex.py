@@ -253,7 +253,9 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
                 language="ja",
                 seed=None,
             )
-            png_image = save_image_locally(response[0])
+            #png_image = save_image_locally(response[0])
+            png_image = io.BytesIO(response[0])
+
         else:
             response = client.images.generate(
                 model="dall-e-3",
