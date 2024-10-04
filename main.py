@@ -237,8 +237,8 @@ DEFAULT_ENV_VARS = {
     'CORE_IMAGE_TYPE': 'Dall-e',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
     'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1',
-    'VERTEX_MODEL': 'gemini-1.5-pro-001',
-    'VERTEX_IMAGE_MODEL': '',
+    'VERTEX_MODEL': 'gemini-1.5-pro-002',
+    'VERTEX_IMAGE_MODEL': 'imagen-3.0-generate-001',
     'BLOCKED_ACCOUNT_MESSAGE': 'システム管理者によりアカウントがブロックされました。',
     'BLOCKED_NEW_ACCOUNTS': 'False',
     'BLOCKED_NEW_ACCOUNTS_MESSAGE': '現在、新規利用者の登録を停止しています。'

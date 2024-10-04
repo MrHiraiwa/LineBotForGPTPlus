@@ -185,10 +185,12 @@ def bucket_exists(bucket_name):
 
     return bucket.exists()
 
-def download_image(image_url):
-    """ PNG画像をダウンロードする """
+def download_image(image_url, filename):
+    """ PNG画像をダウンロードしてファイルに保存する """
     response = requests.get(image_url)
-    return io.BytesIO(response.content)
+    with open(filename, 'wb') as file:
+        file.write(response.content)
+    return filename
 
 def create_preview_image(original_image_stream):
     """ 画像のサイズを縮小してプレビュー用画像を生成する """
@@ -199,20 +201,37 @@ def create_preview_image(original_image_stream):
     preview_image.seek(0)
     return preview_image
 
-def upload_blob(bucket_name, source_stream, destination_blob_name, content_type='image/png'):
-    """Uploads a file to the bucket from a byte stream."""
+def upload_blob(bucket_name, source_stream_or_path, destination_blob_name, content_type='image/png'): 
+    """Uploads a file to the bucket from either a file path or a byte stream."""
     try:
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(destination_blob_name)
 
-        blob.upload_from_file(source_stream, content_type=content_type)
+        if isinstance(source_stream_or_path, (str, bytes, os.PathLike)):
+            # ファイルパスが渡された場合、ファイルを開く
+            with open(source_stream_or_path, 'rb') as file_obj:
+                blob.upload_from_file(file_obj, content_type=content_type)
+        else:
+            # BytesIOが渡された場合、そのままアップロード
+            blob.upload_from_file(source_stream_or_path, content_type=content_type)
     
         public_url = f"https://storage.googleapis.com/{bucket_name}/{destination_blob_name}"
         return public_url
     except Exception as e:
         print(f"Failed to upload file: {e}")
         raise
+
+
+def save_image_locally(image_result):
+    # ユニークなファイル名を生成
+    filename = f"{uuid.uuid4()}.png"
+    
+    # 画像をローカルに保存
+    image_result.save(filename)  # saveメソッドを使用して画像を保存
+    
+    # 保存した画像のファイルパスを返す
+    return filename
 
 def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, user_id, message_id, bucket_name, file_age):
     filename = str(uuid.uuid4())
@@ -223,11 +242,12 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
     public_img_url = ""
     public_img_url_s = ""
     image_result = None
+    png_image = None
     
     try:
         if CORE_IMAGE_TYPE == "Vertex":
             image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
-            response = model.generate_images(
+            response = image_model.generate_images(
                 prompt=prompt,
                 number_of_images=1,
                 guidance_scale=float("1024"),
@@ -235,7 +255,8 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
                 language="ja",
                 seed=None,
             )
-            image_result = response[0]
+            png_image = save_image_locally(response[0])
+
         else:
             response = client.images.generate(
                 model="dall-e-3",
@@ -245,6 +266,9 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
                 n=1,
             )
             image_result = response.data[0].url
+            png_image = f"{uuid.uuid4()}.png"  # Generate a unique file name
+            download_image(image_result, png_image)  # Save image to file
+            
         if bucket_exists(bucket_name):
             set_bucket_lifecycle(bucket_name, file_age)
         else:
@@ -252,11 +276,7 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
             return "SYSTEM:バケットが存在しません。", public_img_url, public_img_url_s
 
         # PNG画像をダウンロード
-        png_image = download_image(image_result)
         preview_image = create_preview_image(png_image)
-        
-        png_image.seek(0)  # ストリームをリセット
-        preview_image.seek(0)  # ストリームをリセット
 
         # 画像をアップロード
         public_img_url = upload_blob(bucket_name, png_image, blob_path)
