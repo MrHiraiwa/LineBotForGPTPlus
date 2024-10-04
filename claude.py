@@ -229,7 +229,7 @@ class Generateimage(BaseTool):
         try:
             if CORE_IMAGE_TYPE == "Vertex":
                 image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
-                response = model.generate_images(
+                response = image_model.generate_images(
                     prompt=prompt,
                     number_of_images=1,
                     guidance_scale=float("1024"),
@@ -237,7 +237,7 @@ class Generateimage(BaseTool):
                     language="ja",
                     seed=None,
                 )
-                image_result = response[0]
+                image_result = save_image_locally(response[0])
             else:
                 response = client.images.generate(
                     model="dall-e-3",
