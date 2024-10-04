@@ -262,7 +262,9 @@ class Generateimage(BaseTool):
                     n=1,
                 )
                 image_result = response.data[0].url
-                png_image = download_image(image_result)
+                png_image = f"{uuid.uuid4()}.png"  # Generate a unique file name
+                download_image(image_result, png_image)  # Save image to file
+            
             if bucket_exists(bucket_name):
                 set_bucket_lifecycle(bucket_name, file_age)
             else:
@@ -270,9 +272,6 @@ class Generateimage(BaseTool):
                 return "SYSTEM:バケットが存在しません。"
 
             preview_image = create_preview_image(png_image)
-        
-            png_image.seek(0)  # ストリームをリセット
-            preview_image.seek(0)  # ストリームをリセット
 
             # 画像をアップロード
             public_img_url = upload_blob(bucket_name, png_image, blob_path)
