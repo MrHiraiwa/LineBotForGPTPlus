@@ -226,9 +226,9 @@ def generate_image(CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL, paint_prompt, i_prompt, 
     
     try:
         if CORE_IMAGE_TYPE == "Vertex":
-            generate_image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
-            response = generate_model.generate_images(
-                prompt=i_prompt,
+            image_model = ImageGenerationModel.from_pretrained(VERTEX_IMAGE_MODEL)
+            response = image_model.generate_images(
+                prompt=prompt,
                 number_of_images=1,
                 guidance_scale=float("1024"),
                 aspect_ratio="1:1",
