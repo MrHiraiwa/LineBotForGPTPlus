@@ -249,7 +249,7 @@ class Generateimage(BaseTool):
                     language="ja",
                     seed=None,
                 )
-                image_result = save_image_locally(response[0])
+                png_image = save_image_locally(response[0])
             else:
                 response = client.images.generate(
                     model="dall-e-3",
