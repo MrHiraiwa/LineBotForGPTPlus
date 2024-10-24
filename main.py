@@ -737,7 +737,7 @@ def handle_message(event):
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
                     'audio_speed' : audio_speed,
-                    'translate_language' : translate_language
+                    'translate_language' : translate_language,
                     'core_ai_type_personal' : CORE_AI_TYPE
                 }
                 transaction.set(doc_ref, user)
