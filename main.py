@@ -665,6 +665,7 @@ def handle_message(event):
             gaccount_refresh_token = ""
             free_duration = False
             blocked_account = False
+            core_ai_type_personal = None
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -714,6 +715,7 @@ def handle_message(event):
                 gaccount_access_token = user.get('gaccount_access_token', "")
                 gaccount_refresh_token = user.get('gaccount_refresh_token', "")
                 blocked_account = user.get('blocked_account', False)
+                core_ai_type_personal =  user.get('core_ai_type_personal', CORE_AI_TYPE)
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -736,6 +738,7 @@ def handle_message(event):
                     'or_english' : or_english,
                     'audio_speed' : audio_speed,
                     'translate_language' : translate_language
+                    'core_ai_type_personal' : CORE_AI_TYPE
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
@@ -1028,7 +1031,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
                         
-                elif CORE_AI_TYPE == 'Claude':
+                elif core_ai_type_personal == 'Claude':
                     temp_messages_final = []
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
@@ -1036,7 +1039,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
                         
-                elif CORE_AI_TYPE == 'LocalLLM':
+                elif core_ai_type_personal == 'LocalLLM':
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})                    
@@ -1044,7 +1047,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
 
-                if CORE_AI_TYPE == 'Vertex':
+                if core_ai_type_personal == 'Vertex':
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
