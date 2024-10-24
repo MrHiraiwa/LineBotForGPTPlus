@@ -1099,6 +1099,8 @@ def handle_message(event):
             user['gaccount_refresh_token'] = gaccount_refresh_token
             user['blocked_account'] = blocked_account
 
+            user['core_ai_type_personal'] = core_ai_type_personal
+
             # Firestore ドキュメントを更新
             transaction.set(doc_ref, {**user, 'messages': encrypted_messages}, merge=True)
 
