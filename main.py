@@ -139,6 +139,12 @@ REQUIRED_ENV_VARS = [
     "GACCOUNT_QUICK_REPLY",
     "GACCOUNT_AUTH_URL",
     "CORE_AI_TYPE",
+    "CORE_AI_TYPE_KEYWORDS",
+    "CORE_AI_TYPE_MESSAGE",
+    "CORE_AI_TYPE_GUIDE_MESSAGE",
+    "CORE_AI_TYPE_GPT_QUICK_REPLY",
+    "CORE_AI_TYPE_GEMINI_QUICK_REPLY",
+    "CORE_AI_TYPE_CLAUDE_QUICK_REPLY",
     "CORE_IMAGE_TYPE",
     "CLAUDE_MODEL",
     "LOCALLLM_BASE_URL",
@@ -234,6 +240,12 @@ DEFAULT_ENV_VARS = {
     'GACCOUNT_QUICK_REPLY': '👤Gアカウント登録',
     'GACCOUNT_AUTH_URL': 'https://example.com',
     'CORE_AI_TYPE': 'GPT',
+    'CORE_AI_TYPE_KEYWORDS': 'AIタイプ変更,ＡＩタイプ変更,aiタイプ変更,ａｉタイプ変更',
+    'CORE_AI_TYPE_MESSAGE': 'AIタイプを変更しました。',
+    'CORE_AI_TYPE_GUIDE_MESSAGE': 'ユーザーに「画面下の項目をタップすると使用するAIのタイプを変更します」と案内してください。以下の文章はユーザーから送られたものです。', 
+    'CORE_AI_TYPE_GPT_QUICK_REPLY': '🧠ChatGPT',
+    'CORE_AI_TYPE_GEMINI_QUICK_REPLY': '🌟Gemini',
+    'CORE_AI_TYPE_CLAUDE_QUICK_REPLY': '📚Claude',
     'CORE_IMAGE_TYPE': 'Dall-e',
     'CLAUDE_MODEL': 'claude-3-haiku-20240307',
     'LOCALLLM_BASE_URL': 'https://127.0.0.1:5000/v1',
@@ -270,7 +282,8 @@ def reload_settings():
     global VOICEVOX_URL, VOICEVOX_STYLE_ID
     global GACCOUNT_KEYWORDS, GACCOUNT_GUIDE_MESSAGE, GACCOUNT_FAIL_MESSAGE, GACCOUNT_QUICK_REPLY, GACCOUNT_AUTH_URL
     global DATABASE_NAME
-    global CORE_AI_TYPE, CORE_IMAGE_TYPE
+    global CORE_AI_TYPE, CORE_AI_TYPE_KEYWORDS, CORE_AI_TYPE_MESSAGE, CORE_AI_TYPE_GUIDE_MESSAGE, CORE_AI_TYPE_GPT_QUICK_REPLY, CORE_AI_TYPE_GEMINI_QUICK_REPLY, CORE_AI_TYPE_CLAUDE_QUICK_REPLY
+    global CORE_IMAGE_TYPE
     global CLAUDE_MODEL
     global LOCALLLM_BASE_URL
     global VERTEX_MODEL, VERTEX_IMAGE_MODEL
@@ -405,6 +418,12 @@ def reload_settings():
     GACCOUNT_QUICK_REPLY = get_setting('GACCOUNT_QUICK_REPLY')
     GACCOUNT_AUTH_URL = get_setting('GACCOUNT_AUTH_URL')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
+    CORE_AI_TYPE_KEYWORDS = get_setting('CORE_AI_TYPE_KEYWORDS')
+    CORE_AI_TYPE_MESSAGE = get_setting('CORE_AI_TYPE_MESSAGE')
+    CORE_AI_TYPE_GUIDE_MESSAGE = get_setting('CORE_AI_TYPE_GUIDE_MESSAGE')
+    CORE_AI_TYPE_GPT_QUICK_REPLY = get_setting('CORE_AI_TYPE_GPT_QUICK_REPLY')
+    CORE_AI_TYPE_GEMINI_QUICK_REPLY = get_setting('CORE_AI_TYPE_GEMINI_QUICK_REPLY')
+    CORE_AI_TYPE_CLAUDE_QUICK_REPLY = get_setting('CORE_AI_TYPE_CLAUDE_QUICK_REPLY')
     CORE_IMAGE_TYPE = get_setting('CORE_IMAGE_TYPE')
     CLAUDE_MODEL = get_setting('CLAUDE_MODEL')
     LOCALLLM_BASE_URL = get_setting('LOCALLLM_BASE_URL')
@@ -665,6 +684,7 @@ def handle_message(event):
             gaccount_refresh_token = ""
             free_duration = False
             blocked_account = False
+            core_ai_type_personal = None
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -714,6 +734,7 @@ def handle_message(event):
                 gaccount_access_token = user.get('gaccount_access_token', "")
                 gaccount_refresh_token = user.get('gaccount_refresh_token', "")
                 blocked_account = user.get('blocked_account', False)
+                core_ai_type_personal =  user.get('core_ai_type_personal', CORE_AI_TYPE)
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -735,7 +756,8 @@ def handle_message(event):
                     'or_chinese' : or_chinese,
                     'or_english' : or_english,
                     'audio_speed' : audio_speed,
-                    'translate_language' : translate_language
+                    'translate_language' : translate_language,
+                    'core_ai_type_personal' : CORE_AI_TYPE
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
@@ -910,6 +932,30 @@ def handle_message(event):
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
+            elif CORE_AI_TYPE_GPT_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['core_ai_type_personal'] = "GPT"
+                CORE_AI_TYPE_MESSAGE = get_setting('CORE_AI_TYPE_MESSAGE')
+                bot_reply_list.append(['text', CORE_AI_TYPE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
+            elif CORE_AI_TYPE_GEMINI_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['core_ai_type_personal'] = "Vertex"
+                CORE_AI_TYPE_MESSAGE = get_setting('CORE_AI_TYPE_MESSAGE')
+                bot_reply_list.append(['text', CORE_AI_TYPE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
+            elif CORE_AI_TYPE_CLAUDE_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['core_ai_type_personal'] = "Claude"
+                CORE_AI_TYPE_MESSAGE = get_setting('CORE_AI_TYPE_MESSAGE')
+                bot_reply_list.append(['text', CORE_AI_TYPE_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
 
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 enable_quick_reply = True
@@ -968,7 +1014,13 @@ def handle_message(event):
                     bot_reply_list.append(['text', GACCOUNT_FAIL_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
-
+            if any(word in user_message for word in CORE_AI_TYPE_KEYWORDS) and "aitype" in FUNCTIONS and not exec_functions:
+                enable_quick_reply = True
+                quick_reply_items.append(['message', CORE_AI_TYPE_GPT_QUICK_REPLY, CORE_AI_TYPE_GPT_QUICK_REPLY])
+                quick_reply_items.append(['message', CORE_AI_TYPE_GEMINI_QUICK_REPLY, CORE_AI_TYPE_GEMINI_QUICK_REPLY])
+                quick_reply_items.append(['message', CORE_AI_TYPE_CLAUDE_QUICK_REPLY, CORE_AI_TYPE_CLAUDE_QUICK_REPLY])
+                head_message = head_message + CORE_AI_TYPE_GUIDE_MESSAGE
+            
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
                 head_message = head_message + TRANSLATE_ORDER
@@ -1028,7 +1080,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
                         
-                elif CORE_AI_TYPE == 'Claude':
+                elif core_ai_type_personal == 'Claude':
                     temp_messages_final = []
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
@@ -1036,7 +1088,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
                         
-                elif CORE_AI_TYPE == 'LocalLLM':
+                elif core_ai_type_personal == 'LocalLLM':
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})                    
@@ -1044,7 +1096,7 @@ def handle_message(event):
                     if enable_quick_reply == True:
                         public_img_url = []
 
-                if CORE_AI_TYPE == 'Vertex':
+                if core_ai_type_personal == 'Vertex':
                     temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
