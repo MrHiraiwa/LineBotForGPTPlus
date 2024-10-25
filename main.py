@@ -309,7 +309,7 @@ def reload_settings():
     if SYSTEM_PROMPT:
         SYSTEM_PROMPT = SYSTEM_PROMPT.split(',')
     else:
-        SYSTEM_PROMPT = []
+        SYSTEM_PROMPT = ""
     SYSTEM_PROMPT1 = str(SYSTEM_PROMPT[0]) if len(SYSTEM_PROMPT) > 0 else None
     SYSTEM_PROMPT2 = str(SYSTEM_PROMPT[1]) if len(SYSTEM_PROMPT) > 1 else None
     PAINT_PROMPT = get_setting('PAINT_PROMPT') 
@@ -576,9 +576,6 @@ def settings():
     required_env_vars=REQUIRED_ENV_VARS
     )
 
-def systemRole():
-    return { "role": "system", "content": SYSTEM_PROMPT }
-
 def get_encrypted_message(message, hashed_secret_key):
     cipher = AES.new(hashed_secret_key, AES.MODE_ECB)
     message = message.encode('utf-8')
@@ -709,7 +706,7 @@ def handle_message(event):
             blocked_account = False
             core_ai_type_personal = None
             system_prompt_personal = 0
-            system_prompt_temp = SYSTEM_PROMPT
+            system_prompt_temp = SYSTEM_PROMPT1
             
             if message_type == 'text':
                 user_message = event.message.text
