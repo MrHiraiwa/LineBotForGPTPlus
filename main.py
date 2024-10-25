@@ -152,7 +152,12 @@ REQUIRED_ENV_VARS = [
     "VERTEX_IMAGE_MODEL",
     "BLOCKED_ACCOUNT_MESSAGE",
     "BLOCKED_NEW_ACCOUNTS",
-    "BLOCKED_NEW_ACCOUNTS_MESSAGE"
+    "BLOCKED_NEW_ACCOUNTS_MESSAGE",
+    "SYSTEM_PROMPT_KEYWORDS",
+    "SYSTEM_PROMPT_MESSAGE",
+    "SYSTEM_PROMPT_GUIDE_MESSAGE",
+    "SYSTEM_PROMPT1_QUICK_REPLY",
+    "SYSTEM_PROMPT2_QUICK_REPLY",
 ]
 
 DEFAULT_ENV_VARS = {
@@ -253,7 +258,12 @@ DEFAULT_ENV_VARS = {
     'VERTEX_IMAGE_MODEL': 'imagen-3.0-generate-001',
     'BLOCKED_ACCOUNT_MESSAGE': 'システム管理者によりアカウントがブロックされました。',
     'BLOCKED_NEW_ACCOUNTS': 'False',
-    'BLOCKED_NEW_ACCOUNTS_MESSAGE': '現在、新規利用者の登録を停止しています。'
+    'BLOCKED_NEW_ACCOUNTS_MESSAGE': '現在、新規利用者の登録を停止しています。',
+    'SYSTEM_PROMPT_KEYWORDS': 'プロンプト変更',
+    'SYSTEM_PROMPT_GUIDE_MESSAGE': 'ユーザーに「以下の項目を選択すると「私のプロンプトが変更されます。プロンプトを変更した場合、私の記憶も消去されます」と案内してください。以下の文章はユーザーから送られたものです。',
+    'SYSTEM_PROMPT_MESSAGE': 'プロンプトを変更し記憶を消去しました。',
+    'SYSTEM_PROMPT1_QUICK_REPLY': '🥇プロンプト',
+    'SYSTEM_PROMPT2_QUICK_REPLY': '🥈プロンプト'
 }
 
 try:
@@ -288,6 +298,7 @@ def reload_settings():
     global LOCALLLM_BASE_URL
     global VERTEX_MODEL, VERTEX_IMAGE_MODEL
     global BLOCKED_ACCOUNT_MESSAGE, BLOCKED_NEW_ACCOUNTS, BLOCKED_NEW_ACCOUNTS_MESSAGE
+    global SYSTEM_PROMPT_KEYWORDS, SYSTEM_PROMPT_MESSAGE, SYSTEM_PROMPT_GUIDE_MESSAGE, SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY
     
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -438,6 +449,12 @@ def reload_settings():
     BLOCKED_ACCOUNT_MESSAGE = get_setting('BLOCKED_ACCOUNT_MESSAGE')
     BLOCKED_NEW_ACCOUNTS = get_setting('BLOCKED_NEW_ACCOUNTS')
     BLOCKED_NEW_ACCOUNTS_MESSAGE = get_setting('BLOCKED_NEW_ACCOUNTS_MESSAGE')
+    SYSTEM_PROMPT_KEYWORDS = get_setting('SYSTEM_PROMPT_KEYWORDS')
+    SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+    SYSTEM_PROMPT_GUIDE_MESSAGE = get_setting('SYSTEM_PROMPT_GUIDE_MESSAGE')
+    SYSTEM_PROMPT1_QUICK_REPLY = get_setting('SYSTEM_PROMPT1_QUICK_REPLY')
+    SYSTEM_PROMPT2_QUICK_REPLY = get_setting('SYSTEM_PROMPT2_QUICK_REPLY')
+    
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -691,6 +708,7 @@ def handle_message(event):
             free_duration = False
             blocked_account = False
             core_ai_type_personal = None
+            system_prompt_number = 0
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -740,7 +758,8 @@ def handle_message(event):
                 gaccount_access_token = user.get('gaccount_access_token', "")
                 gaccount_refresh_token = user.get('gaccount_refresh_token', "")
                 blocked_account = user.get('blocked_account', False)
-                core_ai_type_personal =  user.get('core_ai_type_personal', CORE_AI_TYPE)
+                core_ai_type_personal = user.get('core_ai_type_personal', CORE_AI_TYPE)
+                system_prompt_number = user.get('system_prompt_number', 0)
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -763,7 +782,8 @@ def handle_message(event):
                     'or_english' : or_english,
                     'audio_speed' : audio_speed,
                     'translate_language' : translate_language,
-                    'core_ai_type_personal' : CORE_AI_TYPE
+                    'core_ai_type_personal' : CORE_AI_TYPE,
+                    'system_prompt_number' : 0
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
@@ -962,6 +982,22 @@ def handle_message(event):
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
+            elif SYSTEM_PROMPT1_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['system_prompt_personal'] = 1
+                SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+                bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
+            elif SYSTEM_PROMPT2_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['system_prompt_personal'] = 2
+                SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+                bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
 
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 enable_quick_reply = True
@@ -1026,6 +1062,11 @@ def handle_message(event):
                 quick_reply_items.append(['message', CORE_AI_TYPE_GEMINI_QUICK_REPLY, CORE_AI_TYPE_GEMINI_QUICK_REPLY])
                 quick_reply_items.append(['message', CORE_AI_TYPE_CLAUDE_QUICK_REPLY, CORE_AI_TYPE_CLAUDE_QUICK_REPLY])
                 head_message = head_message + CORE_AI_TYPE_GUIDE_MESSAGE
+            if any(word in user_message for word in SYSTEM_PROMPT_KEYWORDS) and SYSTEM_PROMPT1 and SYSTEM_PROMPT2 and not exec_functions:
+                enable_quick_reply = True
+                quick_reply_items.append(['message', SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT1_QUICK_REPLY])
+                quick_reply_items.append(['message', SYSTEM_PROMPT2_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY])
+                head_message = head_message + SYSTEM_PROMPT_GUIDE_MESSAGE
             
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
