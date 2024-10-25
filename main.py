@@ -1105,9 +1105,18 @@ def handle_message(event):
                     user['messages'].append({'role': 'user', 'content': display_name + ":" + user_message})
                     transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
-
+            if SYSTEM_PROMPT1 and SYSTEM_PROMPT2:
+                if system_prompt_personal == 1:
+                    system_prompt_temp = SYSTEM_PROMPT1
+                elif system_prompt_personal == 2:
+                    system_prompt_temp = SYSTEM_PROMPT2
+                else:
+                    system_prompt_temp = SYSTEM_PROMPT1
+            else:
+                system_prompt_temp = SYSTEM_PROMPT
+            
             temp_messages = "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
-            total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
+            total_chars = len(encoding.encode(system_prompt_temp)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 if user['messages'][0]['role'] == 'user':
                     # 先頭がユーザーメッセージの場合、ユーザーメッセージとアシスタントメッセージを削除
@@ -1116,11 +1125,11 @@ def handle_message(event):
                     user['messages'].pop(0)
                     user['messages'].pop(0)
 
-                total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
+                total_chars = len(encoding.encode(system_prompt_temp)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
 
             try:
                 if CORE_AI_TYPE == 'GPT':
-                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final = [{'role': 'system', 'content': system_prompt_temp}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
                     bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
@@ -1131,12 +1140,12 @@ def handle_message(event):
                     temp_messages_final = []
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, FUNCTIONS, system_prompt_temp, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
                 elif core_ai_type_personal == 'LocalLLM':
-                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final = [{'role': 'system', 'content': system_prompt_temp}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})                    
                     bot_reply, public_img_url, public_img_url_s = localllm_functions(LOCALLLM_BASE_URL, temp_messages_final)
@@ -1144,7 +1153,7 @@ def handle_message(event):
                         public_img_url = []
 
                 if core_ai_type_personal == 'Vertex':
-                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final = [{'role': 'system', 'content': system_prompt_temp}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
                     bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = vertex_functions(VERTEX_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
