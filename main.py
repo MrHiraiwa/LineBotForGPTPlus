@@ -152,7 +152,12 @@ REQUIRED_ENV_VARS = [
     "VERTEX_IMAGE_MODEL",
     "BLOCKED_ACCOUNT_MESSAGE",
     "BLOCKED_NEW_ACCOUNTS",
-    "BLOCKED_NEW_ACCOUNTS_MESSAGE"
+    "BLOCKED_NEW_ACCOUNTS_MESSAGE",
+    "SYSTEM_PROMPT_KEYWORDS",
+    "SYSTEM_PROMPT_MESSAGE",
+    "SYSTEM_PROMPT_GUIDE_MESSAGE",
+    "SYSTEM_PROMPT1_QUICK_REPLY",
+    "SYSTEM_PROMPT2_QUICK_REPLY"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -253,7 +258,12 @@ DEFAULT_ENV_VARS = {
     'VERTEX_IMAGE_MODEL': 'imagen-3.0-generate-001',
     'BLOCKED_ACCOUNT_MESSAGE': 'システム管理者によりアカウントがブロックされました。',
     'BLOCKED_NEW_ACCOUNTS': 'False',
-    'BLOCKED_NEW_ACCOUNTS_MESSAGE': '現在、新規利用者の登録を停止しています。'
+    'BLOCKED_NEW_ACCOUNTS_MESSAGE': '現在、新規利用者の登録を停止しています。',
+    'SYSTEM_PROMPT_KEYWORDS': 'プロンプト変更',
+    'SYSTEM_PROMPT_GUIDE_MESSAGE': 'ユーザーに「以下の項目を選択すると「私のプロンプトが変更されます。プロンプトを変更した場合、私の記憶も消去されます」と案内してください。以下の文章はユーザーから送られたものです。',
+    'SYSTEM_PROMPT_MESSAGE': 'プロンプトを変更し記憶を消去しました。',
+    'SYSTEM_PROMPT1_QUICK_REPLY': '🥇プロンプト',
+    'SYSTEM_PROMPT2_QUICK_REPLY': '🥈プロンプト'
 }
 
 try:
@@ -263,7 +273,7 @@ except Exception as e:
     raise
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, PAINT_PROMPT, GPT_MODEL, FUNCTIONS
+    global BOT_NAME, SYSTEM_PROMPT, SYSTEM_PROMPT1, SYSTEM_PROMPT2, PAINT_PROMPT, GPT_MODEL, FUNCTIONS
     global MAX_TOKEN_NUM, MAX_DAILY_USAGE, MAX_MONTHLY_USAGE, GROUP_MAX_DAILY_USAGE, FREE_LIMIT_DAY, MAX_DAILY_MESSAGE, MAX_MONTHLY_MESSAGE
     global NG_MESSAGE, NG_KEYWORDS
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
@@ -288,6 +298,7 @@ def reload_settings():
     global LOCALLLM_BASE_URL
     global VERTEX_MODEL, VERTEX_IMAGE_MODEL
     global BLOCKED_ACCOUNT_MESSAGE, BLOCKED_NEW_ACCOUNTS, BLOCKED_NEW_ACCOUNTS_MESSAGE
+    global SYSTEM_PROMPT_KEYWORDS, SYSTEM_PROMPT_MESSAGE, SYSTEM_PROMPT_GUIDE_MESSAGE, SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY
     
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -295,6 +306,12 @@ def reload_settings():
     else:
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
+    if SYSTEM_PROMPT:
+        SYSTEM_PROMPT = SYSTEM_PROMPT.split(',')
+    else:
+        SYSTEM_PROMPT = ""
+    SYSTEM_PROMPT1 = str(SYSTEM_PROMPT[0]) if len(SYSTEM_PROMPT) > 0 else None
+    SYSTEM_PROMPT2 = str(SYSTEM_PROMPT[1]) if len(SYSTEM_PROMPT) > 1 else None
     PAINT_PROMPT = get_setting('PAINT_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
     FUNCTIONS = get_setting('FUNCTIONS')
@@ -419,6 +436,10 @@ def reload_settings():
     GACCOUNT_AUTH_URL = get_setting('GACCOUNT_AUTH_URL')
     CORE_AI_TYPE = get_setting('CORE_AI_TYPE')
     CORE_AI_TYPE_KEYWORDS = get_setting('CORE_AI_TYPE_KEYWORDS')
+    if CORE_AI_TYPE_KEYWORDS:
+        CORE_AI_TYPE_KEYWORDS = CORE_AI_TYPE_KEYWORDS.split(',')
+    else:
+        CORE_AI_TYPE_KEYWORDS = []
     CORE_AI_TYPE_MESSAGE = get_setting('CORE_AI_TYPE_MESSAGE')
     CORE_AI_TYPE_GUIDE_MESSAGE = get_setting('CORE_AI_TYPE_GUIDE_MESSAGE')
     CORE_AI_TYPE_GPT_QUICK_REPLY = get_setting('CORE_AI_TYPE_GPT_QUICK_REPLY')
@@ -432,6 +453,16 @@ def reload_settings():
     BLOCKED_ACCOUNT_MESSAGE = get_setting('BLOCKED_ACCOUNT_MESSAGE')
     BLOCKED_NEW_ACCOUNTS = get_setting('BLOCKED_NEW_ACCOUNTS')
     BLOCKED_NEW_ACCOUNTS_MESSAGE = get_setting('BLOCKED_NEW_ACCOUNTS_MESSAGE')
+    SYSTEM_PROMPT_KEYWORDS = get_setting('SYSTEM_PROMPT_KEYWORDS')
+    if SYSTEM_PROMPT_KEYWORDS:
+        SYSTEM_PROMPT_KEYWORDS = SYSTEM_PROMPT_KEYWORDS.split(',')
+    else:
+        SYSTEM_PROMPT_KEYWORDS = []
+    SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+    SYSTEM_PROMPT_GUIDE_MESSAGE = get_setting('SYSTEM_PROMPT_GUIDE_MESSAGE')
+    SYSTEM_PROMPT1_QUICK_REPLY = get_setting('SYSTEM_PROMPT1_QUICK_REPLY')
+    SYSTEM_PROMPT2_QUICK_REPLY = get_setting('SYSTEM_PROMPT2_QUICK_REPLY')
+    
     
 def get_setting(key):
     doc_ref = db.collection(u'settings').document('app_settings')
@@ -552,9 +583,6 @@ def settings():
     default_settings=DEFAULT_ENV_VARS, 
     required_env_vars=REQUIRED_ENV_VARS
     )
-
-def systemRole():
-    return { "role": "system", "content": SYSTEM_PROMPT }
 
 def get_encrypted_message(message, hashed_secret_key):
     cipher = AES.new(hashed_secret_key, AES.MODE_ECB)
@@ -685,6 +713,8 @@ def handle_message(event):
             free_duration = False
             blocked_account = False
             core_ai_type_personal = None
+            system_prompt_personal = 0
+            system_prompt_temp = SYSTEM_PROMPT1
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -734,7 +764,8 @@ def handle_message(event):
                 gaccount_access_token = user.get('gaccount_access_token', "")
                 gaccount_refresh_token = user.get('gaccount_refresh_token', "")
                 blocked_account = user.get('blocked_account', False)
-                core_ai_type_personal =  user.get('core_ai_type_personal', CORE_AI_TYPE)
+                core_ai_type_personal = user.get('core_ai_type_personal', CORE_AI_TYPE)
+                system_prompt_personal = user.get('system_prompt_personal', 0)
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -757,7 +788,8 @@ def handle_message(event):
                     'or_english' : or_english,
                     'audio_speed' : audio_speed,
                     'translate_language' : translate_language,
-                    'core_ai_type_personal' : CORE_AI_TYPE
+                    'core_ai_type_personal' : CORE_AI_TYPE,
+                    'system_prompt_personal' : 0
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
@@ -956,6 +988,22 @@ def handle_message(event):
                 line_reply(reply_token, bot_reply_list)
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
+            elif SYSTEM_PROMPT1_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['system_prompt_personal'] = 1
+                SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+                bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
+            elif SYSTEM_PROMPT2_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['system_prompt_personal'] = 2
+                SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+                bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
 
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 enable_quick_reply = True
@@ -1020,6 +1068,11 @@ def handle_message(event):
                 quick_reply_items.append(['message', CORE_AI_TYPE_GEMINI_QUICK_REPLY, CORE_AI_TYPE_GEMINI_QUICK_REPLY])
                 quick_reply_items.append(['message', CORE_AI_TYPE_CLAUDE_QUICK_REPLY, CORE_AI_TYPE_CLAUDE_QUICK_REPLY])
                 head_message = head_message + CORE_AI_TYPE_GUIDE_MESSAGE
+            if any(word in user_message for word in SYSTEM_PROMPT_KEYWORDS) and SYSTEM_PROMPT1 and SYSTEM_PROMPT2 and not exec_functions:
+                enable_quick_reply = True
+                quick_reply_items.append(['message', SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT1_QUICK_REPLY])
+                quick_reply_items.append(['message', SYSTEM_PROMPT2_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY])
+                head_message = head_message + SYSTEM_PROMPT_GUIDE_MESSAGE
             
             if translate_language != 'OFF':
                 TRANSLATE_ORDER = get_setting('TRANSLATE_ORDER').format(display_name=display_name,translate_language=translate_language)
@@ -1058,9 +1111,18 @@ def handle_message(event):
                     user['messages'].append({'role': 'user', 'content': display_name + ":" + user_message})
                     transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
-
+            print(f"system_prompt_temp:{system_prompt_temp}")
+            if SYSTEM_PROMPT1 and SYSTEM_PROMPT2:
+                if system_prompt_personal == 1:
+                    system_prompt_temp = SYSTEM_PROMPT1
+                elif system_prompt_personal == 2:
+                    system_prompt_temp = SYSTEM_PROMPT2
+                else:
+                    system_prompt_temp = SYSTEM_PROMPT1
+            print(f"system_prompt_temp:{system_prompt_temp}, SYSTEM_PROMPT1:{SYSTEM_PROMPT1}, SYSTEM_PROMPT2:{SYSTEM_PROMPT2}")
+            
             temp_messages = "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
-            total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
+            total_chars = len(encoding.encode(system_prompt_temp)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
             while total_chars > MAX_TOKEN_NUM and len(user['messages']) > 0:
                 if user['messages'][0]['role'] == 'user':
                     # 先頭がユーザーメッセージの場合、ユーザーメッセージとアシスタントメッセージを削除
@@ -1069,11 +1131,11 @@ def handle_message(event):
                     user['messages'].pop(0)
                     user['messages'].pop(0)
 
-                total_chars = len(encoding.encode(SYSTEM_PROMPT)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
+                total_chars = len(encoding.encode(system_prompt_temp)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
 
             try:
                 if CORE_AI_TYPE == 'GPT':
-                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final = [{'role': 'system', 'content': system_prompt_temp}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
                     bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = chatgpt_functions(GPT_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
@@ -1084,12 +1146,12 @@ def handle_message(event):
                     temp_messages_final = []
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
-                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, FUNCTIONS, SYSTEM_PROMPT, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
+                    bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = claude_functions(CLAUDE_MODEL, FUNCTIONS, system_prompt_temp, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
                     if enable_quick_reply == True:
                         public_img_url = []
                         
                 elif core_ai_type_personal == 'LocalLLM':
-                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final = [{'role': 'system', 'content': system_prompt_temp}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})                    
                     bot_reply, public_img_url, public_img_url_s = localllm_functions(LOCALLLM_BASE_URL, temp_messages_final)
@@ -1097,7 +1159,7 @@ def handle_message(event):
                         public_img_url = []
 
                 if core_ai_type_personal == 'Vertex':
-                    temp_messages_final = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+                    temp_messages_final = [{'role': 'system', 'content': system_prompt_temp}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
                     bot_reply, public_img_url, public_img_url_s, gaccount_access_token, gaccount_refresh_token = vertex_functions(VERTEX_MODEL, FUNCTIONS, temp_messages_final, user_id, message_id, ERROR_MESSAGE, PAINT_PROMPT, BACKET_NAME, FILE_AGE, GOOGLE_DESCRIPTION, CUSTOM_DESCRIPTION, gaccount_access_token, gaccount_refresh_token, CORE_IMAGE_TYPE, VERTEX_IMAGE_MODEL)
