@@ -709,6 +709,7 @@ def handle_message(event):
             blocked_account = False
             core_ai_type_personal = None
             system_prompt_personal = 0
+            system_prompt_temp = ""
             
             if message_type == 'text':
                 user_message = event.message.text
