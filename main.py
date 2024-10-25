@@ -157,7 +157,7 @@ REQUIRED_ENV_VARS = [
     "SYSTEM_PROMPT_MESSAGE",
     "SYSTEM_PROMPT_GUIDE_MESSAGE",
     "SYSTEM_PROMPT1_QUICK_REPLY",
-    "SYSTEM_PROMPT2_QUICK_REPLY",
+    "SYSTEM_PROMPT2_QUICK_REPLY"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -708,7 +708,7 @@ def handle_message(event):
             free_duration = False
             blocked_account = False
             core_ai_type_personal = None
-            system_prompt_number = 0
+            system_prompt_personal = 0
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -759,7 +759,7 @@ def handle_message(event):
                 gaccount_refresh_token = user.get('gaccount_refresh_token', "")
                 blocked_account = user.get('blocked_account', False)
                 core_ai_type_personal = user.get('core_ai_type_personal', CORE_AI_TYPE)
-                system_prompt_number = user.get('system_prompt_number', 0)
+                system_prompt_personal = user.get('system_prompt_personal', 0)
                 
                 if nowDate.date() != updated_date.date():
                     daily_usage = 0
@@ -783,7 +783,7 @@ def handle_message(event):
                     'audio_speed' : audio_speed,
                     'translate_language' : translate_language,
                     'core_ai_type_personal' : CORE_AI_TYPE,
-                    'system_prompt_number' : 0
+                    'system_prompt_personal' : 0
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
