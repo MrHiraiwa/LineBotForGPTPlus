@@ -310,9 +310,8 @@ def reload_settings():
         SYSTEM_PROMPT = SYSTEM_PROMPT.split(',')
     else:
         SYSTEM_PROMPT = []
-    if SYSTEM_PROMPT[0] and SYSTEM_PROMPT[1]:
-        SYSTEM_PROMPT1 = SYSTEM_PROMPT[0] if len(SYSTEM_PROMPT) > 0 else None
-        SYSTEM_PROMPT2 = SYSTEM_PROMPT[1] if len(SYSTEM_PROMPT) > 1 else None
+    SYSTEM_PROMPT1 = SYSTEM_PROMPT[0] if len(SYSTEM_PROMPT) > 0 else None
+    SYSTEM_PROMPT2 = SYSTEM_PROMPT[1] if len(SYSTEM_PROMPT) > 1 else None
     PAINT_PROMPT = get_setting('PAINT_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
     FUNCTIONS = get_setting('FUNCTIONS')
