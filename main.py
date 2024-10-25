@@ -994,6 +994,7 @@ def handle_message(event):
                 SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
                 bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
+                user['messages'] = []
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
             elif SYSTEM_PROMPT2_QUICK_REPLY in user_message:
@@ -1002,6 +1003,7 @@ def handle_message(event):
                 SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
                 bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
                 line_reply(reply_token, bot_reply_list)
+                user['messages'] = []
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
 
