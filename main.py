@@ -709,7 +709,7 @@ def handle_message(event):
             blocked_account = False
             core_ai_type_personal = None
             system_prompt_personal = 0
-            system_prompt_temp = ""
+            system_prompt_temp = SYSTEM_PROMPT
             
             if message_type == 'text':
                 user_message = event.message.text
@@ -1106,6 +1106,7 @@ def handle_message(event):
                     user['messages'].append({'role': 'user', 'content': display_name + ":" + user_message})
                     transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                     return 'OK'
+            print(f"system_prompt_temp:{system_prompt_temp}")
             if SYSTEM_PROMPT1 and SYSTEM_PROMPT2:
                 if system_prompt_personal == 1:
                     system_prompt_temp = SYSTEM_PROMPT1
@@ -1113,8 +1114,7 @@ def handle_message(event):
                     system_prompt_temp = SYSTEM_PROMPT2
                 else:
                     system_prompt_temp = SYSTEM_PROMPT1
-            else:
-                system_prompt_temp = SYSTEM_PROMPT
+            print(f"system_prompt_temp:{system_prompt_temp}, SYSTEM_PROMPT1:{SYSTEM_PROMPT1}, SYSTEM_PROMPT2:{SYSTEM_PROMPT2}")
             
             temp_messages = "SYSTEM:" + nowDateStr + " " + head_message + "\n" + display_name + ":" + user_message
             total_chars = len(encoding.encode(system_prompt_temp)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
