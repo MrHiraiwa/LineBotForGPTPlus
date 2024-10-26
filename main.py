@@ -307,7 +307,7 @@ def reload_settings():
         BOT_NAME = []
     SYSTEM_PROMPT = get_setting('SYSTEM_PROMPT') 
     if SYSTEM_PROMPT:
-        SYSTEM_PROMPT = SYSTEM_PROMPT.split(',')
+        SYSTEM_PROMPT = re.split(r',,', SYSTEM_PROMPT)
     else:
         SYSTEM_PROMPT = ""
     SYSTEM_PROMPT1 = str(SYSTEM_PROMPT[0]) if len(SYSTEM_PROMPT) > 0 else None
