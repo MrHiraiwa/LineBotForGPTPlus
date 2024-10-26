@@ -721,7 +721,7 @@ def handle_message(event):
             gaccount_refresh_token = ""
             free_duration = False
             blocked_account = False
-            core_ai_type_personal = None
+            core_ai_type_personal = CORE_AI_TYPE
             system_prompt_personal = 0
             system_prompt_temp = SYSTEM_PROMPT1
             
@@ -797,8 +797,8 @@ def handle_message(event):
                     'or_english' : or_english,
                     'audio_speed' : audio_speed,
                     'translate_language' : translate_language,
-                    'core_ai_type_personal' : CORE_AI_TYPE,
-                    'system_prompt_personal' : 0
+                    'core_ai_type_personal' : core_ai_type_personal,
+                    'system_prompt_personal' : system_prompt_personal
                 }
                 transaction.set(doc_ref, user)
             if user_message.strip() == FORGET_QUICK_REPLY:
