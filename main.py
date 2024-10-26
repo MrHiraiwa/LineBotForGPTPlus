@@ -1138,7 +1138,7 @@ def handle_message(event):
                 total_chars = len(encoding.encode(system_prompt_temp)) + len(encoding.encode(temp_messages)) + sum([len(encoding.encode(msg['content'])) for msg in user['messages']])
 
             try:
-                if CORE_AI_TYPE_personal == 'GPT':
+                if core_ai_type_personal == 'GPT':
                     temp_messages_final = [{'role': 'system', 'content': system_prompt_temp}]
                     temp_messages_final.extend(user['messages'])
                     temp_messages_final.append({'role': 'user', 'content': temp_messages})
