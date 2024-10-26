@@ -156,8 +156,7 @@ REQUIRED_ENV_VARS = [
     "SYSTEM_PROMPT_KEYWORDS",
     "SYSTEM_PROMPT_MESSAGE",
     "SYSTEM_PROMPT_GUIDE_MESSAGE",
-    "SYSTEM_PROMPT1_QUICK_REPLY",
-    "SYSTEM_PROMPT2_QUICK_REPLY"
+    "SYSTEM_PROMPT_QUICK_REPLY"
 ]
 
 DEFAULT_ENV_VARS = {
@@ -262,8 +261,7 @@ DEFAULT_ENV_VARS = {
     'SYSTEM_PROMPT_KEYWORDS': 'プロンプト変更',
     'SYSTEM_PROMPT_GUIDE_MESSAGE': 'ユーザーに「以下の項目を選択すると「私のプロンプトが変更されます。プロンプトを変更した場合、私の記憶も消去されます」と案内してください。以下の文章はユーザーから送られたものです。',
     'SYSTEM_PROMPT_MESSAGE': 'プロンプトを変更し記憶を消去しました。',
-    'SYSTEM_PROMPT1_QUICK_REPLY': '🥇プロンプト',
-    'SYSTEM_PROMPT2_QUICK_REPLY': '🥈プロンプト'
+    'SYSTEM_PROMPT_QUICK_REPLY': '👤プロンプト1,👤プロンプト2,👤プロンプト3,👤プロンプト4,👤プロンプト5'
 }
 
 try:
@@ -273,7 +271,7 @@ except Exception as e:
     raise
 
 def reload_settings():
-    global BOT_NAME, SYSTEM_PROMPT, SYSTEM_PROMPT1, SYSTEM_PROMPT2, PAINT_PROMPT, GPT_MODEL, FUNCTIONS
+    global BOT_NAME, SYSTEM_PROMPT, SYSTEM_PROMPT1, SYSTEM_PROMPT2, SYSTEM_PROMPT3, SYSTEM_PROMPT4, SYSTEM_PROMPT5, PAINT_PROMPT, GPT_MODEL, FUNCTIONS
     global MAX_TOKEN_NUM, MAX_DAILY_USAGE, MAX_MONTHLY_USAGE, GROUP_MAX_DAILY_USAGE, FREE_LIMIT_DAY, MAX_DAILY_MESSAGE, MAX_MONTHLY_MESSAGE
     global NG_MESSAGE, NG_KEYWORDS
     global STICKER_MESSAGE, STICKER_FAIL_MESSAGE, OCR_MESSAGE, OCR_BOTGUIDE_MESSAGE, OCR_USER_MESSAGE, MAPS_MESSAGE
@@ -298,7 +296,7 @@ def reload_settings():
     global LOCALLLM_BASE_URL
     global VERTEX_MODEL, VERTEX_IMAGE_MODEL
     global BLOCKED_ACCOUNT_MESSAGE, BLOCKED_NEW_ACCOUNTS, BLOCKED_NEW_ACCOUNTS_MESSAGE
-    global SYSTEM_PROMPT_KEYWORDS, SYSTEM_PROMPT_MESSAGE, SYSTEM_PROMPT_GUIDE_MESSAGE, SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY
+    global SYSTEM_PROMPT_KEYWORDS, SYSTEM_PROMPT_MESSAGE, SYSTEM_PROMPT_GUIDE_MESSAGE, SYSTEM_PROMPT_QUICK_REPLY, SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY, SYSTEM_PROMPT3_QUICK_REPLY, SYSTEM_PROMPT4_QUICK_REPLY, SYSTEM_PROMPT5_QUICK_REPLY
     
     BOT_NAME = get_setting('BOT_NAME')
     if BOT_NAME:
@@ -312,6 +310,9 @@ def reload_settings():
         SYSTEM_PROMPT = ""
     SYSTEM_PROMPT1 = str(SYSTEM_PROMPT[0]) if len(SYSTEM_PROMPT) > 0 else None
     SYSTEM_PROMPT2 = str(SYSTEM_PROMPT[1]) if len(SYSTEM_PROMPT) > 1 else None
+    SYSTEM_PROMPT3 = str(SYSTEM_PROMPT[2]) if len(SYSTEM_PROMPT) > 2 else None
+    SYSTEM_PROMPT4 = str(SYSTEM_PROMPT[3]) if len(SYSTEM_PROMPT) > 3 else None
+    SYSTEM_PROMPT5 = str(SYSTEM_PROMPT[4]) if len(SYSTEM_PROMPT) > 4 else None
     PAINT_PROMPT = get_setting('PAINT_PROMPT') 
     GPT_MODEL = get_setting('GPT_MODEL')
     FUNCTIONS = get_setting('FUNCTIONS')
@@ -460,8 +461,16 @@ def reload_settings():
         SYSTEM_PROMPT_KEYWORDS = []
     SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
     SYSTEM_PROMPT_GUIDE_MESSAGE = get_setting('SYSTEM_PROMPT_GUIDE_MESSAGE')
-    SYSTEM_PROMPT1_QUICK_REPLY = get_setting('SYSTEM_PROMPT1_QUICK_REPLY')
-    SYSTEM_PROMPT2_QUICK_REPLY = get_setting('SYSTEM_PROMPT2_QUICK_REPLY')
+    SYSTEM_PROMPT_QUICK_REPLY = get_setting('SYSTEM_PROMPT_QUICK_REPLY')
+    if SYSTEM_PROMPT_QUICK_REPLY:
+        SYSTEM_PROMPT_QUICK_REPLY = SYSTEM_PROMPT_QUICK_REPLY.split(',')
+    else:
+        SYSTEM_PROMPT_QUICK_REPLY = []
+    SYSTEM_PROMPT1_QUICK_REPLY = str(SYSTEM_PROMPT_QUICK_REPLY[0]) if len(SYSTEM_PROMPT_QUICK_REPLY) > 0 else []
+    SYSTEM_PROMPT2_QUICK_REPLY = str(SYSTEM_PROMPT_QUICK_REPLY[1]) if len(SYSTEM_PROMPT_QUICK_REPLY) > 1 else []
+    SYSTEM_PROMPT3_QUICK_REPLY = str(SYSTEM_PROMPT_QUICK_REPLY[2]) if len(SYSTEM_PROMPT_QUICK_REPLY) > 2 else []
+    SYSTEM_PROMPT4_QUICK_REPLY = str(SYSTEM_PROMPT_QUICK_REPLY[3]) if len(SYSTEM_PROMPT_QUICK_REPLY) > 3 else []
+    SYSTEM_PROMPT5_QUICK_REPLY = str(SYSTEM_PROMPT_QUICK_REPLY[4]) if len(SYSTEM_PROMPT_QUICK_REPLY) > 4 else []
     
     
 def get_setting(key):
@@ -1006,6 +1015,33 @@ def handle_message(event):
                 user['messages'] = []
                 transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
                 return 'OK'
+            elif SYSTEM_PROMPT3_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['system_prompt_personal'] = 3
+                SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+                bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                user['messages'] = []
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
+            elif SYSTEM_PROMPT4_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['system_prompt_personal'] = 4
+                SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+                bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                user['messages'] = []
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
+            elif SYSTEM_PROMPT5_QUICK_REPLY in user_message:
+                exec_functions = True
+                user['system_prompt_personal'] = 5
+                SYSTEM_PROMPT_MESSAGE = get_setting('SYSTEM_PROMPT_MESSAGE')
+                bot_reply_list.append(['text', SYSTEM_PROMPT_MESSAGE])
+                line_reply(reply_token, bot_reply_list)
+                user['messages'] = []
+                transaction.set(doc_ref, {**user, 'messages': [{**msg, 'content': get_encrypted_message(msg['content'], hashed_secret_key)} for msg in user['messages']]})
+                return 'OK'
 
             if any(word in user_message for word in FORGET_KEYWORDS) and exec_functions == False:
                 enable_quick_reply = True
@@ -1075,8 +1111,16 @@ def handle_message(event):
                 head_message = head_message + CORE_AI_TYPE_GUIDE_MESSAGE
             if any(word in user_message for word in SYSTEM_PROMPT_KEYWORDS) and SYSTEM_PROMPT1 and SYSTEM_PROMPT2 and not exec_functions:
                 enable_quick_reply = True
-                quick_reply_items.append(['message', SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT1_QUICK_REPLY])
-                quick_reply_items.append(['message', SYSTEM_PROMPT2_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY])
+                if SYSTEM_PROMPT1:
+                    quick_reply_items.append(['message', SYSTEM_PROMPT1_QUICK_REPLY, SYSTEM_PROMPT1_QUICK_REPLY])
+                if SYSTEM_PROMPT2:
+                    quick_reply_items.append(['message', SYSTEM_PROMPT2_QUICK_REPLY, SYSTEM_PROMPT2_QUICK_REPLY])
+                if SYSTEM_PROMPT3:
+                    quick_reply_items.append(['message', SYSTEM_PROMPT3_QUICK_REPLY, SYSTEM_PROMPT3_QUICK_REPLY])
+                if SYSTEM_PROMPT4:
+                    quick_reply_items.append(['message', SYSTEM_PROMPT4_QUICK_REPLY, SYSTEM_PROMPT4_QUICK_REPLY])
+                if SYSTEM_PROMPT5:
+                    quick_reply_items.append(['message', SYSTEM_PROMPT5_QUICK_REPLY, SYSTEM_PROMPT5_QUICK_REPLY])
                 head_message = head_message + SYSTEM_PROMPT_GUIDE_MESSAGE
             
             if translate_language != 'OFF':
@@ -1122,6 +1166,12 @@ def handle_message(event):
                     system_prompt_temp = SYSTEM_PROMPT1
                 elif system_prompt_personal == 2:
                     system_prompt_temp = SYSTEM_PROMPT2
+                elif system_prompt_personal == 3:
+                    system_prompt_temp = SYSTEM_PROMPT3
+                elif system_prompt_personal == 4:
+                    system_prompt_temp = SYSTEM_PROMPT4
+                elif system_prompt_personal == 5:
+                    system_prompt_temp = SYSTEM_PROMPT5
                 else:
                     system_prompt_temp = SYSTEM_PROMPT1
             
