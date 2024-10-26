@@ -1064,11 +1064,13 @@ def handle_message(event):
                     bot_reply_list.append(['text', GACCOUNT_FAIL_MESSAGE])
                     line_reply(reply_token, bot_reply_list)
                     return 'OK'
-            if any(word in user_message for word in CORE_AI_TYPE_KEYWORDS) and "aitype" in FUNCTIONS and not exec_functions:
+            if any(word in user_message for word in CORE_AI_TYPE_KEYWORDS) and ("aitype_gemini" in FUNCTIONS or "aitype_claude" in FUNCTIONS) and not exec_functions:
                 enable_quick_reply = True
                 quick_reply_items.append(['message', CORE_AI_TYPE_GPT_QUICK_REPLY, CORE_AI_TYPE_GPT_QUICK_REPLY])
-                quick_reply_items.append(['message', CORE_AI_TYPE_GEMINI_QUICK_REPLY, CORE_AI_TYPE_GEMINI_QUICK_REPLY])
-                quick_reply_items.append(['message', CORE_AI_TYPE_CLAUDE_QUICK_REPLY, CORE_AI_TYPE_CLAUDE_QUICK_REPLY])
+                if "aitype_gemini" in FUNCTIONS:
+                    quick_reply_items.append(['message', CORE_AI_TYPE_GEMINI_QUICK_REPLY, CORE_AI_TYPE_GEMINI_QUICK_REPLY])
+                if "aitype_claude" in FUNCTIONS:    
+                    quick_reply_items.append(['message', CORE_AI_TYPE_CLAUDE_QUICK_REPLY, CORE_AI_TYPE_CLAUDE_QUICK_REPLY])
                 head_message = head_message + CORE_AI_TYPE_GUIDE_MESSAGE
             if any(word in user_message for word in SYSTEM_PROMPT_KEYWORDS) and SYSTEM_PROMPT1 and SYSTEM_PROMPT2 and not exec_functions:
                 enable_quick_reply = True
