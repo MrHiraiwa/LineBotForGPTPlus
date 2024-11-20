@@ -18,6 +18,9 @@ from linebot.models import (
     QuickReply, QuickReplyButton, MessageAction, LocationAction, URIAction,
     LocationMessage, ImageMessage, StickerMessage, ImageSendMessage, VideoMessage,
 )
+from typing import Dict
+from linebot.v3.messaging import Configuration, ApiClient, MessagingApi
+from linebot.v3.messaging.models.show_loading_animation_request import ShowLoadingAnimationRequest
 
 import tiktoken
 import pickle
@@ -684,6 +687,7 @@ def handle_message(event):
         message_type = event.message.type
         message_id = event.message.id
         source_type = event.source.type
+        start_loading_animation(user_id)
             
         db = firestore.Client(database=DATABASE_NAME)
         
@@ -1336,6 +1340,19 @@ def line_reply(reply_token, bot_reply_list):
 def get_profile(user_id):
     profile = line_bot_api.get_profile(user_id)
     return profile
+
+def start_loading_animation(user_id, loading_seconds=40):
+    config = Configuration(access_token=os.environ["CHANNEL_ACCESS_TOKEN"])
+    with ApiClient(config) as api_client:
+        api_instance = MessagingApi(api_client)
+        try:
+            animation_request = ShowLoadingAnimationRequest(
+                chat_id=user_id,
+                loading_seconds=loading_seconds
+            )
+            api_instance.show_loading_animation(animation_request)
+        except Exception as e:
+            print(f"ローディングアニメーションの開始中にエラー: {e}")
 
 @app.route('/webhook', methods=['POST'])
 def stripe_webhook():
